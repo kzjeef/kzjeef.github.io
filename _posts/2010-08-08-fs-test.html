@@ -1,0 +1,28 @@
+---
+layout: post
+title: Basic test after file system hack
+date: 2010-08-08 17:23:19.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>This post only for record the how to basic test after a file system hack</p>
+<p>Dan Carpenter wrote:</p>
+<blockquote>
+<p>On filesystem tests, you should always test them before submitting them. Everyone can create a small filesystem like this:</p></p>
+<pre class="brush: bash;light: true; fontsize: 100; first-line: 1; ">dd if=/dev/zero of=block bs=1M count=4000
+mkfs.btrfs block mkdir mnt
+sudo mount -o loop -t btrfs block mnt/ </pre>
+<p>Maybe untar a kernel on it or something...  <br />Not sure.  <br />But if you mess up a filesystem people get annoyed.  :P
+</p></blockquote>

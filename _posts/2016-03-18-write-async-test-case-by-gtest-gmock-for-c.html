@@ -1,0 +1,56 @@
+---
+layout: post
+title: Write Async Test Case by gtest & gmock for C++
+date: 2016-03-18 18:18:25.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- C++
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Recently, I have a project that needs some async IO function,  which use libuv as backend, and move the original logic in an async way.</p>
+<p>The project was ok, but after I have good experience write node.js &amp; Ruby on Rails code, I cannot live without test case for such a complex code.</p>
+<p>Thankfully, deal stackoverflow.com give me the answer, which is <a href="https://github.com/google/googletest">gtest + gmock.</a></p>
+<p>Let first have some taste about the code.</p>
+<p>see the code in this link : <a href="https://gist.github.com/kzjeef/92da7e03f7713fa7a80e">gist</a>.</p>
+<p>(for security reason, I have ignore some logic part of this code, so it's cannot compile).</p>
+<p>class: AsyncIOHttpCallback {} &lt;- This is the callback class, you should define your callback interface in a virtual class, can be impl the policy by caller.</p>
+<p>class: MockCallback which publicly inherit AsyncIOHttpCallback class, and  implement this class  member function by:</p>
+<blockquote><p>MOCK_METHOD1(onError, void(CURLcode errCode));<br />
+MOCK_METHOD0(onTimeout, void());<br />
+MOCK_METHOD2(onData, void(char *data, size_t datalen));<br />
+MOCK_METHOD4(onFinish, void(double content_length, long header_size, long httpcode, char *redirect_url));</p></blockquote>
+<p>The function like MOCK_* it function inside of google mock, just match the parameter type and numbers.</p>
+<p>OK, mock define part is finished.</p>
+<p>let's see this code:</p>
+<p>Create the mock object:</p>
+<blockquote><p>shared_ptr&lt;MockCallback&gt;    mcallback(new StrictMock&lt;MockCallback&gt;);</p></blockquote>
+<p>&nbsp;</p>
+<blockquote><p>policy-&gt;finishHandler = [&amp;mcallback](double content_length, long header_size, long httpcode, char *redirect_url) {<br />
+EXPECT_EQ(httpcode, 200);<br />
+mcallback-&gt;onFinish(content_length, header_size, httpcode, redirect_url);<br />
+};</p></blockquote>
+<p>The finishHanlder is a std::function&lt;&gt; which can be a functor or lambda, in side this lambda, it will call the mock object. (you can define a simpler interface)</p>
+<p>In the end,  we can assert the mock object:</p>
+<blockquote><p>    EXPECT_CALL((*mcallback.get()), onFinish(_,_, _, NULL)).Times(1);</p></blockquote>
+<p>This means, we expect this callback once, and with some parameter we, "_" is a special function, which means this is something we don't care, and all other values will be checked by gmock. If not match, some warning message will printed, and reported.</p>
+<p>If the callback was not called, it will catch this error, if some uninteresting function is called, there will be a warning message.</p>
+<p>Really useful tool!</p>
+<p>There also some other benifits:</p>
+<ol>
+<li>gmock can check memory leak for your mock callback object, if it was leaked after test terminal, it will print error message like:</li>
+</ol>
+<blockquote><p>test_aio.cpp:198: ERROR: this mock object should be deleted but never is. Its address is @0x7fe1d0c0ce50.</p></blockquote>
+<p>&nbsp;</p>
+<p>If you want to know more about gmock, check google's gtest github: <a href="https://github.com/google/googletest">link</a></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

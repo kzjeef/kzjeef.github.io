@@ -1,0 +1,29 @@
+---
+layout: post
+title: Linux技巧： mount 同一个目录到两个地方
+date: 2011-09-19 06:17:51.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>今天新学了一个mount的参数， --bind， 可以把一个目录mount到两个地方。</p>
+<p>故事是这样的， 别人给了一台linux的服务器， 可以里面的分区有些问题， /home/ 和 /没有分开。 慢慢的服务器空间就不够了， 买了一块硬盘。</p>
+<p>mount 到 /home/下面， 原来的/home/下面的目录分别移的时候漏掉了一些目录（本来直接rsync就可以了，可是已经有人用了新的分区好长时间， 不能直接rsync，只能一个一个的rsync， 这样的重复作业还是漏掉了一个两个）。</p>
+<p>服务器起来以后， 有人报告说自己的目录找不到了， 可是我没有把这些目录都sync到新的硬盘上（太费时间）， 留在了原来的/home/目录下面。</p>
+<p>但是旧的/home/目录已经无法访问了， 又不能重新mount， 因为很多人在用。</p>
+<p>幸亏linux和google的强大， 有一条命令可以把一个目录mount到两个地方。</p>
+<p>于是我随便找了一个目录， 暂且叫~/dir吧。</p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">mount --bind / ~/dir
+rsync -a ~/dir/home/xxxx /home/xxxx</pre>
+<p>这样就搞定了。</p>
+<p>&nbsp;</p>

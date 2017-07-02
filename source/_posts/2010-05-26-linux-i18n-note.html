@@ -1,0 +1,41 @@
+---
+layout: post
+title: Linux I18N 笔记
+date: 2010-05-26 15:17:41.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>今天看了James Su在2007年的北京google 开发者日讲的I18N国际化的视频， 这是youku的地址：<a href="http://v.youku.com/v_show/id_XNTczNzcyOA==.html">http://v.youku.com/v_show/id_XNTczNzcyOA==.html</a></p>
+<p>算是解开了几个基本对于国际化的问题，这里作一个笔记吧， 记在本子上老是会找不到。</p>
+<p>UCS&nbsp; vs UNICODE</p>
+<p>其实UCS 和 UNICODE 现在是一样的编码，但是在最初制定的时候是由两个组织制订的，后来两个组织发现一个世界不需要两套编码，就想办法合并了一下，所以就兼容了。</p>
+<p>UCS里面有 UCS-2(16位) UCS-4 (32位) 之类的</p>
+<p>UCS 其实只是一个字符的表格，规定哪个页那行哪列是哪个字符，而UNICODE则一些其他的东西。这里有一个链接八卦了一些历史，http://blog.chinaunix.net/u1/49491/showart_2209875.html。</p>
+<p>说一下外码， 和内码。</p>
+<p>以前一直不太理解什么叫做外码， 其实外码就是存储（比如存放在硬盘上）传输（比如网络传输）用的字符编码，比如UTF-8，ASCII，还有恶心的GB2312之类的。在函数里面，通常这个会简称为mbs (multi byte string)。外码是不定长的，比如UTF-8就是有可能是1个字节，最多也可能到4个字节。</p>
+<p>而内码呢，就是在内存中的使用的字符存储，因为外码是不定长的，所以在编程和处理的时候就会比较麻烦，比如你想往前3个字符，如果在ASCII下面就是3个字节，而如果是中文，那么就是不是3个字节了。 这个指针就不好操作了。所以会有内码，内码是定长的，比如你用wchar_t, wint_t就可以了。英文种的缩写是 wcs(wide char string)。</p>
+<p>有一定需要注意的， 就是只有定义了__STDC_ISO_10646__这个宏的以后才是使用的unicode。</p>
+<p>Linux下面有一个locale的东西，这个东西就是控制是使用哪一种语言的，其中包含一批宏。你在shell下输入locale就能看到这些宏的值了。比如我的就是</p>
+<p>kzj@t61:~$ locale<br />LANG=zh_CN.UTF-8<br />LANGUAGE=zh_CN.UTF-8<br />LC_CTYPE="zh_CN.UTF-8"<br />LC_NUMERIC="zh_CN.UTF-8"<br />LC_TIME="zh_CN.UTF-8"<br />LC_COLLATE="zh_CN.UTF-8"<br />LC_MONETARY="zh_CN.UTF-8"<br />LC_MESSAGES="zh_CN.UTF-8"<br />LC_PAPER="zh_CN.UTF-8"<br />LC_NAME="zh_CN.UTF-8"<br />LC_ADDRESS="zh_CN.UTF-8"<br />LC_TELEPHONE="zh_CN.UTF-8"<br />LC_MEASUREMENT="zh_CN.UTF-8"<br />LC_IDENTIFICATION="zh_CN.UTF-8"<br />LC_ALL=</p>
+<p>我现在的外码是使用的zh_CN.UTF-8。</p>
+<p>如果是有两个码，就需要转换了。你从文件中读入一个字符串到内存的时候。 你需要把这些字符串都处理成内码来使用。</p>
+<p>Linux下面有两种方法。</p>
+<p>一种是使用 mbstowcs(3) 一类的函数来进行转换， 这样转换过的函数就可以使用wprintf一系列的函数了。这种方法严重依赖于你的locale设置，如果你读入的文本的编码和你的locale不一样的话，乱码就和你招手了，因为它只是把locale设置的语言转换成你的内码。</p>
+<p>在操作所有这些和locale有关的函数之前，都要调用setlocale，不然可能会错误。</p>
+<p>第二种使用iconv(3)的函数进行编码转换，这个函数不依赖于你的locale设置，随便指定编码转换，比如你可以用这个函数实现的简体和繁体之间的转换功能。</p>
+<p>常见的错误：</p>
+<p>1. 直接在源代码里面写中文。。。 建议任何有不是ASCII的内容都用gettext作翻译。</p>
+<p>2. 使用UCS-2是不够的， 最好使用UCS-4，因为UCS-2是16位的，就算是汉字只能存2完多，最新发的标准都有5万多个汉字了。 所以不够，或者使用UTF-8比较好。</p>
+<p>3. 直接操作外码，记不记得以前，WIN 98？ 的时候经常有软件出现半个汉字的情况？ 所以要处理汉字之类的，总是先转换成内码再操作。</p>

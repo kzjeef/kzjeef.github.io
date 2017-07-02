@@ -1,0 +1,44 @@
+---
+layout: post
+title: Finally Fix ia32-libs depends error
+date: 2013-06-28 11:49:47.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta:
+  _wpas_done_all: '1'
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>I'm using Ubuntu 12.04 at work, the laptop is a intel + nvidia video card, so I have tried a lot of solution to fix the 3D issue, but I finally found it introduce a lot of other issue like ia32-libs depends issue.</p>
+<p>The log is like this:</p>
+<pre class="lang:sh highlight:0 decode:true">/var@jasozhang-nv $ sudo apt-get install ia32-libs
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+Some packages could not be installed. This may mean that you have
+requested an impossible situation or if you are using the unstable
+distribution that some required packages have not yet been created
+or been moved out of Incoming.
+The following information may help to resolve the situation:
+
+The following packages have unmet dependencies:
+ ia32-libs : Depends: ia32-libs-multiarch
+E: Unable to correct problems, you have held broken packages.</pre>
+<p>After tried every method on google, all failed.</p>
+<p>So I remember I have add lots of ppa which maybe related to this issue.</p>
+<p>I tried this:</p>
+<p>1. in Update Manager -&gt; Software Sources -&gt; Other Software<br />
+Enable *ALL* ppa you have ever installed, what even currently it was disable or not, enable them all.</p>
+<p>2. Then, install y-ppa-manager, (method can be search on google).<br />
+<strong>*Purge*</strong> Every ppa you have.</p>
+<p>After did this, the package relationship become a normal.</p>
+<p>In the end, I think this is a lesson that install ppa, specially big ppa, like xorg-edgers, kubuntu-ppa are very risky. Be caution when you install such ppa.</p>

@@ -1,0 +1,66 @@
+---
+layout: post
+title: 一个用手指波动指针调整的时钟的QT3实现
+date: 2008-09-05 20:21:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><a onblur="try {parent.deselectBloggerImageGracefully();} catch(e) {}" href="http://2.bp.blogspot.com/_AVbdO906nR8/SMFf6CAC-jI/AAAAAAAACnQ/xQSCXrmfiTE/s1600-h/Screenshot-qt-test.png"><img style="margin: 0px auto 10px; display: block; text-align: center; cursor: pointer;" src="{{ site.baseurl }}/assets/Screenshot-qt-test.png" alt="" id="BLOGGER_PHOTO_ID_5242576891810085426" border="0" /></a><br />有一天OPPO的人拿来多普达的手机让我看一个触摸屏拖动指针来调时钟的功能。<br />看了以后觉得很NB， 不过一直不服， 就在想怎么自己写一个。</p>
+<p>昨天看了atan2函数以后就想到了办法，<br />今天对时钟的稳定性做了调整。<br />这个程序即使把调整时间的API换成WIN的也不能正常在WIN下工作。 所以这个小程序就不支持win了。 在linux下正常。</p>
+<p>这个程序直接：<br />qmake -project<br />qmake<br />make<br />就可以运行了。<br />不过要在ROOT权限下运行哦~</p>
+<p>有啥BUG发给我哈。</p>
+<p><code><br />#include <qapplication.h><br />#include <qpushbutton.h><br />#include <qslider.h><br />#include <qlcdnumber.h><br />#include <qfont.h></p>
+<p>#include <qpoint.h><br />#include <qpainter.h><br />#include <qdatetime.h><br />#include <qtimer.h></p>
+<p>#include <qvbox.h><br />#include <qwidget.h><br />#include <cmath><br />#include <qcanvas.h><br />int degreen(double a) ;</p>
+<p>class MyWidget : public QWidget<br />{<br />public:<br />MyWidget( QWidget *parent=0, const char *name=0 );</p>
+<p>protected:<br />void paintEvent (QPaintEvent *);<br />void mouseMoveEvent (QMouseEvent *e);<br />void mouseReleaseEvent (QMouseEvent *) ;</p>
+<p>private:</p>
+<p>double rotate_angle_minute;   // minute rotate angle<br />bool in_move;</p>
+<p>};</p>
+<p>MyWidget::MyWidget( QWidget *parent, const char *name )<br />: QWidget( parent, name )<br />{<br />bool in_move = false;<br />QTimer  *timer = new QTimer (this);</p>
+<p>connect ( timer, SIGNAL(timeout()), this, SLOT(update()));<br />timer->start(500);</p>
+<p>resize(200, 200);<br />}</p>
+<p>int degreen(double a) {<br />return a * 180 / M_PI;<br />}</p>
+<p>#include <sys>time.h><br  </sys>>#include <time.h><br />#include <errno.h></p>
+<p>void adjustTime (int , int min, int )<br />{<br />struct  timeval cur_val;<br />struct  timezone cur_zone;<br />int ret;<br />static int last_min = 0;<br />int delta = min - last_min;<br />qDebug("delta: %d", delta);<br />// ignore too large time adjust<br />if ( delta < -5 || delta > 10) {<br />last_min = min;<br />return;<br />} else {<br />delta = min - last_min;<br />last_min = min;<br />}</p>
+<p>gettimeofday(&cur;_val, &cur;_zone);</p>
+<p>time_t new_time;<br />new_time = delta * 60;<br />cur_val.tv_sec += new_time;</p>
+<p>ret = settimeofday(&cur;_val, &cur;_zone);<br />qDebug( "time add %d seconds, ret is :%d ", (int)new_time, ret);<br />if (errno != 0)<br />perror("can't set time");<br />}</p>
+<p>void<br />MyWidget::mouseMoveEvent( QMouseEvent *e) {<br />static int count = 0;<br />if (count++ < 5)  // also for let adjust smoothly<br />  return;<br />else<br />  count = 0;</p>
+<p>int angle;<br />angle = degreen(atan2(100 -  e->pos().y()  ,  100 - e->pos().x() ));</p>
+<p>qDebug(" X:%3d Y:%3d  angle :%3d  -- the minute angle :%d  ",<br /> e->pos().x(),<br /> e->pos().y(),<br /> angle,<br /> (int)rotate_angle_minute);<br />if (!in_move)<br />angle = rotate_angle_minute; // for avoid minute pin jump<br />in_move = true;</p>
+<p>int current_minute = (angle/ 6);</p>
+<p>QString old_time = QTime::currentTime().toString();</p>
+<p>adjustTime (0, current_minute - QTime::currentTime().minute(), 0);</p>
+<p>QString new_time_str = QTime::currentTime().toString();<br />qDebug("old time: %s n", old_time.latin1());<br />qDebug("new time: %s n", new_time_str.latin1());<br />update();<br />}</p>
+<p>void MyWidget::mouseReleaseEvent (QMouseEvent *) {<br />in_move = false;  // just for minute pin don't jump<br />}</p>
+<p>void MyWidget::paintEvent (QPaintEvent *) {<br />QPointArray hourhand(3);<br />QPointArray minutehand(3);</p>
+<p>hourhand.putPoints (0, 3, 7, 8, -7, 8, 0, -40);<br />minutehand.putPoints (0, 3, 7, 8, -7, 8, 0, -70);</p>
+<p>QPointArray secondhand(3);<br />secondhand.putPoints(0, 3, 3, 4, -3, -4, 0, -90);</p>
+<p>QColor hourColor(127, 0, 127);<br />QColor minuteColor(0, 127, 127);<br />QColor secondColor (127, 127, 0);</p>
+<p>int side = (width() < height()) ? width() : height() ;<br />QTime time = QTime::currentTime();</p>
+<p>QPainter painter(this);<br />painter.translate(width() / 2, height() / 2);<br />painter.scale(side / 200.0, side / 200.0);</p>
+<p>painter.setPen(Qt::NoPen);<br />painter.setBrush(hourColor);</p>
+<p>painter.save();<br />painter.rotate(30.0 * ((time.hour() + time.minute() / 60.0)));<br />painter.drawConvexPolygon(hourhand);<br />painter.restore();</p>
+<p>painter.setPen(hourColor);</p>
+<p>for (int i = 0; i < 12; ++i) {<br />painter.drawLine(88, 0, 96, 0);<br />painter.rotate(30.0);<br />}</p>
+<p>painter.setPen(Qt::NoPen);<br />painter.setBrush(minuteColor);</p>
+<p>painter.save();<br />rotate_angle_minute = ( 6.0 * (time.minute() + time.second() / 60.0));<br />painter.rotate(rotate_angle_minute);</p>
+<p>painter.drawConvexPolygon(minutehand);<br />painter.restore();</p>
+<p>painter.save();<br />painter.setPen(secondColor);<br />painter.rotate( 6.0 * (time.second() + time.msec() / 1000));<br />painter.drawConvexPolygon(secondhand);<br />painter.restore();</p>
+<p>painter.setPen(minuteColor);</p>
+<p>for (int j = 0; j < 60; ++j) {<br />if ((j % 5) != 0)<br />painter.drawLine(92, 0, 96, 0);<br />painter.rotate(6.0);<br />}</p>
+<p>}</p>
+<p>int main( int argc, char **argv )<br />{<br />QApplication a( argc, argv );</p>
+<p>MyWidget w;<br />a.setMainWidget( &w; );<br />w.show();<br />return a.exec();<br />}<br /></errno.h></time.h></qcanvas.h></cmath></qwidget.h></qvbox.h></qtimer.h></qdatetime.h></qpainter.h></qpoint.h></qfont.h></qlcdnumber.h></qslider.h></qpushbutton.h></qapplication.h></code></p>

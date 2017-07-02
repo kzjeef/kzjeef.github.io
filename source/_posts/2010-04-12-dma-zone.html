@@ -1,0 +1,26 @@
+---
+layout: post
+title: Config Linux DMA zone memory
+date: 2010-04-12 07:33:38.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta:
+  _ssb_hide: 'false'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><p>This value is about DMA zone size of Linux DMA zone size, this value &nbsp;can set in CONFIG_DMA_ZONE_SIZE,&nbsp;This value is set by kernel .config, vi your .config file to see how much,&nbsp;how kernel use this value?</p>
+<p>The arch memory.h header file will use your define function named&nbsp;arch_adjust_zones() to adjust global value zone_size[] to adjust you&nbsp;custom memory zone infomation.</p>
+<p>&nbsp;</p>
+<p>files:</p>
+<p>arch/arm/include/asm/memory.h : arch_adjust_zones</p>
+<p>arch/arm/mach-xxx/include/mach/memory.h arch_adjust_zones</p>
+<p>&nbsp;</p></p>

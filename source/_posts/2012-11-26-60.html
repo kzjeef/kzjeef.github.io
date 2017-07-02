@@ -1,0 +1,104 @@
+---
+layout: post
+title: ARM V6 和V6+架构中的原子指令
+date: 2012-11-26 22:04:27.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- CPU
+- 未分类
+tags:
+- arm
+- linux
+meta:
+  _edit_last: '1'
+  _wp_jd_target: http://thinksrc.com/?p=60
+  _jd_tweet_this: 'yes'
+  _wp_jd_wp: http://thinksrc.com/?p=60
+  _wpt_failed: 'a:5:{s:6:"author";s:0:"";s:8:"sentence";s:76:"Post Edited: ARM V6
+    和V6+架构中的原子指令 http://thinksrc.com/?p=60";s:5:"error";s:50:"This account is not
+    authorized to post to Twitter.";s:4:"code";s:3:"401";s:9:"timestamp";s:10:"1353940346";}'
+  _wpas_skip_2244592: '1'
+  _wpas_skip_2244573: '1'
+  _wpas_skip_2244563: '1'
+  _wpas_skip_2244581: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><!--?xml version="1.0" encoding="UTF-8" standalone="no"?--></p>
+<h1>ARM V6</h1>
+<p>ARM V6中原子指令是:</p>
+<h2>SWP 指令</h2>
+<div>该指令可以实现寄存器和内存之间的原子交换, 但是由于该指令要lock住BUS, 所以会影响系统性能.</div>
+<div></div>
+<div>例子:</div>
+<div>
+<pre>sem_wati:MOV R1,#0
+LDR R0,=SEM
+SWP R1,R1,[R0] ;取出信号量，并设置其为0
+CMP R1,#0 ;判断是否有信号
+BEQ sem_wait ;若没有信号，则等待</pre>
+</div>
+<div></div>
+<div>所以在内核中, V6以前的架构, atomic_add/sub 之类的指令都是用</div>
+<pre>
+raw_local_irq_save(flags)
+val = v->counter;
+v->counter = val += 1;
+raw_local_irq_restore(flags)
+</pre>
+<div>来实现的.</div>
+<div></div>
+<h1>ARM V6 以后， V7， V8中</h1>
+<div>提供LDREX和STREX来替换SWP指令, 实现对原子的内存操作.</div>
+<div></div>
+<div>
+<pre>LDREX &lt;Rt&gt;,[Rn]STREX &lt;Rd&gt;,&lt;Rt&gt;,[Rn] ；STREX成功，Rd置0</pre>
+</div>
+<div></div>
+<div>所以Linux内核就可以利用这个指令来做原子操作， 内核中的atomic_add 实现就是</div>
+<div></div>
+<div>
+<pre> static inline void atomic_add(int i, atomic_t *v)
+static inline void atomic_add(int i, atomic_t *v)
+{
+     unsigned long tmp;
+     int result;
+
+     __asm__ __volatile__("@ atomic_addn"
+"1:     ldrex     %0, [%3]n"    // 先读入counter
+"     add     %0, %0, %4n"     // 再把counter+i
+"     strex     %1, %0, [%3]n"  // 把counter再写到result的地址, 并且放返回值到tmp里面.
+"     teq     %1, #0n"                // 检查tmp和0相等否
+"     bne     1b"                          // 如果不相等, 再重新来一次. 防止被其他的CPU或者其他的竞争条件.
+     : "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)
+     : "r" (&v->counter), "Ir" (i)
+     : "cc");
+}</pre>
+</div>
+<div></div>
+<div></div>
+<div>下面是一些ARM V6+架构对该指令的内部实现,(参考:<a href="http://www.keil.com/support/man/docs/armasmref/armasmref_Cihbghef.htm">http://www.keil.com/support/man/docs/armasmref/armasmref_Cihbghef.htm</a>)</div>
+<div>
+<p>LDREX loads data from memory.If the physical address has the Shared TLB attribute, LDREX tags the physical address as exclusive access for the current processor, and clears any exclusive access tag for this processor for any other physical address.</p>
+<p>Otherwise, it tags the fact that the executing processor has an outstanding tagged physical address.</p>
+</div>
+<div>(如果物理地址在TLB中, 那么LDREX就标识该地址为当前CORE的排他使用(exclusive access), 而且清楚掉该Core对其他的地址的exclusive access.</div>
+<div>如果不在TLB中, 那么就标志当前CPU有一个outstanding tagged 物理地址, 我想应该是一个特殊的物理地址访问的意思.)</div>
+<div></div>
+<div>
+<p>STREX performs a conditional store to memory. The conditions are as follows:If the physical address does not have the Shared TLB attribute, and the executing processor has an outstanding tagged physical address, the store takes place, the tag is cleared, and the value 0 is returned in Rd.</p>
+</div>
+<div>(如果该物理地址没有share TBL 属性, 也就是没有load到TLB中, 当前执行的CPU有一个"outstanding tagged physical address", 那么存储会直接存进去, 清除tag, 然后再Rd里面返回0)</div>
+<div></div>
+<div>
+<p>    If the physical address does not have the Shared TLB attribute, and the executing processor does not have an outstanding tagged physical address, the store does not take place, and the value 1 is returned in Rd. (如果物理地址没有在TBL中, 而且当前执行CPU没有一个outstanding tagged physical address, 那么这次store不发生, 并且返回1在Rd中).If the physical address has the Shared TLB attribute, and the physical address is tagged as exclusive access for the executing processor, the store takes place, the tag is cleared, and the value 0 is returned in Rd.</p>
+<p>(如果物理地址已经有一个TLB的属性, 而且该物理地址已经被标识为exclusive access, 那么存储发生, 并且清掉TAG, 在Rd中返回0)</p>
+</div>
+<div>If the physical address has the Shared TLB attribute, and the physical address is not tagged as exclusive access for the executing processor, the store does not take place, and the value 1 is returned in Rd.</div>
+<div>(如果该地址已经有TLB的属性, 但是物理地址没有tag成exclusive access, 存储不发生, 并且在Rd中返回0.</div>

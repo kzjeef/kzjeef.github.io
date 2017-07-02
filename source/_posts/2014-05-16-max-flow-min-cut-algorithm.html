@@ -1,0 +1,122 @@
+---
+layout: post
+title: Max Flow Min Cut Algorithm.
+date: 2014-05-16 11:03:10.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Algorithm
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>这些算法都是基于Ford-Fulkerson 方法，</p>
+<p>这个方法基本上是这样的一个循环：</p>
+<p>Cap = 0;<br />
+while find Augmenting Path != NIL<br />
+Cap += decrease capacity of the Augmenting path</p>
+<p>return Cap;</p>
+<p>就是循环的寻找Augmenting Path（增广路径）， 然后再在图上的边的Capacity（容量）上减去这个值， 这样一直找， 知道找不到增广路径位置。</p>
+<p>首先是一个基于BFS（广度有限搜索）的算法， 名字叫做： Edwinds-Karp alg：</p>
+<p>下面是一个C++实现：</p>
+<pre class="lang:c++ decode:true">#include &lt;vector&gt;
+#include &lt;unordered_set&gt;
+#include &lt;queue&gt;
+#include &lt;cmath&gt;
+#include &lt;climits&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+vector&lt; vector&lt;int&gt; &gt; matrix;
+vector&lt; vector&lt;int&gt; &gt; capacity;
+
+int bfs(int source, int size,  int sink) {
+    queue&lt;int&gt; q;
+    q.push(source);
+    int from[size];
+    bool visited[size];
+
+    memset(from, -1, sizeof(from));
+    memset(visited, false, sizeof(visited));
+
+    visited[source] = true;
+    // use bfs find the route to the sink.
+    while(!q.empty()) {
+        bool found_sink = false;
+        int where = q.front();
+        q.pop();
+
+        // for each vertex next adjancent to where.
+        for (auto next = matrix[where].begin(); next != matrix[where].end(); next++) {
+            int val = *next;
+            if (visited[val] == true)
+                continue;
+            if (capacity[where][val] &gt; 0) {
+                q.push(val);
+                visited[val] = true;
+                from[val] = where;
+                if (val == sink) {
+                    found_sink = true;
+                    break;
+                }
+            }
+        }
+        if (found_sink)
+            break;
+    }
+
+    //  then compute the path capacity.
+    // Find the critical path from the sink back to source.
+    // find the minimal path capacity of the path.
+    int where = sink, prev, path_cap = INT_MAX;
+    while (from[where] &gt; -1) {
+        prev = from[where];
+        path_cap = min(path_cap, capacity[prev][where]);
+        where = prev;
+    }
+
+    // then update the residual network, if no path is found the while loop will not be enter.
+
+    // Then - augment.
+    where = sink;
+    while (from[where] &gt; -1) {
+        prev = from[where];
+        capacity[prev][where] -= path_cap;
+        capacity[where][prev] += path_cap;
+        where = prev;
+    }
+
+    // if no path is found, path_cap is infinity.
+    // and return the augmenting capacity.
+    if (path_cap == INT_MAX)
+        return 0;
+    else
+        return path_cap;
+}
+
+int max_flow()
+{
+    int result = 0, path_cap ;
+    while (true) {
+        path_cap = bfs(1, 8, 7);
+        if (path_cap == 0)
+            break;
+        else
+            result += path_cap;
+    }
+    return result;
+}</pre>
+<p>这个实现的是基于BFS的。</p>
+<p>BFS 里面的循环基本就是一个标准的BFS遍历方法， 检测条件的时候增加了一个路径的Capacity（容量）必须大于0, 这样就不会找到已经满了路径了。顺着source一直走到sink以后， 记录下路径。</p>
+<p>然后通过sink反着找到Capacity最小的一条边， 记录这个值。</p>
+<p>最后在路径上对于正方向， 减去这个指， 对于反方向， 增加这个值。并且返回这个数值。</p>
+<p>这个实现的算法复杂度是O(VE²）， 因为BFS的负责读是O(E)， 而其他每一次找增广路径的计算的复杂度是O(V）。</p>
+<p>&nbsp;</p>

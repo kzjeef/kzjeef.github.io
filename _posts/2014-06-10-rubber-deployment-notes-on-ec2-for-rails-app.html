@@ -1,0 +1,115 @@
+---
+layout: post
+title: Rubber Deployment Notes on EC2 for Rails App.
+date: 2014-06-10 14:11:58.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Rails
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>I need deployment my rails app on EC2 recently,  actually I use Heroku for a while, Heroku is excellent for development, but the price is not very well compare to EC2, also it's was little slow when access from China.</p>
+<p>So I decide to deployment it to EC2, unlike Heroku, Setup  EC2 require a lots of setting, which is headache for every one. But I found <a href="https://github.com/rubber/rubber">Rubber</a>, and excellent tool for setup environment on EC2, it based on <a href="https://github.com/capistrano/capistrano">Capistrano</a>.</p>
+<p>From these <a href="http://ramenlab.wordpress.com/2011/06/24/deploying-your-rails-app-to-aws-ec2-using-rubber/">link1</a>, <a href="http://ilakeruby.blogspot.tw/2011/04/rails-rubber-github-amazon-free-tier.html">link2</a>,  I can start to do with rubber.</p>
+<p>In my first try, I setup all db, app, web, all all server to a single EC2 instance, but there is a lot minor issue, record them here:</p>
+<p>1. in rubber.yml, make sure set correct private net mask, default was 10.0.0.0/8, but in some AWS Region, it was become like 172.0.0.0/8, make sure it added to the list, otherwise, your app instance maybe can not access your db instance.</p>
+<p>2. When build redis, I found it become build failed, like depends on jemalloc.a not been found, the fix is redis build Makefile sucks, and it need add following like into deloy-redis.rb (between two &gt; )</p>
+<pre class="theme:github lang:sh decode:true">&gt;           tar -zxf redis-#{rubber_env.redis_server_version}.tar.gz
+          # Build the binaries.
+          cd redis-#{rubber_env.redis_server_version}
+          cd deps; make hiredis jemalloc linenoise lua; cd ..  # to fix the build error.
+&gt;           make
+</pre>
+<p>3. postgresql, because my postgresql require uuid-ossp, I have add following task warper in config/deploy.rb</p>
+<pre class="theme:github lang:ruby decode:true">namespace :rubber do
+
+  namespace :project do
+
+    before "deploy:migrate", "rubber:project:add_pg_superuser_and_enable_hstore"
+    after "deploy:migrate", "rubber:project:remove_pg_superuser"
+
+    task :add_pg_superuser_and_enable_hstore,
+         :roles =&gt; [:postgresql_master, :postgresql_slave] do
+      alter_user_cmd = "ALTER USER #{rubber_env.db_user} SUPERUSER;"
+      create_ext_cmd = 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+      rubber.sudo_script "add_superuser_create_hstore", &lt;&lt;-ENDSCRIPT
+      ENDSCRIPT
+      rsudo "sudo -i -u postgres psql -c "#{create_ext_cmd}""
+
+
+    end
+
+    task :remove_pg_superuser, :roles =&gt; [:postgresql_master,
+                                          :postgresql_slave] do
+      alter_user_cmd = "ALTER USER #{rubber_env.db_user} NOSUPERUSER"
+      rubber.sudo_script "add_superuser_create_hstore", &lt;&lt;-ENDSCRIPT
+        sudo -i -u postgres psql -c "#{alter_user_cmd}"
+      ENDSCRIPT
+    end
+
+  end</pre>
+<p>Also need this package change in rubber-postgresql.yml : 36</p>
+<pre class="lang:default decode:true">packages: [postgresql-client, libpq-dev, postgresql-contrib]
+</pre>
+<p>4. About figaro</p>
+<p>If you're save your secret in ENV var like me, you maybe want to use figaro,<br />
+but when you use github to deploy code, the application.yml is not check in to repo, so you need add a task in your config/deploy.rb</p>
+<pre class="theme:github lang:ruby decode:true"># This task make sure application.yml will copy after git.
+namespace :figaro do
+  desc "SCP transfer figaro configuration to the shared folder"
+  task :setup do
+    transfer :up, "config/application.yml", "#{shared_path}/application.yml", via: :scp
+  end
+ 
+  desc "Symlink application.yml to the release path"
+  task :symlink do
+    run "ln -sf #{shared_path}/application.yml #{latest_release}/config/application.yml"
+  end
+ 
+  desc "Check if figaro configuration file exists on the server"
+  task :check do
+    begin
+      run "test -f #{shared_path}/application.yml"
+    rescue Capistrano::CommandError
+      unless fetch(:force, false)
+        logger.important 'application.yml file does not exist on the server "shared/application.yml"'
+        exit
+      end
+    end
+  end
+end
+after "deploy:setup", "figaro:setup"
+after "deploy:finalize_update", "figaro:symlink"
+</pre>
+<p>5. Github ssh.</p>
+<p>Because you maybe using a private github account to do deployment, you need to use ssh auth, but you don't want to the private put in every EC2 instance.</p>
+<p>So you can consider use ssh agent forwarding to do this job, you need 3 steps to make it happen:<br />
+a)   add following to your ~/.ssh/config</p>
+<pre class="lang:default decode:true">Host *.compute.amazonaws.com
+  ForwardAgent yes</pre>
+<p>b) use this command to generate a new key for the deployment.</p>
+<pre class="lang:default decode:true">ssh-keygen -f ~/.ec2/github_key
+</pre>
+<p>c) add setting in your config/deploy.rb</p>
+<pre class="lang:default decode:true">ssh_options[:forward_agent] = true
+ssh_options[:port] = 22
+ssh_options[:keys] = [File.join(ENV["HOME"], ".ec2", "github_key")]
+</pre>
+<p>Don't forgot change the scm part:</p>
+<pre class="lang:default decode:true"># Use a simple directory tree copy here to make demo easier.
+# You probably want to use your own repository for a real app
+set :scm, :git
+set :repository, "git@github.com:xxxx/yyyy.git"
+set :deploy_via, :remote_cache</pre>
+<p>After all, you can use github to deploy your new code.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

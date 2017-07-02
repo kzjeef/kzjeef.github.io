@@ -1,0 +1,34 @@
+---
+layout: post
+title: 谈谈closure
+date: 2012-03-05 14:44:12.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>&nbsp;</p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;">closure是functional programming中的很重要的一个概念，Scheme首创这个概念， 大致可以理解为一个东西可以以自己为开始并且结束， 最常见的形式莫过于回调函数了。这句话很难理解。</p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">举个生活中的例子：</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">刚来上海的时候， 经常到一家小饭馆吃饭， 发现这个饭馆点菜很有方法。 这是一个小饭馆， 每个人点菜都不是很多， 点菜再前台， 点完以后拿到小票给服务员， 服务员走到桌子前， 打气桌子上写着桌号的小夹子加载小票上， 一起交给厨师。</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">然后上菜的时候另外一个服务员就可以通过夹子找到客人， 然后在把夹子放在桌子上。</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">全过程中， 这个菜单和夹子就是一个object， 它自我闭包， 不需要任何起其他记录（全局变量）， 就可以完成完全不知道的两个服务员正确的送菜（多线程）。</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">从这个例子可以看到， 这个点菜过程完全是闭包的， 其中的对象可以说就是这个夹子（夹子上有桌号和菜单）。正因为这种closure， 这个饭馆可以随时更换增加和减少服务员和厨师数量的数量， 每个厨师和服务员都不需要记住任何客人的地方和菜单。只要这个夹子就可以知道所有上菜与做菜的东西。</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;"><span style="letter-spacing: 0.0px;">其实在高度并发的环境下，增加程序的闭包性是最优雅，也是最快的解决办法。不需要上下文， 不需要复杂的记录object的数据， 完全由并发的个体自我完成。&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px;"><span style="letter-spacing: 0.0px;">&nbsp;</span></p>
+<p style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica;">&nbsp;</p>

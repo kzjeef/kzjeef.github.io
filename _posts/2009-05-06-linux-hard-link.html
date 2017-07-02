@@ -1,0 +1,28 @@
+---
+layout: post
+title: Linux hard link
+date: 2009-05-06 23:45:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>You may confused what the hard link is, and why the delete file use the unlink(2) system call. this example will help you somehow.</p>
+<p>assumption, there is a file in /tmp/a.txt</p>
+<p>$ cat /tmp/a.txt<br />hello, i'm a.txt</p>
+<p>then, we write this test.c<br />test.c:
+<div style="text-align: justify;"><span style="font-family: lucida grande;">#include &lt;unistd.h&gt;</span><br /><span style="font-family: lucida grande;">int main(void)</span><br /><span style="font-family: lucida grande;">{</span><br /><span style="font-family: lucida grande;">    link("/tmp/a.txt", "/tmp/new_a.txt");</span><br /><span style="font-family: lucida grande;">    /* in this moment, the a.txt have same content with new_a.txt */</span><br /><span style="font-family: lucida grande;">    unlink("/tmp/a.txt");</span><br /><span style="font-family: lucida grande;">   /* in this moment, a.txt will be delete */</span><br /><span style="font-family: lucida grande;">}</span></div>
+<p>we compile the test.c<br />$gcc test.c</p>
+<p>and run it<br />$./a.out</p>
+<p>$ cat /tmp/new_a.txt<br />hello, i'm a.txt</p>
+<p>Use hard link is the simplest and the fastest way move files within the same filesystem, since hard link cann't across filesystem.</p>
+<p>More infomation you need check the link(2) or the unix filesystem design.</p>

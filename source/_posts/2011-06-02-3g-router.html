@@ -1,0 +1,49 @@
+---
+layout: post
+title: 一个3G router的性能优化经历
+date: 2011-06-02 05:06:54.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux 优化
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>这里记录一个在工作中经历过的一次优化记录，其中会隐去一些真实的名字。</p>
+<p>背景是这样的，公司有一个客户要做一个3G的WIFI移动AP，就是像 http://www.360buy.com/product/273676.html 这个东东一样的一个产品。 使用的CPU是ARM9为Core，运行在454MHz上，并且内存宽度只有16-bit. 这种设备通常对成本和功耗比较敏感，所以硬件配置都比较低，但是对于一方面的性能还是有很高的要求的。</p>
+<p>架构大概是这样的：</p></p>
+<p>这里3G要通过USB， 然后经过Net Filter过滤，通常这个规则是很少的，但是是必须的， 然后通过SDIO连接到WIFI芯片上，然后再通过无线连接到各种Device上面。</p>
+<p>该说说目标了，客户的要求的目标比较远大， 你看上面列出来那个HW的产品，上行是7Mbps 下行是 5Mbps. 呵呵， 注意是bits的。而对于这个产品，客户的要求是这样的25Mbps/28Mbps， 整整高了5倍左右。 任重而道远啊。当然这个速度是下行速度。</p>
+<p>首先是没有优化过的版本跑一下，得到的数据是13Mbps, 好像比上面那位兄台的要强很多了嘛，不过和客户的要求还差整整一倍呢。于是就开始优化，装备ftrace， oprofile等工具。 监视统计信息。</p>
+<p>首先看到的是&nbsp; /proc/cpu/alignment， 这里记录一些非对其访问的次数：比如</p>
+<p>probash-3.2# cat /proc/cpu/alignment<br />
+User:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+System:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+Skipped:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+Half:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+Word:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+DWord:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+Multi:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0<br />
+User faults:&nbsp;&nbsp;&nbsp; 4 (signal)</p>
+<p>首先发现这里的有一个值异常的高， 而对于ARM9的架构，对于这种非4字节对其的访问是会由一个trap交给Kernel来处理，所以会很慢。 再追这个非对其访问来自于哪里以后发现是由tcp的栈上的访问。 最后发现这个是在我们的测试环境中的FEC的driver的问题，因为太网头是12个字节，这样减下来就导致，后面TCP的访问都不是4字节对齐的了。最后用在FEC的驱动中前面留了2个字节的padding，这样以后TCP的访问就都是4字节对齐的访问了。</p>
+<p>经过这次优化以后，达到18Mbps.</p>
+<p>然后接着看USB， 通过ftrace观察发现，在sdio要搬数据的时候， 会经常被USB的中断打断，因为3G modem用的中断模式进行USB传输，而这个频率是1ms一次，这样会造成CPU总是在相应中断，而FIFO中的数据不能搬运到WIFI上，因为WIFI是用的软中断来进行搬运。</p>
+<p>intterupt(UBS) -&gt; 2. softirq--&gt; 3. list(WIFI) --&gt; 4. two thread write SDIO(WIFI/task)</p>
+<p>由于IRQ的优先级高，所以导致其他的task和softirq根本无法被调到。</p>
+<p>所以调整到8ms以后，就可以达到23Mbps的速度了。</p>
+<p>好了，眼看就达到目标了。</p>
+<p>接下来就要看一些通用的方法了，上oprofile, 用oprofile以后发现，memcpy被调用很多次，接下来减少memcpy应该会增加不少性能。</p>
+<p>定位以后可以发现是在WIFI driver里面做的memcpy，进一步观察发现，是因为wifi发现这个buffer前面的头太小了，要插入一个wifi的包头空间不够才会做这样的memcpy， 而这个包是从USB来的，那么就在USB生成包的时候预留更多的空间给wifi做报头，这样就不需要memcpy了。</p>
+<p>在sdio的DMA中，用了sg-list 的DMA方式，这样也减少了一部分的memcpy，因为如果没有sg-list的DMA传输，driver就得把几个小buffer，copy成为一个大的buffer，然后进行DMA传输，有了sg-list传输以后，就可以通过组成一个sg-list的表然后把这些小的内存都进行DMA，进一步减少memcpy传输。</p>
+<p>进行这些优化以后就达到了28Mbps的要求了。</p>
+<p>其实这里面主要就几点， 调度， memcpy, 字节对齐访问。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

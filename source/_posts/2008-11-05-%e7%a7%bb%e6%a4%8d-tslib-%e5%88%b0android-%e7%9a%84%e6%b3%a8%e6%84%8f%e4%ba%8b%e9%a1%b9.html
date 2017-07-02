@@ -1,0 +1,24 @@
+---
+layout: post
+title: 移植 tslib 到Android 的注意事项
+date: 2008-11-05 22:02:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>tslib是这样的结构， tslib只是一个上层， 他主要是调用它的那些插件来处理从驱动那里得到的点，<br />插件的顺序是你的 ts.conf 里面的插件的顺序。<br />昨天发现能够从/dev/input/event1里面读出东西来， 却不能够用ts_test来响应，原来是驱动送上来的点不符合规则， （更搞笑的是他还没意识到这点， 坚持说自己是对的）， 我用的插件是 input 插件， 找到问题以后就好办了， 改configure.ac里面， 给自己加一个插件， 就叫ac97吧， 然后创建文件 tslib_src/plugins/ac97-raw.c ， 把你“特殊”的驱动加进去就可以了。</p>
+<p>测试的时候， 发现很慢， 奇怪驱动送上来的点是很快的啊， 结果发现是因为我在读入每个点之后都打印了调试信息， 所以导致tslib的延迟， 如果你的系统也存在同样的问题， 最好去掉debug试一试， 毕竟终端是比较慢的设备。</p>
+<p>其实把tslib放入Android里面首先要解决的问题是Android的编译系统， 你要把tslib， 和那些你用到的插件们都编译成动态库的形式， 可以参考其他库的Android.mk文件来编写， 还有就是你要把ts_test, ts_calebrate编译成可执行文件， 同样是编写Android.mk。</p>
+<p>因为Android是从/dev/input/event0读入鼠标事件， 我们的想法就是不要去改动他的代码， 在后台运行一个daemon， 它就是把 /dev/input/event1中读出来的坐标（经过校准的），inject到event0里面， 这样一来就可以不修改Android的代码， 而加入我们的东西。<br />我在想， 要不要把tslib的东西checkin到Android的baseline中呢。 这是一个好想法。 毕竟不是所有人都用电容触摸屏的。</p>
+<p>移植进入Android里面可能会有这样的问题， 就是点击触摸屏和键盘会没有反应， 其实这是因为电源管理相关的东西导致的， 如果你也遇到同样的问题， 那么请屏蔽掉 _android_src_/hardware/libhardware/power.c中的函数（关键是最后一个函数， 函数名我忘了呵呵）。</p>
+<p>PS：fprintf到stderr上严重影响性能， 用打log调试确实不是一个好的方法， 在tiny loop和相应用户事件的地方不要大量的打log， 这也是为什么让我体会到了Android中的logger设备的优点啊。</p>

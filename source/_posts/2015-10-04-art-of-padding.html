@@ -1,0 +1,28 @@
+---
+layout: post
+title: Art of padding
+date: 2015-10-04 15:54:46.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Performance
+tags: []
+meta:
+  _edit_last: '1'
+  _ssb_hide: 'false'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Sharing some  links which I feel very useful when understanding the padding in kernel's code, you usually see those padding skill in some high performance application like 3D gaming.</p>
+<p>Eric.S.Raymond have great Article about C struct padding, how it affect the actually memory size of your structure:<br />
+<a href="http://www.catb.org/esr/structure-packing/">link</a></p>
+<p>And there is a article from intel performance guide about how padding fix the "false sharing" issue in a SMP programming model.</p>
+<p><a href="https://software.intel.com/en-us/articles/avoiding-and-identifying-false-sharing-among-threads">link</a></p>
+<p>The link below is belongs to <a href="https://software.intel.com/en-us/articles/intel-guide-for-developing-multithreaded-applications">Intel Guide for Developing Multithreaded Applications</a>  which also valuable to read.</p>
+<p>This link is from roguewave 's manual, which also have great detail about how actually memory layout by padding: <a href="http://docs.roguewave.com/threadspotter/2011.2/manual_html_linux/manual_html/ch05s01.html">link</a></p>
+<p>EOF</p>

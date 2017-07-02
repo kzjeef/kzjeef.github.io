@@ -1,0 +1,52 @@
+---
+layout: post
+title: Time Machine Eat My HD...
+date: 2012-07-20 15:32:13.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta:
+  _edit_last: '1'
+  _wpas_skip_2244592: '1'
+  _wpas_skip_2244573: '1'
+  _wpas_skip_2244563: '1'
+  _wpas_skip_2244581: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><!--?xml version="1.0" encoding="UTF-8" standalone="no"?--></p>
+<div style="font-family: Arial; font-size: small;">今天忽然发现自己的MBP上面的320G的硬盘用完了， 慢的叫个没话说。</div>
+<div style="font-family: Arial; font-size: small;">可是东西感觉没安多少， 基本上就是iTune U上面下了很多视频， 但是也不至于把硬盘全部用完把。</div>
+<div style="font-family: Arial; font-size: small;">所以还是先到根目录下面找找是什么占了内存了：</div>
+<div style="font-family: Arial; font-size: small;"><span style="font-family: Arial, Verdana, sans-serif; font-size: 12px;"> </span>&nbsp;</p>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">cd /
+sudo find . -size +200M 2&>/dev/null</pre>
+</div>
+</div>
+<div style="font-family: Arial; font-size: small;">惊讶的发现删掉的很多视频竟然出现在 /.MbileBackups 里面。</div>
+<div style="font-family: Arial; font-size: small;">计算了一下大小：</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo du -sh /.MobileBackups.trash/</pre>
+</div>
+<div style="font-family: Arial; font-size: small;">发现竟然有48G， My God， 必须回收回来。。</div>
+<div style="font-family: Arial; font-size: small;">Google了一会发现原来发现这个目录是Time Machine用来做本地备份的，</div>
+<div style="font-family: Arial; font-size: small;"><em>Apple considered to implement a new "feature" to Lion that no one seems to be aware of: Local Backups if your Time Machine Drive is not connected to you computer. It seems to affect only Mac Laptops, not the desktop Macs. So every time your Time Machine backup starts without the destination drive it will copy all data in a secure folder on your local startup volume called ".MobileBackups".</em></div>
+<div style="font-family: Arial; font-size: small;">已经有很多天备份了， 而且已经把Music目录排除出去了，估计这些文件是在很早以前下载的。 于是查到了通过这个命令关掉这些本地备份， 重启以后就会全部删掉。</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo tmutil disablelocal
+sudo reboot</pre>
+</div>
+<div style="font-family: Arial; font-size: small;">然后发现重启以后就多了48G空间</div>
+<div style="font-family: Arial; font-size: small;">不过Time Machine还是有必要的，于是又重新打开</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo tmutil enablelocal
+sudo reboot</pre>
+</div>

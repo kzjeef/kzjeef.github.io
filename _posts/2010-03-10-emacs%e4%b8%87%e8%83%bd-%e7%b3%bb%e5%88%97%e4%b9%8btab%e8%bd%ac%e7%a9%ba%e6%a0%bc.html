@@ -1,0 +1,36 @@
+---
+layout: post
+title: Emacs万能 系列之TAB转空格
+date: 2010-03-10 18:17:52.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- emacs
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>最近在参与一个开源项目， <a href="http://code.google.com/p/iptux"><span style="color:#000000;">iptux</span></a>&nbsp;，为了统一风格我们要把代码里面所有的tab都转换成空格，大约有70个C++源文件两万行代码那么多。&nbsp;</p>
+<p>我的第一个想法是去找indent工具来作这件事清，可是当我实验了几下以后发现不对，indent会作很多其他的风格的修改，做了太多事情了，不行。</p>
+<p>怎么办呢，上emacs，想不到该怎么办的时候我总是想到emacs，合并代码，去找BUG...不胜枚举.</p>
+<p>我是这么作的，大约用了2分钟作了这个工作两次（因为第一次做完以后提交的时候遇到冲突，所以就revert &amp; up了以后重新来了一次）。</p>
+<p>1. 首先，现用C-f 打开所有的.cpp和.h文件</p>
+<p>2. 按F3开始录制宏,</p>
+<p>3. 然后开始一次转一个文件</p>
+<p>C－SPC &nbsp; # 设定开始标记</p>
+<p>M－S－&gt; # 到达文件末尾</p>
+<p>M-x untabify ENT &nbsp;# 输入转换成空格的命令并回车</p>
+<p>C-x C-s # 保存文件</p>
+<p>C-k ENT #关掉当前buffer</p>
+<p>4. 按F4表示录制完毕.</p>
+<p></p>
+<p>然后就狂按F4执行刚才录制的宏, 直到没有窗口为止.因为我们之前已经把所有需要转换的文件都打开了,所以关到没有窗口的时候就是全部转换完了。</p>
+<p>OK， 转换完了。提交代码了。</p>
+<p>顺便推销一下iptux，如果你在局域网环境中，你需要一个Linux下面兼容飞鸽传书类的软件的话，就选择它吧。&nbsp;</p>

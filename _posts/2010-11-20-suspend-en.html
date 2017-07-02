@@ -1,0 +1,499 @@
+---
+layout: post
+title: Linux Kernel and Android Suspend/Resume
+date: 2010-11-20 13:28:56.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- android
+- linux
+meta:
+  _wpas_skip_2244592: '1'
+  _edit_last: '1'
+  _wpas_skip_2244563: '1'
+  _wpas_skip_2244581: '1'
+  _wpas_skip_2244573: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><span style="font-family: Times, serif; line-height: normal;">Author: zhangjiejing &lt;kzjeef#gmail.com&gt;   thinksrc.com</span></p>
+<h2 id="sec-2" style="font-size: 1.5em;"><span style="font-family: Times, serif; font-weight: normal; line-height: normal; font-size: 13px;"> <strong>Table of Contents</strong> </span></h2>
+<div id="table-of-contents">
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Abstract</a></li>
+<li><a href="#sec-2">I11N</a></li>
+<li><a href="#sec-3">Version</a></li>
+<li><a href="#sec-4">Introducion of suspend</a></li>
+<li><a href="#sec-5">Normal Linux Suspend</a>
+<ul>
+<li><a href="#sec-5.1">Files:</a></li>
+<li><a href="#sec-5.2">Prepare, Freezing Process</a></li>
+<li><a href="#sec-5.3">Suspend Devices</a></li>
+<li><a href="#sec-5.4">Resume</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">Android Suspend</a>
+<ul>
+<li><a href="#sec-6.1">Files:</a></li>
+<li><a href="#sec-6.2">Feathers</a>
+<ul>
+<li><a href="#sec-6.2.1">Early Suspend</a></li>
+<li><a href="#sec-6.2.2">Late Resume</a></li>
+<li><a href="#sec-6.2.3">Wake Lock</a></li>
+</ul>
+</li>
+<li><a href="#sec-6.3">Android Suspend</a></li>
+<li><a href="#sec-6.4">Early Suspend</a></li>
+<li><a href="#sec-6.5">Late Resume</a></li>
+<li><a href="#sec-6.6">Wake Lock</a></li>
+<li><a href="#sec-6.7">Suspend</a></li>
+<li><a href="#sec-6.8">Different Between Standard Linux Suspend</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Abstract</h2>
+<div id="text-1" class="outline-text-2">Suspend &amp; Resume is a huge function that Linux kernel provied, it's more and more useful with the mobile and quick start requirememnt increasing. This post will introduce the big picture of Linux suspend and resume, and how android power management works.</div>
+</div>
+<div id="outline-container-2" class="outline-2">
+<h2>I11N</h2>
+<div id="text-2" class="outline-text-2">
+<ul>
+<li>English Version : <a href="http://www.thinksrc.com/2010/11/20/suspend-en.html" target="_blank">link</a></li>
+<li>中文版 : <a href="http://www.thinksrc.com/2010/04/18/suspend-cn.html" target="_blank">link</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Version</h2>
+<div id="text-3" class="outline-text-2">
+<ul>
+<li>Linux Kernel: v2.6.28</li>
+<li>Android: v2.0</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Introducion of suspend</h2>
+<div id="text-4" class="outline-text-2">
+<p>Suspend have 3 major part: Freezing process and tasks Call every driver's suspend callback Suspend CPU and core system devices Freezing process is like stop all process, and when resume, it will start execute as if not stop ever. User space process and kernel space taskes will never know this stop, They are like babies at all. How user let Linux goto suspend ? User can read/write sys fs file: /sys/power/state to control and get kernel power managment(PM) service. such as:</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;"># echo standby &gt; /sys/power/state</pre>
+<p>to let system going to suspend. also</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;"># cat /sys/power/state</pre>
+<p>to get how many PM method you kernel supported.</p>
+</div>
+</div>
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Normal Linux Suspend</h2>
+<div id="outline-container-5.1" class="outline-3">
+<h3 id="sec-5.1">Files:</h3>
+<div id="text-5.1" class="outline-text-3">
+<p>you can checkout a <a href="http://www.kernel.org/">standard linux source code</a>, below is the path.</p>
+<ul>
+<li>linux_soruce/kernel/power/main.c</li>
+<li>linux_source/kernel/arch/xxx/mach-xxx/pm.c</li>
+</ul>
+<p>Let 's going to see how these happens. The userspace interface /sys/power/state is state_store() function in main.c: You can write the strings defined by const char * const pm_state[]: such as "mem", "standby". In a normal linux kernel, It will going to enter_state() in main.c enter_state() will first do some check of state. sync file system. Below is the source code:</p>
+<pre class="lang:c decode:true ">/**
+ *      enter_state - Do common work of entering low-power state.
+ *      @state:         pm_state structure for state we're entering.
+ *
+ *      Make sure we're the only ones trying to enter a sleep state. Fail
+ *      if someone has beat us to it, since we don't want anything weird to
+ *      happen when we wake up.
+ *      Then, do the setup for suspend, enter the state, and cleaup (after
+ *      we've woken up).
+ */
+static int enter_state(suspend_state_t state)
+{
+int error;
+
+if (!valid_state(state))
+return -ENODEV;
+
+if (!mutex_trylock(&amp;pm_mutex))
+return -EBUSY;
+
+printk(KERN_INFO "PM: Syncing filesystems ... ");
+sys_sync();
+printk("done.n");
+
+pr_debug("PM: Preparing system for %s sleepn", pm_states[state]);
+error = suspend_prepare();
+if (error)
+goto Unlock;
+
+if (suspend_test(TEST_FREEZER))
+goto Finish;
+
+pr_debug("PM: Entering %s sleepn", pm_states[state]);
+error = suspend_devices_and_enter(state);
+
+Finish:
+pr_debug("PM: Finishing wakeup.n");
+suspend_finish();
+Unlock:
+mutex_unlock(&amp;pm_mutex);
+return error;
+}</pre>
+<p>&nbsp;</p>
+</div>
+</div>
+<div id="outline-container-5.2" class="outline-3">
+<h3 id="sec-5.2"><strong>Prepare, Freezing Process</strong></h3>
+<div id="text-5.2" class="outline-text-3">
+<p>Going to suspend_prepare(), this func will alloc a console for suspend, running suspend notifiers, disable user mode helper, and call suspend_freeze_processes() freeze all process, it will make all process save current state, in the freeze stage, maybe some task/user space process will refuze to going to freezing,it will abort and unfreezing all precess.</p>
+<pre class="lang:default decode:true example">/**
+ *      suspend_prepare - Do prep work before entering low-power state.
+ *
+ *      This is common code that is called for each state that we're entering.
+ *      Run suspend notifiers, allocate a console and stop all processes.
+ */
+static int suspend_prepare(void)
+{
+  int error;
+  unsigned int free_pages;
+  if (!suspend_ops || !suspend_ops-&gt;enter)
+    return -EPERM;
+
+  pm_prepare_console();
+
+  error = pm_notifier_call_chain(PM_SUSPEND_PREPARE);
+  if (error)
+    goto Finish;
+
+  error = usermodehelper_disable();
+  if (error)
+    goto Finish;
+
+  if (suspend_freeze_processes()) {
+    error = -EAGAIN;
+    goto Thaw;
+  }
+
+  free_pages = global_page_state(NR_FREE_PAGES);
+  if (free_pages &lt; FREE_PAGE_NUMBER) {
+    pr_debug("PM: free some memoryn");
+    shrink_all_memory(FREE_PAGE_NUMBER - free_pages);
+    if (nr_free_pages() &lt; FREE_PAGE_NUMBER) {
+      error = -ENOMEM;
+      printk(KERN_ERR "PM: No enough memoryn");
+    }
+  }
+  if (!error)
+    return 0;
+
+ Thaw:
+  suspend_thaw_processes();
+  usermodehelper_enable();
+ Finish:
+  pm_notifier_call_chain(PM_POST_SUSPEND);
+  pm_restore_console();
+  return error;
+}</pre>
+<p><strong> Suspend Devices</strong></p>
+</div>
+</div>
+<div id="outline-container-5.3" class="outline-3">
+<div id="text-5.3" class="outline-text-3">
+<p>For now, all the other process(process/workqueue/kthread) is stoped, they may have locked semaphore, if you waiting for them in driver's suspend function, it will a dead lock. And then, kernel will free some memory for later use. Finally, it will call suspend_devices_and_enter() to suspend all devices, in this function, first will call suspend_ops-&gt;begin() if this machine have this function, device_suspend() in driver/base/power/main.c will be called, this function will call dpm_suspend() to all all device list and their suspend() callback. After suspend devices, it will call the suspend_ops-&gt;prepare() to let machine do some machine related prepare job(could be empty on some machine), it will disable nonboot cpus to avoid race conditions, so , after that, it will only one cpu will running. suspend_ops is a machine related pm op, normally it registed by arch/xxx/mach-xxx/pm.c And then, is suspend_enter() will be called, here will disable arch irqs will suspend, call device_power_down(), this message will call each of suspend_late() callback, thi will be the last call back before system hold, and suspend all system devices, I guess it means, all devices under /sys/devices/system/*, and then it will call suspend_pos-&gt;enter() to let cpu going to a power save mode, system will stop here, aka, the code executing stop here.</p>
+<pre class="lang:default decode:true ">/**
+ *      suspend_devices_and_enter - suspend devices and enter the desired system
+ *                                  sleep state.
+ *      @state:           state to enter
+ */
+int suspend_devices_and_enter(suspend_state_t state)
+{
+  int error, ftrace_save;
+
+  if (!suspend_ops)
+    return -ENOSYS;
+
+  if (suspend_ops-&gt;begin) {
+    error = suspend_ops-&gt;begin(state);
+    if (error)
+      goto Close;
+  }
+  suspend_console();
+  ftrace_save = __ftrace_enabled_save();
+  suspend_test_start();
+  error = device_suspend(PMSG_SUSPEND);
+  if (error) {
+    printk(KERN_ERR "PM: Some devices failed to suspendn");
+    goto Recover_platform;
+  }
+  suspend_test_finish("suspend devices");
+  if (suspend_test(TEST_DEVICES))
+    goto Recover_platform;
+
+  if (suspend_ops-&gt;prepare) {
+    error = suspend_ops-&gt;prepare();
+    if (error)
+      goto Resume_devices;
+  }
+
+  if (suspend_test(TEST_PLATFORM))
+    goto Finish;
+
+  error = disable_nonboot_cpus();
+  if (!error &amp;&amp; !suspend_test(TEST_CPUS))
+    suspend_enter(state);
+
+  enable_nonboot_cpus();
+ Finish:
+  if (suspend_ops-&gt;finish)
+    suspend_ops-&gt;finish();
+ Resume_devices:
+  suspend_test_start();
+  device_resume(PMSG_RESUME);
+  suspend_test_finish("resume devices");
+  __ftrace_enabled_restore(ftrace_save);
+  resume_console();
+ Close:
+  if (suspend_ops-&gt;end)
+    suspend_ops-&gt;end();
+  return error;
+
+ Recover_platform:
+  if (suspend_ops-&gt;recover)
+    suspend_ops-&gt;recover();
+  goto Resume_devices;
+}</pre>
+<p><strong>Resume</strong></p>
+</div>
+</div>
+<div id="outline-container-5.4" class="outline-3">
+<div id="text-5.4" class="outline-text-3">If the system wake up by interrupt or other event, the code executing will be continue. The first thing system resume is resume the devices under /sys/devices/system/, and enable irq, and then, it will enable nonboot cpus, and call suspend_ops-&gt;finish() to let machine know it will start resume, suspend_devices_and_enter() function later will will call every device 's resume() fucntion to resume devices, resume the console, and finally, call the suspend_ops-&gt;end(). Let's return to enter_state() function, after suspend_devices_and_enter() returns, the devices is running, but user space process and task is still freezed, enter_state will later call suspend_finish(), it will thaw the processes and enable user mode helper, and notify all pm they are exit from a suspend stage, and resume the console. This is a stardard linux suspend and resume sequence.</div>
+</div>
+</div>
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"></h2>
+<h2>Android Suspend</h2>
+<div id="text-6" class="outline-text-2">In android patched kernel, going to request_suspend_state() in kernel/power/earlysuspend.c (since android add the Early suspend &amp; wakelock feather in kernel). For detail understand that, let first introduct serval new feather android imported.</div>
+<div id="outline-container-6.1" class="outline-3">
+<h3 id="sec-6.1"><strong>Files:</strong></h3>
+<div id="text-6.1" class="outline-text-3">
+<ul>
+<li>linux_source/kernel/power/main.c</li>
+<li>linux_source/kernel/power/earlysuspend.c</li>
+<li>linux_source/kernel/power/wakelock.c</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-6.2" class="outline-3">
+<h3 id="sec-6.2"><strong>Feathers</strong></h3>
+<div id="outline-container-6.2.1" class="outline-4">
+<h4 id="sec-6.2.1"><strong><span style="color: #000000;">Early Suspend</span></strong></h4>
+<div id="text-6.2.1" class="outline-text-4">Early suspend is a mechanism that android introduced into linux kernel. This state is btween really suspend, and trun off screen. After Screen is off, several device such as LCD backlight, gsensor, touchscreen will stop for battery life and functional requirement.</div>
+</div>
+<div id="outline-container-6.2.2" class="outline-4">
+<h4 id="sec-6.2.2"><strong>Late Resume</strong></h4>
+<div id="text-6.2.2" class="outline-text-4">Late resume is a mechinism pairs to early suspend, executed after the kernel and system resume finished. It will resume the devices suspended during early suspend.</div>
+</div>
+<div id="outline-container-6.2.3" class="outline-4">
+<h4 id="sec-6.2.3"><strong>Wake Lock</strong></h4>
+<div id="text-6.2.3" class="outline-text-4">Wake lock acts as a core member in android power management system. wake lock is a lock can be hold by kernel space ,system servers and applications with or without timeout. In an android patched linux kernel (referenced as android kernel below) will timing how many and how long the lock have. If there isn't any of wake lock prevent suspend(WAKE_LOCK_SUSPEND), android kernel will call linux suspend (pm_suspend()) to let entire system going to suspend.</div>
+</div>
+</div>
+<div id="outline-container-6.3" class="outline-3">
+<h3 id="sec-6.3"><strong>Android Suspend</strong></h3>
+<div id="text-6.3" class="outline-text-3">
+<p>when user write "mem"/"stanby" to /sys/power/state the state_store() will called. And then will going to request_suspend_state(), this function will check the state, if the request is suspend it will queue the early_suspend_work -&gt; early_suspend(),</p>
+<pre class="lang:c decode:true example">void request_suspend_state(suspend_state_t new_state)
+{
+  unsigned long irqflags;
+  int old_sleep;
+
+  spin_lock_irqsave(&amp;state_lock, irqflags);
+  old_sleep = state &amp; SUSPEND_REQUESTED;
+  if (debug_mask &amp; DEBUG_USER_STATE) {
+    struct timespec ts;
+    struct rtc_time tm;
+    getnstimeofday(&amp;ts);
+    rtc_time_to_tm(ts.tv_sec, &amp;tm);
+    pr_info("request_suspend_state: %s (%d-&gt;%d) at %lld "
+	    "(%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)n",
+	    new_state != PM_SUSPEND_ON ? "sleep" : "wakeup",
+	    requested_suspend_state, new_state,
+	    ktime_to_ns(ktime_get()),
+	    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+	    tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
+  }
+  if (!old_sleep &amp;&amp; new_state != PM_SUSPEND_ON) {
+    state |= SUSPEND_REQUESTED;
+    queue_work(suspend_work_queue, &amp;early_suspend_work);
+  } else if (old_sleep &amp;&amp; new_state == PM_SUSPEND_ON) {
+    state &amp;= ~SUSPEND_REQUESTED;
+    wake_lock(&amp;main_wake_lock);
+    queue_work(suspend_work_queue, &amp;late_resume_work);
+  }
+  requested_suspend_state = new_state;
+  spin_unlock_irqrestore(&amp;state_lock, irqflags);
+}</pre>
+<p>&nbsp;</p>
+</div>
+</div>
+<div id="outline-container-6.4" class="outline-3">
+<h3 id="sec-6.4"><strong>Early Suspend</strong></h3>
+<div id="text-6.4" class="outline-text-3">
+<p>in early_suspend(): It will first check was the state still suspend (in case the suspend request was canceled during the time), if abort, this work will quit. If not, this func will call the all of registered early suspend handlers, and call suspend() of these handlers. And then, sync file system, and most important, give up a main_wake_lock, this wake lock is used by wakelock self and early suspend. This wake lock is not a timeout wake lock, so, if this lock is holded, wake lock will going to suspend even these was none of wake lock actived. During this time, the system suspend was not called. Because of early suspend give up the main_wake_lock, so the wake lock can decide if going to suspend the system.</p>
+<pre class="lang:c decode:true example">static void early_suspend(struct work_struct *work)
+{
+  struct early_suspend *pos;
+  unsigned long irqflags;
+  int abort = 0;
+
+  mutex_lock(&amp;early_suspend_lock);
+  spin_lock_irqsave(&amp;state_lock, irqflags);
+  if (state == SUSPEND_REQUESTED)
+    state |= SUSPENDED;
+  else
+    abort = 1;
+  spin_unlock_irqrestore(&amp;state_lock, irqflags);
+
+  if (abort) {
+    if (debug_mask &amp; DEBUG_SUSPEND)
+      pr_info("early_suspend: abort, state %dn", state);
+    mutex_unlock(&amp;early_suspend_lock);
+    goto abort;
+  }
+
+  if (debug_mask &amp; DEBUG_SUSPEND)
+    pr_info("early_suspend: call handlersn");
+  list_for_each_entry(pos, &amp;early_suspend_handlers, link) {
+    if (pos-&gt;suspend != NULL)
+      pos-&gt;suspend(pos);
+  }
+  mutex_unlock(&amp;early_suspend_lock);
+
+  if (debug_mask &amp; DEBUG_SUSPEND)
+    pr_info("early_suspend: syncn");
+
+  sys_sync();
+ abort:
+  spin_lock_irqsave(&amp;state_lock, irqflags);
+  if (state == SUSPEND_REQUESTED_AND_SUSPENDED)
+    wake_unlock(&amp;main_wake_lock);
+  spin_unlock_irqrestore(&amp;state_lock, irqflags);
+}</pre>
+</div>
+</div>
+<div id="outline-container-6.5" class="outline-3">
+<h3 id="sec-6.5"><strong>Late Resume</strong></h3>
+<div id="text-6.5" class="outline-text-3">
+<p>After all the kernel resume is finished, the user space process and service is running, the wake up of system for these reasons:</p>
+<ul>
+<li>In CallingIf In Calling, the modem will send command to rild (RING command), and rild will send message to WindowManager and Application to deal with in call event, PowerManagerSerivce also will write "on" to interface to let kernel execute late resume.</li>
+<li>User Key EventWhen system waked by a key event, such as a power key, or menu key, these key event will send to WindowManager, and it will deal with it, if the key is not the key can wake up system, such as return key/home key, the WindowManager will drop the wake lock to let system going to suspend again. if the key is a wake key, the WindowManager will RPC PowerManagerSerivce interface to execute late resume.</li>
+<li>Late Resume will call the resume func in list of early suspend devices.</li>
+</ul>
+<pre class="lang:c decode:true example">static void late_resume(struct work_struct *work)
+{
+  struct early_suspend *pos;
+  unsigned long irqflags;
+  int abort = 0;
+
+  mutex_lock(&amp;early_suspend_lock);
+  spin_lock_irqsave(&amp;state_lock, irqflags);
+  if (state == SUSPENDED)
+    state &amp;= ~SUSPENDED;
+  else
+    abort = 1;
+  spin_unlock_irqrestore(&amp;state_lock, irqflags);
+
+  if (abort) {
+    if (debug_mask &amp; DEBUG_SUSPEND)
+      pr_info("late_resume: abort, state %dn", state);
+    goto abort;
+  }
+  if (debug_mask &amp; DEBUG_SUSPEND)
+    pr_info("late_resume: call handlersn");
+  list_for_each_entry_reverse(pos, &amp;early_suspend_handlers, link)
+    if (pos-&gt;resume != NULL)
+      pos-&gt;resume(pos);
+  if (debug_mask &amp; DEBUG_SUSPEND)
+    pr_info("late_resume: donen");
+ abort:
+  mutex_unlock(&amp;early_suspend_lock);
+}</pre>
+<p>&nbsp;</p>
+</div>
+</div>
+<div id="outline-container-6.6" class="outline-3">
+<h3 id="sec-6.6"><strong>Wake Lock</strong></h3>
+<div id="text-6.6" class="outline-text-3">
+<p>Let's see how the wake lock mechinism run, we will focus on file wakelock.c. wake lock have to state, lock or unlock. The Lock have two method:</p>
+<ol>
+<li>Unlimited LockThis type of lock will never unlock until some one call unlock</li>
+<li>Wake Lock with TimeoutThis type of lock is alloc with a timeout, is the time expired, this lock will automatic unlock.</li>
+</ol>
+<p>Also have two type of lock:</p>
+<ol>
+<li>WAKE_LOCK_SUSPENDThis type of Lock will prevent system going to suspend.</li>
+<li>WAKE_LOCK_IDLEThis type of Lock not prevent system going to suspend, not a lock can make system wake, I can't figure out why this lock exist.In wake lock functions, there was 3 enter pointer can call the suspend() workqueue:
+<ol>
+<li>In wake_unlock(), if there was none of wake lock after unlock, the suspend started.</li>
+<li>after the timeout timer expired, the callback of timer will be called, in this function, it will check if there no of wake lock, system goto suspend.</li>
+<li>In wake_lock(), if add lock success, it will check if there was none of wake lock, if none of wake lock, it will going to suspend. I think the way check here is unnessary at all, the better way is let wake_lock() wake_unlock() to be atomic, since this check add here also have chance missing the unlock.</li>
+</ol>
+</li>
+<li>Wakelock debug</li>
+</ol>
+</div>
+<div id="text-6.6" class="outline-text-3">           There is a very useful way to enable wake lock's debug information in runtime as below, it will print all wake lock acquire and release information in your console, it's very useful while debugging the suspend/resume issue on android.</div>
+<div class="outline-text-3">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">echo 15 &gt; /sys/module/wakelock/parameter/debug_mask</pre>
+</div>
+</div>
+<div id="outline-container-6.7" class="outline-3">
+<h3 id="sec-6.7"><strong>Suspend</strong></h3>
+<div id="text-6.7" class="outline-text-3">
+<p>If the wake lock call the suspend workqueue, the suspend() will be called, this function check wake lock,sysc file system, and then call the pm_suspend()-&gt;enter_state() to going standard linux suspend sequence.</p>
+<pre class="lang:default decode:true example">static void suspend(struct work_struct *work)
+{
+	int ret;
+	int entry_event_num;
+
+	if (has_wake_lock(WAKE_LOCK_SUSPEND)) {
+		if (debug_mask &amp; DEBUG_SUSPEND)
+			pr_info("suspend: abort suspendn");
+		return;
+	}
+
+	entry_event_num = current_event_num;
+	sys_sync();
+	if (debug_mask &amp; DEBUG_SUSPEND)
+		pr_info("suspend: enter suspendn");
+	ret = pm_suspend(requested_suspend_state);
+	if (current_event_num == entry_event_num) {
+		wake_lock_timeout(&amp;unknown_wakeup, HZ / 2);
+	}
+}</pre>
+<p><strong>Different Between Standard Linux Suspend</strong></p>
+</div>
+</div>
+<div id="outline-container-6.8" class="outline-3">
+<div id="text-6.8" class="outline-text-3">
+<p>the pm_suspend() will call the enter_state() to going to a suspend() state, but it's not 100% same as standard kernel suspend sequence:</p>
+<ul>
+<li>When freezing process, android will check if there was any of wakelock, if have, the suspend sequence will be interrupted.</li>
+<li>In suspend_late callback, this callback will have a final check of wake lock, if some driver or freezed have the wake lock, it will return an error, this will make system going to resume. This could a problem in some situation. But this check is can't avoid, since the caller of wake_lock() normally not check the return value. So maybe some process start freezing without wake lock, but acquire some wake lock during the freezing, (I'm sure would this happen).</li>
+</ul>
+<p>If the pm_suspend() success, the log after that will not seen until system resume success. some times, folks said can't see the log printed in suspend, some times is some error on resume, so the log will never been seen. So the suspend error is hard to debug. The log during suspend can print to console by add "<span style="line-height: 17px; font-size: 12px;"><span style="color: #000000;">no_console_suspend" to <span style="line-height: 19px; font-size: 13px;">kernel command line <span style="line-height: 17px; font-size: 12px;"> , thanks <strong><a id="commentauthor-67002" style="color: #2970a6; text-decoration: none; padding: 0px; margin: 0px;" href="http://gitorious.org/android-opencsbc" rel="external nofollow">kasim</a>.</strong></span></span></span></span></p>
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author">A more detailed about linux suspend  please see http://kerneltrap.org/node/14004</p>
+</div>
+<p>&nbsp;</p>

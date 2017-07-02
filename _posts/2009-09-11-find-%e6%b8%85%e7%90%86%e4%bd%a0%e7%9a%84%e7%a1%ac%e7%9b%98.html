@@ -1,0 +1,22 @@
+---
+layout: post
+title: Find, 清理你的硬盘
+date: 2009-09-11 08:13:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>最近因为几份庞大的代码， 动则几个G的空间就没有了。 在我的Linux上分区实在不够，但是又不舍得删一些720P的电影， 只好想尽办法来清理硬盘上的垃圾。</p>
+<p>有了GNU的工具链，这个就非常容易。</p>
+<p>cd /<br />find -size +100M -print</p>
+<p>有了这条就可以找到大于100M的文件，于是我找到一堆不需要的压缩包。 删之。 空间剧增。</p>

@@ -1,0 +1,42 @@
+---
+layout: post
+title: Mac下面最好用的Emacs
+date: 2014-05-27 01:06:09.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Emacs
+- Throughs
+tags:
+- emacs
+- homebrew
+- mac
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>想想第一次接触Emacs是在2005年的时候， 还是yangxi同学推荐的。 自从那个时候， Emacs就一直是我主要的工具。 编程环境从Linux， Win， 到Mac， 变了很多。 从写C，到后来写C＋＋， Java， Objective C, Python, Ruby。</p>
+<p>后来浅浅的尝试过许多编辑器， IDE， 却都没有Emacs用的顺手。 知道后来得了Emacs Pinky， 也没有变过。</p>
+<p>用Emacs就不得不说一下按Control健得方法， 一开始是用小拇指按， 慢慢得变成用手掌按Control键， 后来买了HHKB以后， 就把键盘得Caps键该成了Control。 知道后来小拇指得疼痛已经让我无法正常工作以后， 才意识到不能用换Caps键。 还是回到了用手掌按Caps键得老方法。 小拇指现在不是很疼了。<br />
+当然， 买个脚踏板应该是最终解决办法。 :)</p>
+<p>瞎扯了这么多， 还是回到正题上面来。<br />
+Emacs在Linux下面是非常的快， 用最新的Emacs24很爽。<br />
+但是当我现在主要的编程环境编程了Mac OS以后， Emacs安装那个包就是一个复杂的问题了。</p>
+<p>一开始我用这个：<br />
+<a href="http://www.emacsformacosx.com/">emacsformacosx.com/</a><br />
+一开始用的都挺好的， 直到Mac到了10.9以后， 这个Emacs会有严重的<a href="https://groups.google.com/forum/#!topic/gnu.emacs.bug/s47kTTrcL4Q">内存泄漏问题</a>造成CPU 100%， 以及在本本休眠唤醒以后， 造成风火轮不停转， 必须切断电源的问题。 经历过几次强行断电之后， 不得已只有换了。</p>
+<p>后来我用这个：<br />
+<a href="http://aquamacs.org/">Aquamacs: Emacs for Mac OS X： </a><br />
+但是这个Emacs速度不快， 能够明显感觉到迟滞。还有它对一些扩展包的兼容性并不是太好。 许多很方便的包都不能用。</p>
+<p>于是在某天的晚上， 实在觉得应该磨磨刀的时候， 决定试试新的方法。<br />
+根据这个<a href="http://wikemacs.org/index.php/Installing_Emacs_on_OS_X">wiki</a>里面介绍的， 使用homebrew 安装。如果你和一样喜欢用最新的版本，就可以使用下面的Brew命令安装：</p>
+<pre class="lang:default decode:true">brew install emacs --cocoa --HEAD --use-git-head --srgb</pre>
+<p>因为Homebrew是下载源代码， 在本机做编译， 惊喜的发现， 编出来的Emacs速度相当的快， 已经可以和Linux下的媲美了。</p>
+<p>我推测原因可能是因为本机是安装了最新的Xcode， 一些基础库用了Clang做编译， 也许运行时的兼容性更好？</p>
+<p>原因是很难查出来的了， 但是作为一个经验， 还是觉得非常有用。 编辑器的快慢影响的不知是打字的速度， 还能够最小的打断写代码时候的思路。</p>

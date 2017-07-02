@@ -1,0 +1,24 @@
+---
+layout: post
+title: Dell T3500 安装 ubuntu记录
+date: 2011-03-25 12:12:06.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>这几天部门买了台工作站，Dell T3500， 很好很强大，硬件RAID0/5支持。于是要装一台Ubuntu 10.10 64位机器出来。  没想到过程很是痛苦，让我折腾了好几天。这里记录一下吧，也许有人也在痛苦着。  首先是安装环节，Ubuntu10.10 默认用的2.6.35的kernel， 这个kernel在T3500的这个AHCI的Controller有一个BUG，会导致识别不出来硬盘。</p>
+<p>找了一堆以后发现，可以通过在安装程序的cmdline里面加一条命令完成，  如果你是用Cmdline模式的安装，那么输入 install pci=nocrs 或者是图形界面，选择高级以后，然后在cmdline的末尾&ldquo;ro quiet&rdquo;后面写上，pci=nocrs。  否则在安装程序格盘的时候会只能找到iSCSI的盘。</p>
+<p>第二，也许你现在已经开始装了，但是别着急，好戏还在后头呢。 由于这台工作站有硬件的RADI，而且是默认打开的，你会发现安装完毕以后，initrd会找不到根目录，提示大概是UUID=xxx找不到。然后把你扔到一个busybox里面了。 调查了很久，还看了一下kernel的文档和代码。</p>
+<p>终于发现症结了，原来是dm(Hardwaer RAID)的支持在这个Ubuntu的版本不好， 尽管kernel支持了，可是在initrd里面，没有去创建设备节点，你可以看到在/dev/mapper/下面只有两个文件，一个是control, 一个是zxz...Volume0,上面的分区节点都找不到了，所以这就是为什么系统起不来的原因。  大概是mdadm一类的脚本写的不好。我想在下一个Release会解决这个问题吧。  但是生活还得继续，虽然说还有一个月Ubuntu就会出11.04的版本了，可是我下了Alpha3的版本发现根本不能安装，所以只有换了。</p>
+<p>最终的解决办法是使用软Raid，在机器启动的时候你能看到一个RAID的管理程序，进去以后把里面的RAID volume都删掉，然后再重新安装的时候配置成Software RAID。  这里还有一个提示就是/boot分区不要用任何RAID之类的套起来，否则grub会找不到它的config。</p>
+<p>我这里是把 sda1的分区format成EXT2的分区，用来挂/boot 其他一个RAID0 挂 / 一个RAID0 挂 /home 一个16G的swap 这里有一个技巧就是，把同一个raid分区的两个字卷放在两个磁盘上，这样会有性能的提升。如果你放在同一个磁盘上，我想会有性能的下降吧。</p>

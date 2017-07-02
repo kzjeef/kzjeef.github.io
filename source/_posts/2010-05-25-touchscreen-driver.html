@@ -1,0 +1,74 @@
+---
+layout: post
+title: experices on a linux touchscreen panel driver
+date: 2010-05-25 07:11:22.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>"Write a good touch feel touchscreen panel driver"</p>
+<p>Recently, I had re-factory three time of our touch panel driver.Every time re-factory with clear aim.</p>
+<p>&nbsp;</p>
+<p>Our product use a resistance touchscreen panel(about touchscreen&nbsp;panel, see [http://en.wikipedia.org/wiki/Touchscreen]), the touch screen&nbsp;use an adc(Analog-to-digital converter) convert the resistance change&nbsp;to the digital number, then these value should be calibration by&nbsp;algorithm like (tslib, [http://tslib.berlios.de/]) does. After that,&nbsp;these value is be a human readable coordinate. The event should report&nbsp;we user touch the touchscreen, and should report a touch up event&nbsp;notice service layer the user leave the touchscreen.&nbsp;</p>
+<p>In linux, all of these use by api in (linux/input.h), such as :&nbsp;</p>
+<p>input_report_abs();</p>
+<p>input_event();</p>
+<p>input_sync();</p>
+<p>Our first version of driver using a kthread, a infinite while loop;</p>
+<pre>void kthread_func() {
+        while(1) {
+                poll_event(x, y, touch); //get a event from adc driver.
+                input_report_abs(x);    //here report the coordinate of touch event
+                input_event(touch);     //here report the state of touch, 1
+                                        //means touch down, 0 means touch up.
+                input_sync();                   //sync means a complete event.
+                sleep(delay);
+        }
+}
+</pre>
+<p>This design is very simple and clear, But it have some shortcoming.</p>
+<p>1. the kthread is hard to control, it hard stop by the other thread,&nbsp;until it stop by itself. It will be problem we you want to&nbsp;suspend/resume driver.&nbsp;</p>
+<p>2. There is a touchscreen use case, If you move quickly you finger on&nbsp;the touchscreen, maybe there is one or two event is touch leave the&nbsp;screen in the middle of this move. This should be ignore by&nbsp;&nbsp; driver. Excellent product like iPad, iPhone touchscreen have this&nbsp;feather. But in this implantation, the touch leave event will&nbsp;report.</p>
+<p>The next version of this driver, we change few things.</p>
+<p>1. use a single_threaded_workqueue instead of kthread, so we can stop&nbsp;the thread when the driver suspend.</p>
+<p>2. in the workquque, it only report the down event and the abs change&nbsp;of the toucscreen, the touch up event is sent by a hrtimer. &nbsp;every&nbsp;time the work is running, it will adjust the timer. If there is no&nbsp;event coming, the timer is not modify by anyone, so it expired, the&nbsp;callback is called, it will send a touch up event.&nbsp;</p>
+<p>pseudocode is:</p>
+<pre>   timer_func()
+   {
+        input_report_abs(ABS_X, x);     //x,y coordinate
+        input_report_abs(ABS_Y, y);
+        input_report_abs(ABS_PRESSURE, 0); //pressure
+        input_event(EV_KEY, BTN_TOUCH, 0); //touch up event
+        input_sync();
+   }
+
+   workqueue_func()
+   {
+
+        poll_event(x, y, touch); //get a event from adc driver.
+        start_hrtimer(timer, timeout_of_touch_up); //normally 2-10
+                                                   //times of delay
+        if (touch) {
+                input_report_abs(x);    //here report the coordinate of touch event
+                input_event(touch);     //here report the state of touch, 1
+                                        //means touch down, 0 means touch up.
+                input_sync();                   //sync means a complete event.
+        }
+        queue_self_to_delayed_workqueue(delay);
+    }
+</pre>
+<p>In this implemention, above all issues are fixed.</p>
+<p>1. use a delayed workqueue, we can cancel the queued work to stop the&nbsp;wokequeue looping. It is very easy to control.</p>
+<p>2. if there is one or two event up in the figer move(figer gesture),&nbsp;the timeout will not expired, so the move is continue until user&nbsp;really want to leave their figure off the touchscreen.</p>
+<p>I'm very happen that our touchscreen have a better touch feelling like&nbsp;the top level of the industry such as iPad. :)</p>

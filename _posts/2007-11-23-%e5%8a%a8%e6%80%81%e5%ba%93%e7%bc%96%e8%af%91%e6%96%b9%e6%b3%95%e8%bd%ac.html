@@ -1,0 +1,28 @@
+---
+layout: post
+title: 动态库编译方法[转]
+date: 2007-11-23 23:54:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><font id="zoom" class="f14"> # 声称动代连接库，假设名称为libtest.so<br />gcc x.c y.c z.c -fPIC -shared -o libtest.so</font></p>
+<p><font id="zoom" class="f14"># 将main.c和动态连接库进行连接生成可执行文件<br />gcc main.c -L. -ltest -o main</font></p>
+<p><font id="zoom" class="f14"># 输出LD_LIBRARY_PATH环境变量，一边动态库装载器能够找到需要的动态库<br />export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.</font></p>
+<p><font id="zoom" class="f14"># 测试是否动态连接，如果列出libtest.so，那么应该是连接正常了<br />ldd main</font></p>
+<p><font id="zoom" class="f14"># 执行就不用说了吧</font></p>
+<p><font id="zoom" class="f14">--------------------------------------------------<br />建议创建一个Makefile来作这些事情。</font></p>
+<p><font id="zoom" class="f14">-fPIC：表示编译为位置独立的代码，不用此选项的话编译后的代码是位置相关的所以动态载入时是通过代码拷贝的方式来满足不同进程的需要，而不能达到真正代码段共享的目的。</font></p>
+<p><font id="zoom" class="f14">-L.：表示要连接的库在当前目录中</font></p>
+<p><font id="zoom" class="f14">-ltest：编译器查找动态连接库时有隐含的命名规则，即在给出的名字前面加上lib，后面加上.so来确定库的名称</font></p>
+<p><font id="zoom" class="f14">LD_LIBRARY_PATH：这个环境变量指示动态连接器可以装载动态库的路径。<br />当然如果有root权限的话，可以修改/etc/ld.so.conf文件，然后调用<br />/sbin/ldconfig来达到同样的目的，不过如果没有root权限，那么只能采用输出LD_LIBRARY_PATH的方法了。</font></p>

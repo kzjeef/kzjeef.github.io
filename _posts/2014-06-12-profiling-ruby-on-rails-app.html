@@ -1,0 +1,72 @@
+---
+layout: post
+title: Profiling Ruby on Rails App
+date: 2014-06-12 13:00:06.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Rails
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>I think everyone is enjoy ruby's programming, the meta programming is really efficiently way. But sometime we meet our function or app have a poor performance.</p>
+<p>Guess what, my first through was, ruby is f**k too slow.. , but my second through was, how can I figure out where is slow, rather than switch some other language?</p>
+<p>So let's start some profiling to figure it out.</p>
+<p>add this in your Gemfile or gem install it.</p>
+<pre class="lang:default decode:true">gem 'ruby-prof', :git =&gt; 'git://github.com/ruby-prof/ruby-prof.git', :group =&gt; [:development, :test]</pre>
+<p>Add this function in your ApplicationController.rb</p>
+<pre class="lang:ruby decode:true "> def profile(prefix = "profile")
+    result = RubyProf.profile { yield }
+
+    dir = File.join(Rails.root, "tmp", "performance", params[:controller].parameterize)
+    FileUtils.mkdir_p(dir)
+    file = File.join(dir, "callgrind.%s.%s.%s" % [prefix.parameterize, params[:action].parameterize, Time.now.to_s.parameterize] )
+    open(file, "w") {|f| RubyProf::CallTreePrinter.new(result).print(f, :min_percent =&gt; 1) }
+  end
+
+  helper_method :profile
+</pre>
+<p>You can put what you want profile in this block, and it will generate callgrind file under your tmp/performance/[controller-name] folder.</p>
+<p>If you're under mac, you can install this tool to check the function profiling:</p>
+<pre class="lang:default decode:true ">brew install qcachegrind</pre>
+<p>other platform have some equal tools like, kcachegrind under linux.</p>
+<p>you will got the profile result like this picture.</p>
+<p><a href="http://thinksrc.com/wp-content/uploads/2014/06/屏幕快照-2014-06-12-下午12.53.38.png"><img class="alignnone size-large wp-image-229122" src="{{ site.baseurl }}/assets/&#23631;&#24149;&#24555;&#29031;-2014-06-12-&#19979;&#21320;12.53.38-1024x576.png" alt="屏幕快照 2014-06-12 下午12.53.38" width="700" height="393" /></a></p>
+<p>Hope this will help you figure out which part is cause the performance issue.</p>
+<p>And my other little trick is, like the :profile helper, I add a simple timer helper:</p>
+<pre class="lang:ruby decode:true"> def timer(tag = "default")
+
+   t1 = Time.now
+   yield
+   t2 = Time.now
+   
+   msecs = (t2 - t1) * 1000.0
+   logger.info "Time in profile #{tag} #{msecs.to_i} ms"
+
+ end
+
+ helper_method :timer
+</pre>
+<p>Together with code block, you can get each part 's timer profile like below:</p>
+<pre class="lang:ruby decode:true ">timer("total") do 
+
+  timer("func1") do 
+  function1
+  end
+
+  function2 
+
+  timer("loop") do
+      some_array.each { function }
+  end
+
+end</pre>
+<p>Seems too naive, but this simple method can be more helpful than other complex tools.</p>

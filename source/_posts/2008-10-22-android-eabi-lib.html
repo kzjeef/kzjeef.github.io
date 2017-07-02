@@ -1,0 +1,24 @@
+---
+layout: post
+title: android eabi lib
+date: 2008-10-22 00:18:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Android SDK里面所带的二进制库生成全部是EABI兼容的， 那么什么是EABI？ 对<br />我们有什么意义呢？</p>
+<p>1.这里现介绍一下什么是EABI（Embedded Application Binary Interface）</p>
+<p>      EABI最早是从powerPC 在 UNIX V5 的ABI（Application Binary<br />      Interface）的补充的基础上构建的， 他的木表示减少内存使用和优化执<br />      行速度， 而且这些都是特别针对于嵌入式系统软件的。<br />      EABI规定了一下几个内容：<br />            * 文件的格式<br />            * 数据类型和对齐<br />            * 寄存器用法的规定<br />            * 堆栈布局和组织<br />            * 函数参数传递顺序<br />            * 小数据区域(data area)的用法和组织</p>
+<p>2. 对我们有什么意义呢？<br />      EABI兼容的二进制库除了在速度上有所优化以外， 它还保证了一样东<br />      西。<br />      就是让软件开发着可以混合使用EABI兼容的不同厂商之间的二进制库，<br />      只要他们是EABI兼容的， 并且开发者的软件也是用EABI兼容的编译起编<br />      译的， 就可以正确的一起使用。</p>
+<p>      这样， 我们就可以在不能拿到代码， 或者是专门为本平台编译过的二进<br />      制库的情况下来使用这些二进制库。</p>
+<p>      就近来讲， 就是Android SDK 里面带的.so文件， 有一些我们可以不必<br />      要拿到代码，或者重新编译。 但是为了能够正确的使用这些库。 可能还<br />      是需要一些支持工作。 比如这些库和驱动之间的接口之类的。</p>

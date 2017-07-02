@@ -1,0 +1,28 @@
+---
+layout: post
+title: wm8993啸叫问题调试总结
+date: 2011-03-27 08:15:44.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>最近调了一个wm8993的啸叫问题， 看了一些Linux ALSA Asoc的资料，发现了很多很好的地方，放在这里做一个集合吧。也许能帮到别人。<br /> 那个wm8993的啸叫问题现象是这样的，在录音的时候，从系统里面播放一个声音，就会发生啸叫。由于wm8993有很恐怖的AudioMap， 可以参考wm8993文档的27页。所以一开始分析觉得是在播放的路由有一声音跑到了录音那里，然后录音出来的的声音又跑到了Speaker上。这样就会形成一个死循环，导致声音越来越大。</p>
+<p>啸叫我知道两种情况：</p>
+<p>一种啸叫是由于内部路由的问题，就像现在这种情况，所以你按住Mic（也就是不让Mic听到Speaker放出来的声音）是没有用的。<br />还有一种啸叫是外部原因，因为结构的问题把Mic放到了Speaker的前面，就像你在卡拉OK听到的哪种。<br />判断这两种有一个方法就是在发生啸叫的时候，按住Mic，如果还有啸叫就是内部那种。</p>
+<p>经过把那张路由表打出来，必须是A3的，A4的纸都看不清楚。检查出来确实有几个通路形成了这样的循环。在配置里面关掉就好了。有一个奇怪的地方是，这些通路默认都是关掉的，是谁把他们打开了呢？现在还不知道，一个猜测可能是在alsa.conf里面没有配置好，或者是asoc的machine代码中没有把这些场景定义好。</p>
+<p>下面是一些链接：</p>
+<p><a href="http://hi.baidu.com/zhlg_hzh/blog/item/6f6651c8144e5e107e3e6f19.html">DAI: Digital Audio Interfaces(音频设备的硬件接口) </a><a href="http://hi.baidu.com/zhlg_hzh/blog/item/7827261e090f5c18403417f5.html"><br /></a></p>
+<p><a href="http://hi.baidu.com/zhlg_hzh/blog/item/7827261e090f5c18403417f5.html">Alsa SoC Audio(part 1) </a></p>
+<p><a href="http://hi.baidu.com/zhlg_hzh/blog/item/b041ae738b31121b8601b0fe.html">Alsa SoC Audio(part 2)</a></p>
+<p>Neo1973 相关的，一个完整的电话声音，非常有参考价值</p>
+<p><a href="http://wiki.openmoko.org/wiki/Neo1973_Audio_Subsystem">http://wiki.openmoko.org/wiki/Neo1973_Audio_Subsystem</a><br /> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag_gsmhandset_mic_std.png">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag_gsmhandset_mic_std.png</a><br /> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag__gsmhandset_tx+rx-processed.png">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag__gsmhandset_tx+rx-processed.png</a><br /> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag.png">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag.png</a><br /> <a href="http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem">http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem</a><br /><a href="http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#AT.25Nxxxx"> http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#AT.25Nxxxx</a></p>

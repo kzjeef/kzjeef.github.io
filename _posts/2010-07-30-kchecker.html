@@ -1,0 +1,50 @@
+---
+layout: post
+title: kchecker - check your kernel code
+date: 2010-07-30 09:10:06.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>kchecker is a Static source code check tools. It can find some buggy kmalloc usage and&nbsp;</p>
+<p>You can get this tool under http://repo.or.cz/w/smatch.git</p>
+<p><span style="font-family: 'Courier New', monospace; line-height: 18px; font-size: 12px; white-space: pre;">git clone git://repo.or.cz/smatch.git</span></p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">cd smatch
+make -j4
+sudo make install</pre>
+<p>After then, you can find kchecker under&nbsp;./smatch_scripts/kchecker.<br /> Lets try it.</p>
+<pre>x@x-desktop:$kchecker  --spammy  fs/ubifs/journal.c
+  CHK     include/linux/version.h
+make[1]: &ldquo;include/asm-arm/mach-types.h&rdquo; is latest
+  CHK     include/linux/utsrelease.h
+  SYMLINK include/asm -&gt; include/asm-arm
+  CALL    scripts/checksyscalls.sh
+  CHECK   fs/ubifs/journal.c
+fs/ubifs/journal.c +233 reserve_space(118) warn: inconsistent returns mutex:&amp;wbuf-&gt;io_mutex: locked (136,202,215) unlocked (169,184,219,233)
+  CC      fs/ubifs/journal.o</pre>
+<p>This script find some wrong usage of mutex. Lets have another try:</p>
+<p><span style="font-family: 'Courier New', monospace; line-height: 18px; font-size: 12px; white-space: pre;">x@x-desktop$ kchecker --spammy drivers/video/mxc/mxc_ipuv3_fb.c</span></p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">  CHK     include/linux/version.h
+  CHK     include/linux/utsrelease.h
+  SYMLINK include/asm -&gt; include/asm-arm
+  CALL    scripts/checksyscalls.sh
+  CHECK   drivers/video/mxc/mxc_ipuv3_fb.c
+drivers/video/mxc/mxc_ipuv3_fb.c +875 mxcfb_ioctl(181) warn: possible memory leak of 'mem'
+drivers/video/mxc/mxc_ipuv3_fb.c +992 mxcfb_ioctl(298) warn: 'sem:&amp;mxc_fbi-&gt;alpha_flip_sem' is sometimes locked here and sometimes unlocked.
+drivers/video/mxc/mxc_ipuv3_fb.c +1541 mxcfb_remove(5) warn: variable dereferenced before check 'fbi'
+  CC      drivers/video/mxc/mxc_ipuv3_fb.o</pre>
+<p>This time, it found some possible memory leak. And some buggy lock usage.</p>
+<p>Have fun with this tool...</p>
+<p>BTW, This link&nbsp;<a href="http://smatch.sourceforge.net/">http://smatch.sourceforge.net/</a> shows how to check at compile all kernel code.</p>
+<p>&nbsp;</p>

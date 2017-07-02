@@ -1,0 +1,31 @@
+---
+layout: post
+title: GCC cross compiler of MIPS under GNU/Linux
+date: 2007-11-01 01:44:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Post here because It's useful and hard find...</p>
+<p>Include: binutils,  gcc,  glibc, gdb</p>
+<p>Must compile   binutils  in the first place !</p>
+<p style="border: 0.5pt solid windowtext; padding: 4px 5.4pt; background: #e6e6e6 none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 95%">#here is binutiles</p>
+<p><span style="color: #000000">./</span><span style="color: #000000">configure -target</span><span style="color: #000000">=</span><span style="color: #000000">mips-elf --program-prefix</span><span style="color: #000000">=</span><span style="color: #000000">mips-</span></p>
+<p><span style="color: #000000">make</span></p>
+<p><span style="color: #000000">make install</span></p>
+<p>in GCC, suggesting only enable c rather than c++ or some else...<br />option "--disable-libssp" becouse libssp can't successfully compiled.</p>
+<p style="border: 0.5pt solid windowtext; padding: 4px 5.4pt; background: #e6e6e6 none repeat scroll 0% 50%; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial; width: 95%">#here is GCC<img src="{{ site.baseurl }}/assets/None.gif" align="top" /><span style="color: #000000"></span></p>
+<p><span style="color: #000000">.</span><span style="color: #000000">/</span><span style="color: #000000">configure </span><span style="color: #000000">-</span><span style="color: #000000">target</span><span style="color: #000000">=</span><span style="color: #000000">mips </span><span style="color: #000000">-</span><span style="color: #000000">prefix</span><span style="color: #000000">=/</span><span style="color: #000000">usr</span><span style="color: #000000">/</span><span style="color: #000000">local --disable-libssp </span><span style="color: #000000">-</span><span style="color: #000000">program</span><span style="color: #000000">-</span><span style="color: #000000">prefix</span><span style="color: #000000">=</span><span style="color: #000000">mips</span><span style="color: #000000">-</span><span style="color: #000000"> </span><span style="color: #000000">-</span><span style="color: #000000">enable</span><span style="color: #000000">-</span><span style="color: #000000">languages</span><span style="color: #000000">=</span><span style="color: #000000">'</span><span style="color: #000000">c</span><span style="color: #000000">'</span><span style="color: #000000"><br /><img src="{{ site.baseurl }}/assets/None.gif" align="top" />make</span></p>
+<p>binutils and GCC is enough for my misp asm learning...</p>
+<p>OK.~</p>
+<p>TIPs:  `swiftfox` is very fast in my computer, i replace the build-in firefox with it.</p>

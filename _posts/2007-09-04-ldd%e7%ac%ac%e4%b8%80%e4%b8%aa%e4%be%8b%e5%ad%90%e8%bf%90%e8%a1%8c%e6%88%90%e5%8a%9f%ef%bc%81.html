@@ -1,0 +1,20 @@
+---
+layout: post
+title: LDD第一个例子运行成功！
+date: 2007-09-04 19:01:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>哈哈哈哈哈哈！！！<br />太高兴了，在经过了无数次莫名其妙的失败以后，终于搞定了内核模块~<br />哈哈哈哈~~~<br />大家不要笑我哈，高兴是很正常的~<br />总结经验， 主要是准备工作没有做好， <br />1. 要下载linux-kernel-src , 然后 make all<br />2.make modules_install 把你的模块文件放到 /lib/modules/linux-XX-XX中</p>
+<p>最后把源文件中的 /linux/config.h去掉， <br />然后把makefile中的 uname -r 换成 /lib/modules/linux-XX-XX 就OK了。。。<br />呵呵。。。可以开始研究kernel device driver 了。<br clear="all" /><br />-- <br />Shit happens!</p>

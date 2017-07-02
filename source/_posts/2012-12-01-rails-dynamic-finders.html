@@ -1,0 +1,71 @@
+---
+layout: post
+title: 'Rails: Dynamic Finders'
+date: 2012-12-01 17:39:14.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Rails
+tags: []
+meta:
+  _edit_last: '1'
+  _wpas_done_all: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>Rails's ActiveRecord can use a dymatic way to finder</p>
+<p>Like this model class in rails:</p>
+<pre>
+class Article < ActiveRecord::Base
+  attr_accessible :body, :excerpt, :location, :published_at, :title
+  validates :title, :presence => true
+  validates :body, :presence => true
+end
+</pre>
+<p>It don't have much query function, but you can use query function like:</p>
+<pre>Article.find_by_title('Hello')
+=>; #<;Article id:1, title: "Hello", ...>;</pre>
+<p>It because it use Ruby’s method_missing functionality to automatically create methods that don’t exist until runtime. Using dynamic finders, you can include the attribute you’re looking for directly in the method name.</p>
+<p>There are several variations of dynamic finders, which are summarized in the Table:</p>
+<table border="2" frame="hsides" rules="groups" cellspacing="0" cellpadding="6">
+<caption> </caption>
+<colgroup>
+<col align="left" />
+<col align="left" /></colgroup>
+<thead>
+<tr>
+<th scope="col">Finder</th>
+<th scope="col">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>find_by_*(cond)</td>
+<td>find_by_title('Hello') #=>; Article</td>
+</tr>
+<tr>
+<td>find_all_by_*(cond)</td>
+<td>find_all_by_title('Hello') #=>; Array</td>
+</tr>
+<tr>
+<td>find_by_*_and_*(cond1, cond2)</td>
+<td>find_by_title_and_published_on('Hello', '2012-03-12') #=>;Articlelike creating a record. You can update attributes one at a time and<br />
+then save the result, or you can update attributes in one fell swoop. When you update a<br />
+record, a SQL UPDATE statement is constructed behind the scenes. First, you use a find<br />
+operation to retrieve the record you</td>
+</tr>
+<tr>
+<td>find_all_by_*_and_*(cond1, cond2)</td>
+<td>find_all_by_title_and_published_on('Hello', '2012-03-12') #=>;Array</td>
+</tr>
+</tbody>
+</table>
+<p>Amazing...</p>
+<p>&nbsp;</p>

@@ -1,0 +1,29 @@
+---
+layout: post
+title: android的域名解析
+date: 2010-03-07 23:11:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- android
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>android 中的域名解析库， 一般来说叫（libresolve）是netbsd中抓取出来的，在应用程序的层次上， 调用gethostbyname， 而gethostbyname中就是调用了resolve库里面的东西， <br />里面主要用一个 _res的全局变量， </p>
+<p>struct __res_state _res;</p>
+<p>由res_send, res_init来改变这个值。 在netbsd的原来实现中， 是通过查看/etc/resolve.conf来得到这个DNS服务器的。</p>
+<p>然后通过给这些dns服务器发UDP包来获取这个域名的地址。 </p>
+<p>后来这个库的发现上做了一些感动， 通过 </p>
+<p>struct __res_state *res_state(void);<br />#define _res (*(res_state()) </p>
+<p>来把这个全局变量替换成一个函数， 通过这个函数来返回这个变量， 这样可以做到线程安全。 </p>
+<p>android主要做了以下修改</p>
+<p>他没有用_res把这个变量转换成函数res_get_state()， 这个函数会去监视一个prop(属性）：net.changed， 这个prop的值是最后改变了值的dns服务器的地址，如果这个值改变了， 他就会去重新刷新一下他的dns服务器的缓存， 而且，android没有使用/etc/resolve.conf， 而是去动态的获取一个叫做 net.dnsN 的prop， （N是DNS服务器地址的序号）， 通过这个来取得dns服务器的地址。</p>
+<p>这就是为什么很多做android一直的人在gprs.ppp拨通了以后可以Ping到ip， 却不能解析域名的原因。 </p>

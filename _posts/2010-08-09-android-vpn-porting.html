@@ -1,0 +1,45 @@
+---
+layout: post
+title: 'Android: 移植VPN相关的kernel 内容'
+date: 2010-08-09 10:08:09.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- android
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>关于Vpn的支持，android代码在2.6.29的code上是支持的，但是2.6.27的就不支持。 所以今天backport了一下。 这里做一下记录。</p>
+<p>最新的代码在 http://android.git.kernel.org/?p=kernel/common.git;a=summary&nbsp;</p>
+<p>git://android.git.kernel.org/kernel/common.git</p>
+<p>git checkout origin/android-goldfish-2.6.29 -b android-goldfish-2.6.29</p>
+<p>这个分支才有最新的东西。</p>
+<p>这几条commit是关于VPN(pptp, l2tp)的：不过这是到2010年8月9日截止的，以后新的就要自己加了。</p>
+<p>&nbsp;</p>
+<p>c8706d4199cbbe86f370c55e9b84f94e79101a48<br />c50311620326bf4515e1e5aa4f85bbb816852701<br />7620ea508ae5fc623da4fc8ded8c8e10e65196b3<br />d89050258f0133ae56d586dd6d7345d473c9a216<br />f7f6469023c8c704157f9932a7639b70936d44b6</p>
+<div>打上去以后， 到kernel menuconfig里面把几个Config都打开。</div>
+<div>我这里就只有：</div>
+<div>CONFIG_NET_KEY</div>
+<div>CONFIG_NET_IPIP</div>
+<div>CONFIG_INET_ESP</div>
+<div>CONFIG_INET_TUNNEL</div>
+<div>CONFIG_TUN</div>
+<div>CONFIG_PPP_DEFLATE</div>
+<div>CONFIG_PPP_BSDCOMP</div>
+<div>CONFIG_PPP_MPPE</div>
+<div>CONFIG_PPPOE</div>
+<div>CONFIG_PPPOL2TP</div>
+<div>CONFIG_PPPOLAC</div>
+<div>CONFIG_PPPOPNS</div>
+<div>用menuconfig把这些打开以后就可以了（还有一些选项他们打开以后会自动打开)</div>
+<div>我这里有一个config文件，如果少了什么就自己配置了。&nbsp;http://thinksrc.com/media/agdrempibG9ncg0LEgVNZWRpYRiy0gkM/default_config?a=download</div>
+<p>&nbsp;</p>

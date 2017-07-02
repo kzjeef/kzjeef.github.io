@@ -1,0 +1,38 @@
+---
+layout: post
+title: About Prelink & Enable prelink in Unbuntu
+date: 2008-11-09 12:50:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p style="font-family:arial;"> <span style="font-size:130%;"><span class="header">What is Prelinking?</span></span></p>
+<p face="arial">
+<blockquote><p face="arial">Prelinking is a process that allows you to speed up the process of dynamic  linking. What it does is, through a process of magic that is incredibly  complex, but basically  it speeds up the relocation process, in loading   shared libraries.. by setting preferred load addresses.</p>
+<p face="arial">What is he talking about, you ask? Well, here's how it goes. Dynamically linked libraries (often referred to as DSO's or in the windows world DLLs) are libraries which are loaded at runtime. The advantage of shared libraries versus static libraries is, that it reduces the size of executables, since each program doesn't need its libraries built in, but will dynamically locate and use it at run time. This adds some overhead, because the address space of the library, instead of being known in advance, has to be mapped at runtime. Another advantage of shared libraries is that due to the magic of copy-on-write, you can save memory when you have multiple programs sharing the same library (though it's not as simple as that.. it is pretty complicated) </p>
+<p style="font-family: arial;"> Pre-linking sets preferred address space for the libraries to be loaded at. Note they are _preferred_ spaces, and if that address space is not available, then it will use relocation to load it dynamically.. hence pre-linking is not 100% foolproof.<span style="font-weight: bold;font-size:130%;" class="header"><br /></span></p>
+<p style="font-family: arial;"><span style="font-weight: bold;font-size:130%;" class="header" /></p>
+<blockquote></blockquote>
+<p>What do I need to prelink?<br />
+<blockquote></blockquote>
+<p style="font-family: arial;">To prelink, you need at least:<br />- glibc 2.3.1 or greater<br />- libelf or elfutils 0.7, though 0.8 is preferred. Latest version as of this writing is 0.84<br />- Your shared libraries have to be compiled with -fPIC<br />- the prelink program from <a href="ftp://people.redhat.com/jakub/prelink">ftp://people.redhat.com/jakub/prelink</a></p>
+</blockquote>
+<p style="font-family: arial;"><a href="ftp://people.redhat.com/jakub/prelink"></a> </p>
+<p><sp style="font-family:arial;"><span style="font-size:130%;"><br /><span style="font-weight: bold;">HOWTO: Enable prelink</p>
+<p></span></span>Prelink is in universe. I use it on my Ubuntu system without issues, but do google about Prelink and do your research before trying it out.</p>
+<p>How to enable prelink:</p>
+<p>1. Activate Ubuntu universe sources. The procedure is well-documented by Ubuntu.<br />2. use apt-get or synaptic to install prelink.<br />3. Open /etc/default/prelink with your favorite editor, as sudo/root.<br />4. Change PRELINKING=unknown from unknown to yes.<br />5. Adjust the other options if you know what the heck you're doing. Defaults work well.<br />6. To start the first prelink (the longest one!), run sudo /etc/cron.daily/prelink</p>
+<p>In the future, prelink performs a quick prelink (a less-than-1-minute procedure on most systems) daily, usually at midnight. Every 14 days, or whatever you changed it to be, a full prelink will run.</p>
+<p>If you just did a major apt-get upgrade that changed systemwide libraries (i.e. libc6, glibc, major gnome/X libs, etc etc etc) and experience cryptic errors about libs, rerun step 6.</p>
+<p>To undo prelink, change step 4 from yes to no, then rerun step 6.</p>
+<p>WARNING:<br />An amd64 users in another thread (http://ubuntuforums.org/showpost.php...3&postcount;=16) reports having experienced trouble with AMD64 prelinking. I have NOT tried prelinking on anything other than an i386!</sp></p>

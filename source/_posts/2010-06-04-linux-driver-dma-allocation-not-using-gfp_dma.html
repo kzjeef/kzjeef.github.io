@@ -1,0 +1,28 @@
+---
+layout: post
+title: Linux Driver DMA allocation - not using GFP_DMA
+date: 2010-06-04 09:05:53.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Today, I remove our DMA_ZONE in Linux Kernel, that provides 48MiB memory using by system &amp; application, MUCH faster then before.</p>
+<p>Why DMA_ZONE, I think this because of the usage of dma_alloc_coherent(), try to allocate&nbsp;continues memory, in our old driver, they use GFP_DMA to call this function, This will cause this function allocation memory from DMA_ZONE or failed. even you using GFP_DMA|GFP_KERNEL.&nbsp;</p>
+<p>My change almost change GFP_DMA to GFP_KERNEL or just remove GFP_DMA.&nbsp;</p>
+<p>The DMA_ZONE is a legacy design, it was&nbsp;originally&nbsp;design to support 24-bit ISA bus or some broken PCI device that can't access full 32-bit memory. Because DMA_ZONE always in low memory address, so if your system is not like this, just avoid this DMA_ZONE.&nbsp;</p>
+<p>about DMA memory allocation:&nbsp;</p>
+<p>[1] <a href="http://www.linuxjournal.com/article/6930?page=0,2">http://www.linuxjournal.com/article/6930?page=0,2</a></p>
+<p><a href="http://www.linuxjournal.com/article/6930?page=0,2"></a>[2] LDD3 Chapter 15 , 4.3 section.&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>

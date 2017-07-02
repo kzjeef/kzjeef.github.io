@@ -1,0 +1,32 @@
+---
+layout: post
+title: How can we avoid delete/create inconsistency?
+date: 2009-11-30 01:09:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>This is a file system note: @MIT 6.824 2006 Lecture 6</p>
+<p>Think this satiation,</p>
+<p>unlink("f1"); <br />create("f2"); <br />Create happens to re-use the i-node freed by the unlink. <br />suppose only create write goes to disk, but none of the unlink's writes.</p>
+<p>Crash.</p>
+<p>After re-start, what does recovery see?</p>
+<p>The file system looks correct! Nothing to fix! <br />But file f1 actually has file f2's contents!</p>
+<p>Serious *undetected* inconsisency.</p>
+<p>This is *not* a state the file system counld have been in if the crash had occured slightly earlier or later. And fsck did not notify the user there was an unfixable problem!</p>
+<p><em>How can we avoid this delete/create inconsistency?</em></p>
+<p>Observation: We only care about what's visible in the file system tree.</p>
+<p>Goal: on-disk directory entry must always point to correct on-disk i-node.</p>
+<p>Unlink Rule: remove dirent *on disk* before freeing i-node.</p>
+<p>Create Rule: initialize new i-node *on disk* before creating directory entry.</p>
+<p>In general, directory entry writes should be commit points. <br />Crash just before leves us with unused allocated i-node. <br />Crash just after is fine.</p>

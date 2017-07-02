@@ -1,0 +1,64 @@
+---
+layout: post
+title: 配置PPTP VPN服务器的一些注意事项
+date: 2011-12-08 11:26:24.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta:
+  _oembed_d8feece7ba84ce5cf1fec3c443a53b86: '{{unknown}}'
+  _oembed_10fa66d589467da2bb2f302bae9e030e: '{{unknown}}'
+  _oembed_7d924f179715fd200b3eb130ec4a1195: '{{unknown}}'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">由于一些&ldquo;特殊&rdquo;网站的访问需求， 在海岸另外一端配置了一台PPTP服务器，经过几天的折腾，终于达到了一些比较稳定的访问。</pre>
+<p>对于pptp服务器的安装，网上很多教程，这里我主要记录一下摔跤的地方。 这个链接也是一个好的checklist: http://www.dd-wrt.com/wiki/index.php/PPTP_Server_Configuration#Force_Encryption</p>
+<p>刚弄好以后，发现WIN XP能够连接，其他的比如我的iphone， mac都不能连上去， 而且一些android设备连接也不稳定。于是很郁闷。</p>
+<p>在 /etc/pptpd.conf 中</p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">#stimeout 10</pre>
+<p>必须要注掉(也就是要加上#)，这条会导致XP连接不上。</p>
+<p>对于localip和remoteip的设置， 会决定你可以连多少台设备上去。</p>
+<p>localip 192.168.0.1<br />remoteip 192.168.0.204-238,192.168.0.245<br />但是由于pptpd代码里面写死了，最多100个（MAX_CONNECTIONS的默认值）， 所以你这里IP再多也只能是100个， 除非你重编代码。</p>
+<p>&nbsp;</p>
+<p>在/etc/ppp/options.pptp中</p>
+<p>一定要加上：</p>
+<p>nopcomp<br />noaccomp<br />这两项，不然你的iOS设备就不能连了。</p>
+<p>还有要加上</p>
+<p>ms-dns</p>
+<p>不加iOS设备也不爽。</p>
+<p>还有你要打开</p>
+<p>require-mppe-128</p>
+<p>不然有些设备，Mac连不上。</p>
+<p>当你连不上的时候， 通过</p>
+<p>sudo tail -n 100&nbsp; /var/log/daemon.log<br />来看看有什么错误。</p>
+<p>这个网址也可以有一些解决办法：http://pptpclient.sourceforge.net/howto-diagnosis.phtml</p>
+<p>&nbsp;</p>
+<p>我遇到了：</p>
+<p>Dec&nbsp; 8 18:43:26 FAELAB pptpd[5091]: GRE: Bad checksum from pppd.<br />这个错误是因为iptable里面把GRE给禁掉导致的，</p>
+<p><span style="text-decoration: line-through;">我就直接</span></p>
+<p><span style="text-decoration: line-through;">iptables -F</span></p>
+<p><span style="text-decoration: line-through;">把防火墙给干掉了。</span></p>
+<p>不能废掉iptable，然不然nat就不work了，以下这样配置iptables.</p>
+<blockquote>
+<p>4 防火墙设置：<br /> 1) 加入端口转发：<br /> iptables -t nat -A POSTROUTING -p all -o eth0 -s 172.16.0.0/24 -j SNAT --to $ETH0IP</p>
+<p> 2) 开放端口TCP 1723<br /> iptables -A INPUT -p tcp --dport 1723 -j ACCEPT<br /> iptables -A INPUT -p gre -j ACCEPT</p>
+<p> 3) 如果是redhat/centos系列系统，防火墙中再加入<br /> iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</p>
+</blockquote>
+<p>然后为了访问方便一点， 还找了一台buffalo WHR-G300N的WIFI AP刷了DD-WRT设置了自动拨PPTP， 受这篇文章启发：http://pagebrin.com/2011/06/%E5%AE%B6%E5%BA%AD%E7%BA%A7%E6%97%A0%E5%A2%99%E7%BD%91%E7%BB%9C%E6%96%B9%E6%A1%88/</p>
+<p>具体刷机步骤参考,</p>
+<p>(更新： 关于  G300NV2 不能VPN的问题， 我发现是DD WRT的版本问题， 我使用了r18000的版本以后发现PPTP拨号不成功， 但是回到标准的v24sp1版本就好了， G300NV2的要下载这个<a href="http://www.dd-wrt.com/dd-wrtv2/down.php?path=downloads%2Fothers%2Feko%2FBrainSlayer-V24-preSP2%2F2010%2F08-07-10-r14896/">链接</a>的firmware ）</p>
+<p>http://www.dd-wrt.com/wiki/index.php/Main_Page</p>
+<p>http://www.anywlan.com/bbs/thread-45161-1-5.html</p>
+<p>我是用tftp的方式（不是tfptd）， 里面关于arp的设置非常重要。</p>
+<p>刷完以后就用这个方法配VPN：</p>
+<p>http://www.xbox-skyer.com/showthread.php?t=311507&amp;page=1</p>
+<p>终于能无缝访问了， 自己家里也想弄一个。 回去看看我的设备支持不。</p>
+<p>一天的功夫没白费。</p>

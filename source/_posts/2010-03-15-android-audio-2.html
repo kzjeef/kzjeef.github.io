@@ -1,0 +1,53 @@
+---
+layout: post
+title: 'Android Audio System(2): ALSA Layer'
+date: 2010-03-15 10:19:38.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- android
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<div>
+<div><strong>* Hardware Layer: Alsa</strong></div>
+<div>Author : Zhang Jiejing (<a href="http://thinksrc.com">http://thinksrc.com</a>)<br />Data: 2010-3-15</div>
+<div>ALSA hardware layer is becoming a standard part of Android master tree.</div>
+<div>the Android ALSA layer library Code base:</div>
+<div><a href="http://android.git.kernel.org/?p=platform/hardware/alsa_sound.git;a=summary">http://android.git.kernel.org/?p=platform/hardware/alsa_sound.git;a=summary</a></div>
+<div>The major development job is by WindRiver.</div>
+<div>This paper is a continue part of the past post<a href="http://kzjblog.appspot.com/2010/03/6/Android-Audio-System-(1).html" target="_blank"> Audio audio system(1)</a>, if you haven't read it , I strongly suggest you read it first.</div>
+<p><strong>** Roles</strong></p>
+<p><strong>*** &nbsp;AudioSystem - Audio Abstract Layer</strong></p>
+<div>code: frameworks/base/media/libmedia/AudioSystem.*</div>
+<div><strong><br /></strong></div>
+<div><strong>*** AudioPlicyManager - Platform specific policy manager</strong></div>
+<div>Alsa: AudioPolicyManagerALSA.* :&nbsp;This Manager can be implement in OSS or ALSA.</div>
+<div><strong>*** AudioStream[In|Out]Alsa</strong></div>
+<div>This class is controled by AudioPolicyManager, charge the read and audio mix&nbsp;job. using alsa pcm interface.</div>
+<div><strong>*** Alsa device handler: reference code: alsa_default.cpp</strong></div>
+<div>This part is compiled as a separated shared library, alsa_default.cpp just acts as a &nbsp;fall back.(This is just like other libhardware modules, the libhardware frist search the [ModuleName].[ro.hardware prop].so &nbsp;such as alsa.dream.so and ro.product.board, ro.board.platform, ro.arch is continue search, if can't find any of these libraries, it's will fall back to search [ModuleNmae].default.so, such as alsa.default.so)</div>
+<div><strong>** Communation betweens Roles:</strong></div>
+<div><strong><span style="font-weight: normal;">AudioSystem has a AudioPolicyServer Client, it will PRC to AudioPlicyManager class, in this case, the class is &nbsp;AudioPolicyManagerALSA.</span></strong></div>
+<div><strong><span style="font-weight: normal;">AudioStream[In|Out] will use hardware lib via dlopen() the ALSA handler library. And the call the open/close directly.</span></strong></div>
+<div><strong><br />** Control follow:</strong></div>
+<p><strong>*** Media Server side.</strong></p>
+<div>&nbsp;&nbsp; When recording, the AudioSystem will call AudioSystem::getInput first, this call will deliver to AudioPolicyManagerALSA::getInput();&nbsp;&nbsp; AudioPolicyManagerALSA::getInput() will check channel, input format, sampleRate, and call the mpClientInterface openInput's interface(AudioPolicyManagerALSA.cpp:1014), this call will back into audio_flinger 's openInput(AudioPolicyServer.cpp:504),</div>
+<p><strong>*** Back to AudioFlinger &nbsp;&nbsp;</strong></p>
+<div>&nbsp;&nbsp; In AudioFlinger::openInput,This function will wil call AudioHardware's openInputStream(), this will drop into AudioHardwareALSA class(audioHardwareALSA.cpp:229), this fucntion will call the hardware list and call the open function of this device, this will into the hardware shared library(such as alsa_default.cpp) 's open function.</div>
+<p><strong>*** Into hardware handler library</strong></p>
+<div>In the open() it will call snd_pcm_open, this is a ALSA user library function, this function will do some check device, and apply the config (such as hooks in asound.conf) belows to this device. Also it's will do some params setting such as set Hardware params, and software params.After open() returns, the the AudioHardwareALSA will new a AUdioStreamInALSA class, by the handler open() returns, &nbsp;and acoustics.</div>
+</div>
+<div>
+<p><strong>*** Leave hardware handler library</strong></p>
+<p><strong><span style="font-weight: normal;">In AudioStreamInALSA, it will init the ASLAStreamOps class by the alsa hardware hander( for example, alsa_default).Also will create a acousitic device in same time.After that, AudioHardwareALSA will call a stream's set(), this will be in the ALSAStreamOPS::set() function.This function will see the channel config in hardware handler, and format and sample rate, and perpare for the parameter AudioHardwareALSA need.These paramenter will finnally return to audioFlinger, audioFlinger will check whether these valuse are same to what he want, if the value is not same and not by error, the audioFlinger will call openInputStream again by these paramenters.</span></strong></p>
+<div>&nbsp;&nbsp; If the the input is open success, the a RecordThread will be created, and put it into the record thread pool.And then, the record precess will same to other non-ALSA sound hardware.This is how the ALSA connect to AudioSystem and how ALSA connect to ALSA hardware handler.</div>
+</div>

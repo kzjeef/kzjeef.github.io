@@ -1,0 +1,21 @@
+---
+layout: post
+title: firefox浏览器使用wqy字体以后变满的解决办法
+date: 2008-03-20 19:33:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>某同学的抱怨ubuntu下面firefox反应超慢， 其实是字体的原因了， wqy字体采用的是压缩的PCM字体， 就是在每次调用字体的时候就要解压缩来找这个东西， 所以在有大量文字的网页firefox就好像被卡住一样。 好了， 现在说解决的办法把。<br />cd /path/to/wqy/font/    #在我的ubuntu7.10上面是 /usr/share/X11/fonts/misc/<br /><span onclick="tagshow(event)" class="t_tag">sudo</span> gunzip wenquanyi*pcf.gz<br />sudo rm fonts.dir fonts.scale fonts.cache*<br />sudo mkfontdir .<br />sudo cp fonts.dir fonts.scale<br />sudo fc-cache -fv</p>
+<p>然后 CTRL＋ALT＋BACKSPACE重启X以后， 打开FF就会发现浏览速度和飞一样拉。 爽！</p>
+<p>ref:http://www.linuxdiyf.com/bbs/thread-82090-1-1.html</p>

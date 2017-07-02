@@ -1,0 +1,44 @@
+---
+layout: post
+title: notes about libuv timer and async implement.
+date: 
+type: post
+published: false
+status: draft
+categories:
+- Performance
+- System
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>最近在直接用 libuv 做一些异步的优化的东西, 对于 libuv 的内部实现比较感兴趣, 所有可能持续写一些东西关于 libuv 内部的实现.</p>
+<p>今天主要想概括一下 libuv 中两个比较重要的部分的实现方法:</p>
+<ul>
+<li>async</li>
+<li>timer</li>
+</ul>
+<p>首先来说一下 timer,</p>
+<p>我们都知道 libuv 是使用 poll/epoll 这类 io 复用的接口来实现异步 IO 的,  而这些接口, 都会有一个参数是关于超时的, 而 libuv 就很巧妙的使用了这一点, 来实现了他们的 timer 机制.</p>
+<p>当有一个新的 timer 被加入的时候, libuv 会把这个 timer 的 handle 加到它所有 timer 的一个 heap 里面, 根据堆的属性, 我们可以有效的找出这个堆中值最小的那个 handle, 换句话话说就是最快要超时的handle. 这样这个超时就会被添加到poll的超时参数里面. 每次 poll 返回, 都就去检查一下是否是因为超时引起, 这样会去调用相关的 timer 的 handler.</p>
+<p>再来说一下 async, 的使用方法呢, 基本上就是这几个函数.</p>
+<p>uv_async_t *async = new uv_async_t;<br />
+uv_async_init(looper_uv_, async, fireNewRequests);<br />
+uv_async_send(async);</p>
+<p>uv_async_init: 主要是负责 async 的创建.<br />
+uv_async_send : 就是触发这个 async 事件, 这样在 init 的时候指定的 callback 就会被调用.</p>
+<p>下面来说说里面的实现方法.</p>
+<p>这里的主要思路还是根据 poll 来的.</p>
+<p><span class="s1">poll 需要一个文件句柄, 并且这个句柄要可以做 IPC, 在 libuv 里面主要使用了</span> eventfd(2) <span class="s1">这个</span>kernel <span class="s1">的</span> FD.<span class="s1">这个</span> fd <span class="s1">可以被</span> poll.<span class="s1">这个</span> fd <span class="s1">上可以写一个</span>8byte <span class="s1">的</span> int number, <span class="s1">这个</span> number <span class="s1">用来表明发生的</span> fd <span class="s1">的时间类型</span>.所有用<span class="s2"> pipe </span>做事件驱动的地方都可以用<span class="s2"> eventfd </span>来代替<span class="s2">.</span></p>
+<p class="p1"><span class="s1">主要有两个</span> api, <span class="s1">一个是</span>eventfd, <span class="s1">还有一个是</span> eventfd2 , <span class="s1">第二个接口可以接受一个</span> flag <span class="s1">参数</span>.</p>
+<p class="p1">libuv <span class="s1">使用的是第</span>2<span class="s1">个接口</span>.</p>
+<p class="p1"><span class="s1">如果</span> eventfd <span class="s1">创建失败</span>, uv <span class="s1">会尝试使用</span> pipe <span class="s1">作为事件处理函数</span>.</p>
+<p class="p1">uv__async_start()<span class="s1">基本上就是创建了一个</span> eventfd, <span class="s1">并且把这个</span> eventfd <span class="s1">加到</span> watch <span class="s1">的列表里面</span>.</p>
+<p class="p1">当调用uv_async_send的时候, 大致就是在这个文件句柄上写一个 event number 的数据.</p>
+<p class="p1">这样 poll 就会被触发, 根据触发的类型,找到int 的时候的 callback, 再排队到 threadpoll 里面的一个 worker 来执行.</p>

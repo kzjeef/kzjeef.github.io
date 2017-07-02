@@ -1,0 +1,23 @@
+---
+layout: post
+title: Linux Kernel development notes under Mac OS X
+date: 
+type: post
+published: false
+status: draft
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>这里主要纪录一下在MAC OS下面做Linux Kernel开发的东西， 很怪的组合。</p>
+<p>1. 串口， 首先要去下载串口驱动， 比如说最常用的Z-TEK的驱动， 用的是ftdi的芯片， 就去FTDI的网站下一个驱动， 安装方法和安装一个应用一样：http://www.ftdichip.com/FTDrivers.htm</p>
+<p>2. 串口程序， 在Mac下面不需要下载类似putty的工具， 直接用screen打开， 比如说</p>
+<p>screen /dev/tty.usbserial-FTS06SU1 &nbsp;115200 8N1</p>
+<p>这样执行就打开了， 推出的组合键是CTRL-A &nbsp;CTRL－D</p>

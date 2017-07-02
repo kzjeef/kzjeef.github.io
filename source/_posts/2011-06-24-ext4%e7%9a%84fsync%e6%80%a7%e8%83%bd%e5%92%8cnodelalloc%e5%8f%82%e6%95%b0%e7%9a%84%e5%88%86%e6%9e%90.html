@@ -1,0 +1,191 @@
+---
+layout: post
+title: ext4的fsync性能和nodelalloc参数的分析
+date: 2011-06-24 17:32:39.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>感叹归感叹，发泄完了还得继续过。</p>
+<p>前几天忙的不可开交，周报上面竟然能列出11项，想想以前在T公司时候的清闲，现在的老板的真幸运了。</p>
+<p>好了，言归正传。</p>
+<p>我们的系统是使用ext4作为文件系统的，ext4怎么好呢？ 主要是我对它感觉比较好，呵呵，开玩笑的。还记得第一次使用一个全新的ext4作为文件系统（不是ext3转过来的）时候感觉性能的feeling，应该用神奇来形容。</p>
+<p>在我们android系统上使用ext4呢，主要是觉得它mount比较快，这样开机时间会很快。还记得当年在一点一点的抠启动时间，从40秒终于搞到30秒以内了，结果现在到了gingerbread(2.3)以后，没什么特别优化感觉都已经跑入15秒以内了。</p>
+<p>现在遇到的问题是我们在跑一个benchmark的时候，分数比竞争对手低好几倍。总是自我感觉不良好的我们认为这可能就是我们比人家慢吧。这种故事通常的结果就是，到了实在要命的时候，比如一个很大的客户在挑战的时候。就要开始进去查了，好的，这次是我进去了。</p>
+<p>调查的手段呢，第一个想到的就是strace，因为是ＩＯ嘛，必定和系统调用有关，所以strace肯定能够看出来一个一二三的，再加上strace的时间打印，就可以大概看出来哪些操作比较慢了。果然有发现，通过strace，发现fsync(3)消耗很多时间，中间甚至进程都出现了明显的调度出去，至于write，read这些操作，倒也不知道快慢。就先看这个fsync()为什么这么费时间吧。　其实一开始就怀疑是fsync()搞的鬼，因为有一个问题就是我们之前的kernel版本是2.6.31，这个bechmark跑的就很高，而升级到2.6.35上以后，这个分数就下降到1/3这么多。</p>
+<p>还有一个类似的问题就是USB Mass Stroage的性能，在2.6.31上的写性能就很快，而2.6.35上的写性能就奇慢。而USM的f_storage.c里面是调用vfs_write()来进行写Block设备。通过把vfs_write()和mmc的command dump出来发现。原来在2.6.31上，加上了F_SYNC参数的vfs_write()在mmc这层，还是乱序的。而在2.6.35上，发现每一条vfs_write()都对应几条mmc命令，等这几条命令发完以后，才去从USB那里传数据，这样就成了一个很傻很慢的家伙了。而为什么2.6.31上明明加上了F_SYNC参数还是会乱序的写，我想这是一个BUG吧，在2.6.35上修复了而已。</p>
+<p>所以这里的ext4文件系统fsync()慢可能也是和这个有关系的。但是作为嵌入式设备，随处会面对掉电的风险。所以掉电保护就很重要，不能说为了性能吧所有sync的写都变成un-sync的写，那些数据丢失会比较严重。</p>
+<p>Google了两天，发现很多关于fsync和ext4的讨论，放在这里一些万一别人要看呢， [1]</p>
+<p>无头绪，于是继续看ext4在kernel里面的文档，看到了mount参数这节，忽然灵机一动想起换换mount参数跑这个benchmark会不会有所改进呢？</p>
+<p>于是就把那些看似和write相关的参数都做了一个表格。</p>
+<table border="2" cellspacing="0" cellpadding="6" frame="hsides" rules="groups">
+<thead>
+<tr>
+<th scope="col">Ext4 with different option</th>
+<th scope="col">nobarrier</th>
+<th scope="col">nodelalloc</th>
+<th scope="col">journal_async_commit</th>
+<th scope="col">&nbsp;</th>
+</tr>
+<tr>
+<th scope="col">&nbsp;</th>
+<th scope="col">&nbsp;</th>
+<th scope="col">&nbsp;</th>
+<th scope="col">&nbsp;</th>
+<th scope="col">&nbsp;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(no combine)</td>
+<td>558</td>
+<td><span style="color: #ff0000;">1087</span></td>
+<td>524</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td>nobarrier</td>
+<td>NA</td>
+<td>NA</td>
+<td>522</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td>nodelalloc</td>
+<td>1052</td>
+<td>NA</td>
+<td>1051</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td>journal_aysnc_commit</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>&amp; nobarrier &amp; nodelalloc</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>可以看的出来，nodelalloc在这里贡献非常大。几乎是一倍的分数。</p>
+<p>为什么这个参数nodelalloc会这样呢，这是它的文档中的解释：</p>
+<p>delalloc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (*)&nbsp;&nbsp;&nbsp;&nbsp; Defer block allocation until just before ext4<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writes out the block(s) in question.&nbsp; This<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; allows ext4 to better allocation decisions<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; more efficiently.</p>
+<p>nodelalloc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Disable delayed allocation.&nbsp; Blocks are allocated<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; when the data is copied from userspace to the<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; page cache, either via the write(2) system call<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or when an mmap'ed page which was previously<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; unallocated is written for the first time.<br /> 先看这个delalloc， 这是默认值， 就是说把所有的block分配推后到真正要写数据的时候，当有sync调用的时候，也就是这种时候。</p>
+<p>而关掉这个默认feather以后，块号就会在page cache的时候分配。 如果区别只是这里， 就无法解释为什么分配块号会花费这么多的时间了。是的，瓶颈不在这里。</p>
+<p>我们接着看fsync（）这个系统调用，它在手册里面的解释是：</p>
+<p>&nbsp;fsync() transfers ("flushes") all modified in-core data of (i.e., modi‐<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fied&nbsp; buffer cache pages for) the file referred to by the file descrip‐<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tor fd to the disk device (or other&nbsp; permanent&nbsp; storage&nbsp; device)&nbsp; where<br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; that&nbsp; file&nbsp; resides.</p>
+<p>所以它仅仅要求文件系统把所有*该文件*的修改写到磁盘中。</p>
+<p>然后我们去看看ext4对于它的实现。</p>
+<p>&nbsp;</p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">/*
+ * akpm: A new design for ext4_sync_file().
+ *
+ * This is only called from sys_fsync(), sys_fdatasync() and sys_msync().
+ * There cannot be a transaction open by this task.
+ * Another task could have dirtied this inode.  Its data can be in any
+ * state in the journalling system.
+ *
+ * What we do is just kick off a commit and wait on it.  This will snapshot the
+ * inode to disk.
+ *
+ * i_mutex lock is held when entering and exiting this function
+ */
+
+int ext4_sync_file(struct file *file, int datasync)
+{
+        struct inode *inode = file-&gt;f_mapping-&gt;host;
+        struct ext4_inode_info *ei = EXT4_I(inode);
+        journal_t *journal = EXT4_SB(inode-&gt;i_sb)-&gt;s_journal;
+        int ret;
+        tid_t commit_tid;
+
+        J_ASSERT(ext4_journal_current_handle() == NULL);
+
+        trace_ext4_sync_file(file, datasync);
+
+        if (inode-&gt;i_sb-&gt;s_flags &amp; MS_RDONLY)
+                return 0;
+
+        ret = flush_completed_IO(inode);
+        if (ret &lt; 0)
+                return ret;
+        if (!journal) {
+                ret = generic_file_fsync(file, datasync);
+                if (!ret &amp;&amp; !list_empty(&amp;inode-&gt;i_dentry))
+                        ext4_sync_parent(inode);
+                return ret;
+        }
+
+        /*
+         * data=writeback,ordered:
+         *  The caller's filemap_fdatawrite()/wait will sync the data.
+         *  Metadata is in the journal, we wait for proper transaction to
+         *  commit here.
+         *
+         * data=journal:
+         *  filemap_fdatawrite won't do anything (the buffers are clean).
+         *  ext4_force_commit will write the file data into the journal and
+         *  will wait on that.
+         *  filemap_fdatawait() will encounter a ton of newly-dirtied pages
+         *  (they were dirtied by commit).  But that's OK - the blocks are
+         *  safe in-journal, which is all fsync() needs to ensure.
+         */
+        if (ext4_should_journal_data(inode))
+                return ext4_force_commit(inode-&gt;i_sb);
+
+        commit_tid = datasync ? ei-&gt;i_datasync_tid : ei-&gt;i_sync_tid;
+        if (jbd2_log_start_commit(journal, commit_tid)) {
+                /*
+                 * When the journal is on a different device than the
+                 * fs data disk, we need to issue the barrier in
+                 * writeback mode.  (In ordered mode, the jbd2 layer
+                 * will take care of issuing the barrier.  In
+                 * data=journal, all of the data blocks are written to
+                 * the journal device.)
+                 */
+                if (ext4_should_writeback_data(inode) &amp;&amp;
+                    (journal-&gt;j_fs_dev != journal-&gt;j_dev) &amp;&amp;
+                    (journal-&gt;j_flags &amp; JBD2_BARRIER))
+                        blkdev_issue_flush(inode-&gt;i_sb-&gt;s_bdev, GFP_KERNEL,
+                                        NULL, BLKDEV_IFL_WAIT);
+                ret = jbd2_log_wait_commit(journal, commit_tid);
+        } else if (journal-&gt;j_flags &amp; JBD2_BARRIER)
+                blkdev_issue_flush(inode-&gt;i_sb-&gt;s_bdev, GFP_KERNEL, NULL,
+                        BLKDEV_IFL_WAIT);
+        return ret;
+}</pre>
+<p>&nbsp;</p>
+<p>我们的文件系统是以ordered的方式mount的，所以要调到的函数基本是：</p>
+<p>flush_completed_IO()<br />jdb2_log_start_commit()<br />jdb2_log_wait_commit()</p>
+<p>所以我们可以看到，对于一条fsync（）, ext4会把所有的日志都commit掉，所以这才是真正慢的地方。 所以在需要经常做fsync()的应用下，比如sqltie就是一点典型例子。但是我觉得这个功能对于磁盘设备得大于失，但是对于闪存类型的设备，就没什么优势了。</p>
+<p>后来又做一个一个在O_SYNC参数下面的write性能对于关不关delalloc的对比：&nbsp; 这里是的Y轴是差值，高于0就是delalloc的性能好，低于就是差。 X轴代表一次write操作的单元， 不同颜色的线代表不同的文件大小。 单位都是KB <!--[endif] --><span style="font-size: 11.0pt; font-family: &amp;amp;amp; mso-fareast-font-family: 宋体; mso-fareast-theme-font: minor-fareast; mso-bidi-font-family: &amp;amp;amp; color: #1f497d; mso-ansi-language: EN-US; mso-fareast-language: ZH-CN; mso-bidi-language: AR-SA;"></span></p>
+<p>&nbsp;</p>
+<p>从图上可以看出，对于很大的文件，16M的文件，几乎所有的情况都是delolloc的性能要好。 但是对于64K-512K的文件， 性能就要差很多。</p>
+<p>对于文件unit的大小，可以看得出来256K是一个分水岭。 在接近256K的时候，延迟分配性能就要好很多，这个原因是因为我们的L2缓存是256K， 所以当写的数据接近256K的时候，由于延迟分配技术不用去分配Block 块，所以大部分的memory write都可以用来作为文件写page cache，如果有了分配block这些数据，就会导致cache不对其，所以性能就会比延迟分配差很多。</p>
+<p>还有一个地方是L1缓存（我们的是32K），这里前面小于L1的写都是延迟分配要快很多。原因和前面类似，但是不同的是接近L1的时候，反而都是不延迟分配要快一些，这点不知道怎么解释。可能的原因是在L1从L2中取数据的时延比较小.</p>
+<p>这里还有一个有趣的地方是，对于512K大小的unit，delalloc的性能就要明显达到一个最高点。这是为啥呢？</p>
+<p>【注】想起一个事情， 为什么512K是一个特殊的点呢? 因为512K是mmc设备的defualt block size. 但是对于为什么去掉延迟写入的性能会高那么多呢？很有意思。</p>
+<p>[1] right thing, but really affect performance&nbsp; <a href="http://postgresql.1045698.n5.nabble.com/ext4-finally-doing-the-right-thing-td2076089.html" target="_blank">http://postgresql.1045698.n5.nabble.com/ext4-finally-doing-the-right-thing-td2076089.html</a></p>
+<p><a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745" target="_blank">[2] This patch fix it.</a><a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745" target="_blank"> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745</a></p>

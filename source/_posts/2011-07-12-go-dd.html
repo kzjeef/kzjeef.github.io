@@ -1,0 +1,132 @@
+---
+layout: post
+title: 用go写的一个dd程序
+date: 2011-07-12 17:29:20.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- go
+meta:
+  _oembed_4662ed38e1a338141a6fb048dab0c61e: '{{unknown}}'
+  _oembed_8f32a5b887f9ceaad3e6288119bfeb68: '{{unknown}}'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>最近学了下go语言， 写了几个程序下来觉得确实很方便。</p>
+<p>主要是有几点，</p>
+<ul>
+<li>code syle定死了，省的以后浪费时间在code sytle上面的争论</li>
+<li>大括号必须跟在函数后边，只有if和for，简单啊。</li>
+<li>最方便的地方就是错误处理，可以返回一个返回值和一个专门处理错误码。</li>
+<li>还有就是打的字很少。</li>
+<li>用来处理参数的flag很好用，参数处理简单很多。</li>
+</ul>
+<p>在主页http://golang.org 上面有许多文档， 另外还有几个中文的文档看着比较舒服：</p>
+<p>http://code.google.com/p/golang-china/</p>
+<p>http://code.google.com/p/ac-me/</p>
+<p>&nbsp;</p>
+<pre class="brush: python;light: true; fontsize: 100; first-line: 1; ">package main
+
+import (
+	"os"
+	"syscall"
+	"flag"
+	"fmt"
+)
+
+var ofile = flag.String("of", "","out file")
+var ifile = flag.String("if", "", "in file")
+var seek = flag.Int64("seek", 0, "seek bytes")
+var skip = flag.Int64("skip", 0, "skip bytes")
+
+func main() {
+
+	flag.Parse()
+	
+	of := os.Stdout
+	inf := os.Stdin
+	err := os.EINVAL
+
+	fmt.Printf("of :%s if:%s n", *ofile, *ifile);
+	
+	if *ofile != "" {
+		of, err = os.Create(*ofile)
+		if of == nil {
+			fmt.Printf("can open of:%s:%sn",
+				ofile, err.String())
+			os.Exit(1)
+		}
+	}
+	if *ifile != "" {
+		inf, err = os.Open(*ifile)
+		if inf == nil {
+			fmt.Printf("can't oepn if:%s:%sn",
+				ifile, err.String())
+			os.Exit(1)
+		}
+	}
+
+	if *seek != 0 {
+		sr,err := of.Seek(*seek, os.SEEK_CUR)
+		if sr &lt; 0 {
+			fmt.Printf("seek error:%s:%sn",
+				of.Name(), err.String())
+			os.Exit(1)
+		}
+	}
+	if *skip != 0 {
+		sr, err := inf.Seek(*skip, os.SEEK_CUR)
+		if sr &lt; 0 {
+			fmt.Printf("skip error:%s:%sn",
+				inf.Name(), err.String())
+			os.Exit(1)
+		}
+	}
+
+	fmt.Printf("dd :%s to %sn",
+		inf.Name(), of.Name())
+	
+	const NBUF = 4096
+	var buffer [NBUF]byte
+
+	for {
+		switch nr, er := inf.Read(buffer[0:]); true {
+		case nr &lt; 0:
+			fmt.Fprintf(os.Stderr, "dd: error when reading from %s:%sn", inf.Name(), er.String())
+			os.Exit(1)
+		case nr == 0:
+			inf.Close()
+			of.Close()
+			return
+		case nr &gt; 0:
+			if nw, ew := of.Write(buffer[0:nr]); nw != nr{
+				fmt.Fprintf(os.Stderr,"dd: error writing to %s:%sn", of.Name(), ew.String())
+			}
+		}
+	}
+	syscall.Sync()
+}
+</pre>
+<p>&nbsp;</p>
+<p>编译：</p>
+<p>$ 8g dd.go &amp;&amp; 8l -o dd dd.8</p>
+<p>运行：</p>
+<p>./dd -if qi.tar.gz -of tmp</p>
+<p>用一个400M的包做测试：</p>
+<p>time ./dd -if qi.tar.gz -of tmp</p>
+<p>real&nbsp;&nbsp;&nbsp; 0m16.636s<br />user&nbsp;&nbsp;&nbsp; 0m0.152s<br />sys&nbsp;&nbsp;&nbsp; 0m1.764s</p>
+<p>比起来要比dd要快一点：</p>
+<p>time dd if=qi.tar.gz of=tmp<br />记录了843029+1 的读入<br />记录了843029+1 的写出<br />431631274字节(432 MB)已复制，21.1584 秒，20.4 MB/秒</p>
+<p>real&nbsp;&nbsp;&nbsp; 0m21.229s<br />user&nbsp;&nbsp;&nbsp; 0m0.516s<br />sys&nbsp;&nbsp;&nbsp; 0m4.624s</p>
+<p>不过估计是因为我们的dd里面用的是4K的buffer吧。</p>
+<p>time dd if=qi.tar.gz of=tmp bs=4096<br />记录了105378+1 的读入<br />记录了105378+1 的写出<br />431631274字节(432 MB)已复制，13.7601 秒，31.4 MB/秒</p>
+<p>real&nbsp;&nbsp;&nbsp; 0m13.925s<br />user&nbsp;&nbsp;&nbsp; 0m0.040s<br />sys&nbsp;&nbsp;&nbsp; 0m1.424s</p>
+<p>果然， 换成4096的buffer size要比go写的快一点。</p>
+<p>总之，用go写程序比较爽。</p>

@@ -1,0 +1,26 @@
+---
+layout: post
+title: Use debugfs tracing in linux kernel.
+date: 2011-08-26 01:59:15.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Just record how to use debugfs, tracing block IO.</p>
+<p>&nbsp;</p>
+<p><span class="ik"></span><span class="gD" style="color: #5b1094;">Vivek Goyal&nbsp;<span class="Sp"> said on maillist:<br /></span></span></p>
+<p>"""</p>
+<p>You can try using tracing functionality.</p>
+<p> - mount -t debugfs none /sys/kernel/debug<br /> - Enable tracing on the disk you are doing IO to.<br /> &nbsp;echo 1 &gt; /sys/block/sda/trace/enable<br /> - Enable block traces<br /> &nbsp;echo blk &gt; /sys/kernel/debug/tracing/</p>
+<div id=":ed">current_tracer<br /> - cat /sys/kernel/debug/tracing/trace_pipe &gt; /tmp/trace_output</p>
+<p> Let it run for few seconds. Interrupt and kill cat process.<br /> /tmp/trace_output should have useful tracing info.</div>

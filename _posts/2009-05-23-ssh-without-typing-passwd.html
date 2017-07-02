@@ -1,0 +1,42 @@
+---
+layout: post
+title: Ssh without typing passwd
+date: 2009-05-23 23:21:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Blogspot被墙了，只好发到这里了。</p>
+<p>在公司的时候，总是有这样的需求：你需要ssh或者scp东西到别人的机器上面，有时候会比较频繁，但是每次都得你的目标机的人过来输一下密码，很麻烦，效率也很低。</p>
+<p>在看一篇hadoop的<a href="http://www.ibm.com/developerworks/cn/opensource/os-cn-hadoop3/">文章</a>的时候看到了一些ssh，和公钥的用法（唉，没办法，比较土，现在才知道），可以避免输密码。</p>
+<p>我这里就直接抄下来了，版权都在原作者.</p>
+<blockquote style="MARGIN-RIGHT: 0px" dir="ltr"><p>使用三台机器，机器名分别为 homer06, homer07, homer08，均安装 Redhat Enterprise Linux 5.0 (其它 Linux 发行版亦可), 确保各台机器之间网络畅通，机器名与 IP 地址之间解析正确，从任一台机器都可以　ping 通其它机器的机器名。如有机器名的解析问题，可通过设置 /etc/hosts 文件解决，当然更好的解决方法是在你的网络中配置 DNS 服务器。此外，需要在三台机器上创建相同的用户帐号，如 caoyuz, 或直接使用 root 帐号亦可。</p>
+<p>在 Hadoop 分布式环境中，Name Node (主节点) 需要通过 SSH 来启动和停止 Data Node (从结点)上的各类进程。我们需要保证环境中的各台机器均可以通过 SSH 登录访问，并且 Name Node 用 SSH 登录 Data Node 时，不需要输入密码，这样 Name Node 才能在后台自如地控制其它结点。可以将各台机器上的 SSH 配置为使用无密码公钥认证方式来实现。</p>
+<p>现在流行的各类 Linux 发行版一般都安装了 SSH　协议的开源实现 OpenSSH, 并且已经启动了 SSH 服务, 即这些机器缺省应该就是支持 SSH 登录的。如果你的机器缺省不支持 SSH, 请下载安装 OpenSSH。</p>
+<p>以下是配置 SSH 的无密码公钥认证的过程。首先，在 homer06 机器上执行命令，如代码清单 1 所示：</p>
+<p><a name="listing3" id="listing3"><strong>代码清单1</strong></a></p>
+<table cellpadding="0" width="100%" border="0" cellspacing="0">
+<tbody>
+<tr>
+<td class="code-outline">
+<pre class="displaycode"><br /> <br />homer06: $ ssh-keygen -t rsa<br />Generating public/private rsa key pair.<br />Enter file in which to save the key (/home/caoyuz/.ssh/id_rsa): <br />Enter passphrase (empty for no passphrase):<br />Enter same passphrase again:<br />Your identification has been saved in /home/caoyuz/.ssh/id_rsa.<br />Your public key has been saved in /home/caoyuz/.ssh/id_rsa.pub.<br />The key fingerprint is:<br />2e:57:e2:bf:fd:d4:45:5c:a7:51:3d:f1:51:3c:69:68 root@krusty04<br /></pre>
+<p></td>
+</tr>
+</tbody>
+</table>
+<p>
+<p>这个命令将为 homer06 上的当前用户 caoyuz 生成其密钥对，密钥对的保存路径使用缺省的 /home/caoyuz/.ssh/id_rsa, 要求输入 passphrase 的时候，直接回车。这样生成的证书以及公钥将存储在 /home/caoyuz/.ssh 目录，形成两个文件 id_rsa，id_rsa.pub。然后将 id_rsa.pub 文件的内容复制到每一台机器(包括本机 homer06)的　 /home/caoyuz/.ssh/authorized_keys　文件的尾部，如果机器上不存在　 /home/caoyuz/.ssh/authorized_keys 文件，可以自行创建一个。请注意 id_rsa.pub 文件的内容是长长的一行，复制时需注意，不要遗漏字符或混入了多余换行符。</p>
+<p>接下来可以做一下 SSH 连接测试，从 homer06 分别向 homer06, homer07, homer08 发起 SSH 连接请求，确保不需要输入密码就能 SSH 连接成功。注意第一次 SSH 连接时会出现如下提示信息：</p>
+<p>The authenticity of host [homer06] can't be established. The key fingerprint is: 74:32:91:f2:9c:dc:2e:80:48:73:d4:53:ab:e4:d3:1a Are you sure you want to continue connecting (yes/no)?</p>
+<p>请输入 yes, 这样 OpenSSH 会把连接过来的这台主机的信息自动加到 /home/caoyuz/.ssh/know_hosts 文件中去，第二次再连接时，就不会有这样的提示信息了。</p>
+</blockquote>

@@ -1,0 +1,37 @@
+---
+layout: post
+title: 'Notes on Mattt Thompson: Postgres & Rails 4: NoSQL in your SQL Database'
+date: 2014-05-16 11:01:48.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- Rails
+tags:
+- Postgres
+- Rails
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Video: https://www.youtube.com/watch?v=HXEb5-9Nt20</p>
+<p>记录一些要点，</p>
+<p>Postgres 9.2：</p>
+<p>－ hstore， 在Sql 数据库中加入NoSQL的元素。Rails 4 可以直接使用 t.hstore ， 初始化的时候就像Dict一样assign。 非Rails4可以使用这个Gem， activerecord-postgres-hstore。 （create extension hstore）<br />
+－ Full Text Index： 对于English Native 更加有用吧。<br />
+－ plv8: Buildin Javascript： node.js的风刮到这里了。可以直接在postgres里面执行javascript， 会让更多的人把应用逻辑写到数据库里把。 当然这样的效率肯定很高。缺点嘛， 就是Vendor Lock了。<br />
+－ JSON： 直接放进Postgres里面， 可以index等， Postgres有一个Cool Feature。</p>
+<p>Rails4:<br />
+－ hstore， 上面说过了。<br />
+－ Buildin 高级的Type：<br />
+＊ INET： ipv4， ipv6的类型， 比用string提供更多的功能。<br />
+＊ CIDR： Sub Net 专用类型<br />
+＊ MACADDR： 专用的Mac Address的类型<br />
+＊ UUID： UUID 的类型， 比String的好处在于： 对于支持Buildin UUID 的Database， 这个可以直接BuindIn<br />
+＊ ARRAY： 这个大赞， 比如 这个migration， t.string :tags, array: true 这样就可以存在tags里面存多个值， 如果没有，我通常得新建一张表。</p>
+<p>回顾一下， 最赞的地方莫过于hstore &amp; ARRAY</p>

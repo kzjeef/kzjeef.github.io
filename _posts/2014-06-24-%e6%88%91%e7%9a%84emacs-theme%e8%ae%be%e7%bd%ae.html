@@ -1,0 +1,77 @@
+---
+layout: post
+title: 我的Emacs Theme设置
+date: 2014-06-24 11:56:03.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>TD; DR   我的Emacs Theme部分的设置主要有两个特色, 一个是可以根据热键循环选择主题, 另外一个是根据打开编辑器的时间(白天还是夜里)来选择一个默认的主题.</p>
+<p>今天来看看我的Emacs中的theme 设置, 话了很多时间来来回回换主题, 总是觉得不同情况下使用不同的Theme比较顺眼, 所以我的dot emacs中的Theme设置是比较复杂的. 下面就来说说, Emacs版本都是24.</p>
+<p>安装部分<br />
+除了系统自带的那些主题外, 还使用了一些从VIM和Textmat中拿过来的theme, 使用package-install很容易就安装上了.</p>
+<pre class="lang:lisp decode:true ">  (package-install 'zenburn-theme)
+  (package-install 'twilight-theme)
+  (package-install 'twilight-bright-theme)
+  (package-install 'solarized-theme)
+  (package-install 'monokai-theme)
+</pre>
+<p>然后是初始化部分</p>
+<p>这个函数主要是重载load-theme命令,让其先去掉前面的主题, 然后再应用新的主题, 要不然会把两个主题混在一起.</p>
+<pre class="lang:lisp decode:true ">;; Auto disable theme setup before...
+(defadvice load-theme
+  (before theme-dont-propagate activate)
+  (mapcar #'disable-theme custom-enabled-themes))
+</pre>
+<p>这个函数主要是初始化一个主题列表</p>
+<pre class="lang:lisp decode:true ">(defun reset-theme-list() 
+  (setq all-themes '(twilight twilight-bright adwaita zenburn solarized-dark solarized-light monokai))
+  (setq valid-themes all-themes))</pre>
+<p>这个函数主要是一个一个的来循环主题列表, 使用current-theme这个变量来看自己已经到了哪个主题.</p>
+<pre class="lang:lisp decode:true ">(defun looping-select-theme()
+  (interactive)
+  (if valid-themes
+      ((lambda()
+	 (setq current-theme (car valid-themes))
+	 (setq valid-themes (cdr valid-themes))
+	 (load-theme current-theme t)
+	 (message "Current Theme is: %s" current-theme)
+	 ))
+    (reset-theme-list)
+    (disable-theme current-theme)))</pre>
+<p>下面这个函数是主题的初始化函数, 主要是根据当前的时间来添加一个默认的主题. 现在是主要由(and (&lt; hour 16) (&gt; hour 8) 这条来控制, 主要是说在上午8点到下午4点之间使用白天主题, 也就是adwaita, 晚上就使用twillight. 如果你不喜欢不同时间选择不同背景, 可以去掉下面的let那个表达式就可以了.</p>
+<pre class="lang:lisp decode:true">(defun color-init()
+  (reset-theme-list)
+  (when (not (boundp 'current-theme))
+
+    ;; below let s-list will setup the default theme base on current time, if it was in day light, use a white background, else, use a dark background.
+    (let ((hour  (caddr (decode-time (current-time))))
+	  (day-theme 'adwaita)
+	  (night-theme 'twilight))
+      ;; between AM8 and PM4, use blank background have some reflection.
+      (if (and (&lt; hour 16) (&gt; hour 8))
+	  ;; add a day theme in the front of theme list, make it be the default theme.
+	  (when (not (eq (car all-themes) day-theme))
+	    (setq valid-themes (cons day-theme valid-themes)))
+	;; like above s-list.
+	(when (not (eq (car all-themes) night-theme))
+	  (setq valid-themse (cons night-theme valid-themes)))))
+
+    ;; first time call this will use first theme.
+    (looping-select-theme)))</pre>
+<p>在dot emacs里面要添加下面这两个.</p>
+<pre class="lang:default decode:true">(global-set-key[M-f9] 'looping-select-theme)
+(color-init)
+</pre>
+<p>OK了, 这样就可以按Alt-F9来切换主题, 并且打开Emacs的时候会根据当前的时间来选择不同的主题.</p>

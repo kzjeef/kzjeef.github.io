@@ -1,0 +1,66 @@
+---
+layout: post
+title: 10 Rules of programming
+date: 2007-08-31 04:35:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>By Malcolm McLean</p>
+<p>&nbsp;</p>
+<li>
+<div><a name="ruleofone"></a>The rule of one</div>
+<p><i>Thou shalt have one copy and one alone of any item under edit. </i></p>
+<p>Never fork development. It becomes virtually impossible to keep more than one version of a program in synch. A bug is fixed in one program, but the matching file in the other program has some subtle changes essential to make it work. So the fix may or may not be posted in, it may not even be relevant. Very quickly you will arrive at a situation in which no one knows what is happening. </p>
+<p>The rule also applies to program objects that can be edited by the user. The user expects that the interface will show a snapshot of the real state of his data. This is very hard to achieve if every menu item is caching data. Unfortunately it is also a difficult problem to fix; you need to impose rigorous mangement on non-modal meus especially. This is particularly true if efficiency considerations make it impossible to do a general refresh with every data value entered. </p>
+<hr />
+<h3><a name="ruleoftwo"></a>The rule of two </h3>
+<p><i>Thy names shall be binomial. </i></p>
+<p>In most cultures people have two-part names, such as Christian name / surname. When Linnaeus developed his system of biological nomenclature, scientists quickly simplified it to a binomial system, e.g. <i>Pan troglodytes </i>for a chimpanzee, <i>Homo erectus </i>for primitive humans. Three-part or higher names are not names but descriptions. </p>
+<p>The rule is of great importance in variable naming. In many languages variables are usually a member of a named structure or object. This means that both the member and the enclosing instance must have single-part names for the whole to be readable. Eg <i><a href="http://candidate.name">candidate.name</a> </i>not <i>candidate_trainee.firstname </i>. Names longer than two parts can of course be used in simple expressions. The rule applies when variables must be embedded in complex expressions. </p>
+<hr />
+<h3><a name="ruleofthree"></a>The rule of three </h3>
+<p><i>Thou canst cope with only three levels of indirection. </i></p>
+<p>A human can just about read a mathematical expression with three levels of nested parentheses. Go to four and understanding breaks down. Similarly humans can cope with three levels of loop nesting, or arrays with three dimensions, or pointers to pointers to pointers. </p>
+<p>These things are all related to the fact that we are adapted to living in a three-dimensional world. Hence a three dimensional array has a physical analogue. Looping, indirection and parentheses are all used to support multi-dimensional arrays, hence really part of the same rule. </p>
+<hr />
+<h3><a name="ruleoffour"></a>The rule of four </h3>
+<p><i>Thou shalt pass only four parameters to a function. </i></p>
+<p>If you expect your caller to remember the parameters a function takes, their order, and what they do, then you can pass a maximum of four parameters. Five is slightly too many to remember without effort, or to scan unconsiously. Four parameters is also the threshold for machine optimisation on may platforms. </p>
+<hr />
+<h3><a name="ruleoffive"></a>The rule of five </h3>
+<p><i>Thou shalt have only five levels in a tree. </i></p>
+<p>A binary tree with five levels has sixteen members at the leaves. This is about the most that can fit onto a single diagram. Your call tree will of course be much bigger than five levels deep in a large program. However it can be broken down into files, with no more than five levels within each file, and no more than five levels of files in each library, and no more than five levels of libraries in each program. Or in object-oriented languages, no more than five levels of methods within each class, and no more than five levels of class dependencies. </p>
+<hr />
+<h3><a name="ruleofsix"></a>The rule of six </h3>
+<p><i>Thou shalt use up to six letters in a minor identifier. </i></p>
+<p>This one is imposed by Fortran 77, which only allows six letters in identifiers. However it is a good rule to keep to for minor variables. Generally a one letter convention will exist for many variables in a function, such as N for an integer total and i for a counter, x, y and z for Cartesian co-ordinates, and so forth. The problem comes when we have source x, y and destination x, y. We can&#39;t use x, y for both. However sourcex, destinationx will make expressions far too long. srcx, destx is more acceptable. The limit is about six characters. </p>
+<p>Six digits is also the maximum that a human can take in without trouble. Unfortunately this rule is impossible to enforce in a computer programming context, because frequently greater precision is required for technical reasons. However it tells us that the rule of six also applies to names made of arbitrary characters, like "memptr". Identifiers which are English words are obviously perfectly readable. That&#39;s why the rule of six mentions &quot;minor identifiers&quot;. </p>
+<hr />
+<p><a name="ruleofseven"></a></p>
+<h3>The rule of seven </h3>
+<p><i>Thou shalt pass only seven parameters to a function. </i></p>
+<p>Humans can take in about seven objects without counting them. This means that seven parameters is the limit for a readable function call. The rule of four was the rule for a scannable function call. The difference between scanning and reading is that the scanned call can be accepted as a single unit, the read call has to be worked through parameter by parameter. More than seven arguments and the reader will lose track of which is which and have to count arguments, matching them to the manual. So the code becomes non-readable, and is only acceptable if the reader already knows what the function does without looking at its argument list. </p>
+<hr />
+<h3><a name="ruleofeight"></a>The rule of eight </h3>
+<p><i>Thou shalt have no rule of eight. A foolish consistency is the bugbear of little minds. </i></p>
+<hr />
+<h3><a name="ruleofnine"></a>The rule of nine </h3>
+<p><i>Thou shalt hardcode only nine explicit conditions. </i></p>
+<p>In a two dimensional array each non-edge cell has eight neighbours, plus itself to make nine. This is about the limit for coding each condition explicitly. It is also the number of directions in common use � North, South, East, West, North-east, North-west, South-east, South-west, plus one for "stay still". OK, I am running out of ideas; this could be the rule of eight or the rule of ten. An <i>if ... else </i>ladder of nine is not unacceptable. If we go to cubic arrays we have 27 cells in each 3x3x3 block, and we must use loops to index them. Similarly if we want more than the eight compass directions, it is time to code as degrees rather than by name. </p>
+<hr />
+<h3><a name="ruleoften"></a>The rule of ten </h3>
+<p><i>Thou shalt have only ten commandments in a list of rules. </i></p>
+<p>That one was obvious. </p>
+</li>
+<p><br clear="all" /><br />-- <br />Shit happens!</p>

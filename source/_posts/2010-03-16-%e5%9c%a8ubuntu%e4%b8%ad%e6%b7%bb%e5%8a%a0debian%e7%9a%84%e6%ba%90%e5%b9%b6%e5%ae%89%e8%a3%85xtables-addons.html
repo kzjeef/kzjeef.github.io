@@ -1,0 +1,35 @@
+---
+layout: post
+title: 在ubuntu中添加debian的源并安装xtables-addons
+date: 2010-03-16 05:54:05.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- GFW
+- ubuntu
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>也许你想在ubuntu中安装xtables-addons来编译某个爱情故事。那么这里给出一个具体步骤。</p>
+<p>我实验的是使用ubuntu 9.04</p>
+<p>1. 找到一个debian源。<br /> 我用的是http://debian.ustc.edu.cn/debian 如果是用其他的源，可以下面的PUBKEY和地址要替换掉。</p>
+<p>2. 系统 -&gt; 系统设置 -&gt; 软件源</p>
+<p>在第三方软件中加入 deb http://debian.cn99.com/debian&nbsp; unstable main</p>
+<p>这时候Update有可能会提示<br /> NO_PUBKEY 9AA38DCD55BE302B</p>
+<p>如果提示就使用下面的命令把公钥导入，否则可以忽略这两条命令。</p>
+<p>gpg --keyserver pgpkeys.mit.edu --recv-key F1D53D8C4F368D5D</p>
+<p>gpg -a --export&nbsp; F1D53D8C4F368D5D | sudo apt-key add -</p>
+<p>3. update</p>
+<p>sudo apt-get update<br /> &nbsp;<br /> 4. install<br /> sudo apt-get install xtables-addons-common</p>
+<p>如果你是为了编译某个爱情故事需要的xtable来的话， 可以再</p>
+<p>sudo apt-get install --reinstall iptables-dev</p>
+<p>就可以继续编译那个爱情故事了。</p>
+<p>BTW，不过建议在可以编译以后，最好从源里面把debian的库去掉，再update一下，因为有可能版本差距太大，会造成apt一些依赖关系的破坏。</p>

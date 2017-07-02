@@ -1,0 +1,36 @@
+---
+layout: post
+title: Linux中的原子操作以及IA-32架构的原子操作
+date: 2010-07-23 07:01:14.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- linux
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>原子操作， 通常有几种实现方式， 加锁和使用CPU指令中实现的原子变量操作。</p>
+<p>在Linux Kernel中，通常使用atomic_t系列的操作如atomic_set(), atomic_read()来操作。这里先看看几个平台的实现，然后再记录一下X86下面atomic变量的实现。</p>
+<p>atomic_t 的结构是这样的：</p>
+<p>&nbsp;</p>
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">typedef struct { volatile int counter; } atomic_t;<br /><br />在这个结构体中只有一个加上了volatile的int的计数器。基本上大部分的平台下的atomc_read()实现都是<br />#define atomic_read(v)	((v)-&gt;counter)<br />这样一条来实现的。这是因为不管是X86的还是MIPS体系的架构下，都不会对于内存读写作重新排序。因为这个操作有一条指针解引用，所以它就是对内存进行操作。<br /><br />但是对于原子变量的写操作却有比较大的不同：<br />比如</pre>
+<p>arm V6以上：</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<pre class="brush: cpp;light: true; fontsize: 100; first-line: 1; ">#define atomic_read(v)&nbsp;&nbsp;&nbsp; ((v)-&gt;counter)<br />static inline void atomic_set(atomic_t *v, int i)<br />{<br />	unsigned long tmp;<br /><br />	__asm__ __volatile__("@ atomic_setn"<br />"1:	ldrex	%0, [%1]n"<br />"	strex	%0, %2, [%1]n"<br />"	teq	%0, #0n"<br />"	bne	1b"<br />	: "=&amp;r" (tmp)<br />	: "r" (&amp;v-&gt;counter), "r" (i)<br />	: "cc");<br />}</pre>
+<p>&nbsp;</p>
+<p>是用一个strex, ldrex（互斥读内存和互斥写内存）,来写内存如果设置不成功，就继续重新读一次再写一次。虽然这样的操作看起来不是很高效，但是却简化了CPU的设计，在其他方面的提升可以抵消这样操作的损耗。</p>
+<p>剩下的实现都#define atomic_set(v,i) ((v)-&gt;counter = (i))这样实现的。</p>
+<p>看似和读一样，都只是一条简单的赋值操作。 但是如果要实现真正原子，只需要保证编译器老老实实的把这条读写操作变成对于内存的读写就可以了。 而加上volatile就是这个意思，防止编译器把这个变量放在某个寄存器里面进行优化，而是每次都编译成load, store, 或者其他的内存操作指令。</p>
+<p>因为在这些构架中，对于内存的读写都是可以保证原子的。但是对于IA-32有一个例外，就是IA-32构架下只有4字节对其的内存操作才是原子性的。除非是你手动写汇编。这种不是4字节对齐的内存访问需要在手动汇编或者一些结构体定义的时候特别注意。</p>
+<p>下面记录一下IA-32下的原子操作的实现。</p>
+<p>在IA-32下，可以通过在汇编指令前面加入#LOCK来保证这个操作是原子的。但是这个指令实现的方式却是把BUS锁住的方式实现的，所以会很影响系统的吞吐量。其他的指令也会造成类似的效果：</p>
+<p>* CMPXCHG指令，就是传说中的比较并交换。<br />* 设置B位到TSS寄存器中，这样保证任务切换的时候不会出现切换任务的情况。<br />* 更新段选择器的时候。<br />* 更新Page Direcotry, page table 的时候<br />* 相应中断的时候，中断控制器传输中断向量的时候。</p>

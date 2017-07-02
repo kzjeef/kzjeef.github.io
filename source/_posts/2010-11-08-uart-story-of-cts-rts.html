@@ -1,0 +1,34 @@
+---
+layout: post
+title: 'UART: hardware flow control, story of CTS/RTS.'
+date: 2010-11-08 13:31:19.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags:
+- bluetooth
+- linux
+- uart
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>这几天在调试蓝牙(Bluetooth, 以下用BT代替), 这个蓝牙呢是通过把Soc和BT芯片连起来的. 也就是传说中的hci_uart. 芯片是AR3001, 这个调试成功是一个比较曲折的路程, 大致再这里总结一下吧.</p>
+<p>首先拿到的时候, 对UART不是很熟悉, 连公母头都分不清楚, 一开始是用飞线把开发板上的UART和BT上的UART口连起来的. 连了5根线. 分别是, RX, TX, CTS, RTS, GND, 分别是接受, 发送, (Clear to Send)接受方流控(BT芯片控制), (Request to Send)发送用的流控(开发板控制). 首先得搞清除那边控制那边, 所以还是画个图来的比较明显:</p>
+<p style="text-align: center;">
+<p>图中的方向是指数据的方向, RTS 是由CPU来控制的, 而CTS是由BT来控制的. 他们再连起来的时候是一个交叉连的关系. RX,TX是RS232的2,3针, CTS, RTX是RS232的7,8针, 具体是几针请对这你的原理图看吧, 一定要看仔细了. 我就在这个上弄了很久.</p>
+<p>还有一个比较重要的就是硬件流控, 也就是Hardware flow control, 这里的硬件是指谁呢, 这里的硬件是指UART双方的芯片. 如果不加流控呢, UART传输数据的方式类似于一个双向的管子, 两边有了东西就往里面塞, 不管能不能放得下. 因为UART是有一个FIFO, 这个FIFO通常不会很大, 32个字节是比较常见的, 因为做大了也不好. 通常如果你发的太快了, 就会导致UART 的硬件overrun, 糟了, 来不及收了. 那UART会怎么办呢, 丢呗. 它就会忽略掉后面来的数据, 或许你有过经历,就是往一个终端里面复制数据, 复制的太快了发现复制进去的数据乱了. 这可能就是没有打开流控导致的.这里注意一点,就是是接受方需要流控,为什么发送方不需要呢, 因为你发送的时候知道FIFO满了可以先把数据防到内存里面阿.</p>
+<p>好了, 加了流控能够怎么改善这个情况呢?</p>
+<p>好, 现在发送方数据, 尽力发阿. 来吧, 发到了接收方受不了了, 接收方就拉起了他的RTS, 也就是RTS拉高电压, (这里的RTS,CTS,都是低电平有效,其实这些很简单, 他这种东西只有两种电平, 一个高一个低, 二进制嘛), 告诉发送方, 不要发了. 好了, 发送方就乖乖的听话, 不发了. 等到接收方处理的能够接受了, 就拉低RTS的电平. 这样就可以继续发送了.但是这一切都是由硬件控制的. 这时候软件是不能够去手动的操作RTS的.</p>
+<p>有一种情况我们可能需要自己控制RTS和查看CTS的情况, 比如就说这个AR3001吧, 它因为是想省电,所以就经常睡觉, 睡觉的时候你想唤醒它吧,为啥, 你想听歌阿, 你想传东西阿, 你想用手机上上网阿,之类的. 这时候我们唯一能够控制的就是RTS口, 通过这个给一个短脉冲, 在BT芯片那边就会当成一个中断来把它唤醒.这样就能够继续操作了.这时候你就得把硬件流控给关掉, 才能够控制这位. 怎么关呢? 在driver里面, 你可以调用这个tty驱动的termios方法, 去掉c_flags里面CRTSCTS那一位. 这样就可以腾出手来操作RTS那位了, RTS怎么操作呢, 代码吧:</p>
+<pre>static int ath_wakeup_ar3k(struct tty_struct *tty)<br />{<br />   struct termios settings;<br />   int status = tty-&gt;driver-&gt;ops-&gt;tiocmget(tty, NULL);<br /><br />   if (status &amp; TIOCM_CTS)<br />      return status;<br /><br />   /* Disable Automatic RTSCTS */<br />   n_tty_ioctl_helper(tty, NULL, TCGETS, (unsigned long)&amp;settings);<br />   settings.c_cflag &amp;= ~CRTSCTS;<br />   n_tty_ioctl_helper(tty, NULL, TCSETS, (unsigned long)&amp;settings);<br /><br />   /* Clear RTS first */<br />   status = tty-&gt;driver-&gt;ops-&gt;tiocmget(tty, NULL);<br />   tty-&gt;driver-&gt;ops-&gt;tiocmset(tty, NULL, 0x00, TIOCM_RTS);<br />   mdelay(20);<br /><br />   /* Set RTS, wake up board */<br />   status = tty-&gt;driver-&gt;ops-&gt;tiocmget(tty, NULL);<br />   tty-&gt;driver-&gt;ops-&gt;tiocmset(tty, NULL, TIOCM_RTS, 0x00);<br />   mdelay(20);<br /><br />   status = tty-&gt;driver-&gt;ops-&gt;tiocmget(tty, NULL);<br /><br />   n_tty_ioctl_helper(tty, NULL, TCGETS, (unsigned long)&amp;settings);<br />   settings.c_cflag |= CRTSCTS;<br />   n_tty_ioctl_helper(tty, NULL, TCSETS, (unsigned long)&amp;settings);<br /><br />   return status;<br />}<br />
+</pre>
+<p>然后你操作完了就再把利空给恢复了吧, 就像这段代码那样, 这段代码是从http://www.linuxhq.com/kernel/v2.6/36-rc2/drivers/bluetooth/hci_ath.c这里摘抄的.也就是这个AR3001的驱动代码.</p>
+<p>还有,就是你汇发现这里面的tty驱动, 其实如果遇到问题, 你也要钻到TTY驱动里面的, <br />对这Reference manual看看里面的操作是否正确. 因为我遇到的问题就是, imx的uart驱动不是很标准, <br />打开硬件流控和关闭硬件流控没有实现. 折腾了半天, 现象就是UART时好时坏, 就像便秘一样.</p>
+<p>最后自己打了实现打开和关闭流控的代码之后就一切没有问题了.别看小小的UART驱动, 如果不标准,也会带来很大的麻烦阿!</p>

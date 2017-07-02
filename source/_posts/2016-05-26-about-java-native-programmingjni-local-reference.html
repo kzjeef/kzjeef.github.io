@@ -1,0 +1,56 @@
+---
+layout: post
+title: About Java Native Programming(JNI) Local Reference
+date: 2016-05-26 16:34:23.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- java
+tags: []
+meta:
+  _edit_last: '1'
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p>Today I needs record some experience about Java JNI programming,</p>
+<p>More accuratly, it's about the local reference in JNI.</p>
+<p>first of all, about JNI's reference , see this link for a basic knowlege: (http://www.ibm.com/support/knowledgecenter/SSYKE2_8.0.0/com.ibm.java.win.80.doc/diag/understanding/jni_refs.html).</p>
+<p>In this post, I'm going to talk about:<br />
+1) when JNI function will generate a local reference.<br />
+2) when the local reference will be release automatily by java vm.<br />
+3) what issue might happens about it.</p>
+<p>1. When JNI function will generate a local reference.</p>
+<p>Basic rule is simple:<br />
+1) the function not return a GlobalReference / WeakGlobalReferece<br />
+2) the function will return a point named in follwing list:</p>
+<p>jobject, jclass, jstring, jarray, jobjectArray, jbooleanArray, jbyteArray, jcharArray, jshortArray,<br />
+jintArray, jlongArray;, floatArray, jdoubleArray, jthrowable, jweak.</p>
+<p>actually , this list is copy from jni.h , there is a section named /* Reference types */</p>
+<p>When these two rules apply, it will generate a LocalReference.</p>
+<p>2. when the local reference will be release automatily by java vm.</p>
+<p>In java document, said that the local Reference will be freeed after *native* call.</p>
+<p>but what's is the native call, let's give a example.</p>
+<p>A.java : have one native function:</p>
+<p>native void method_native();</p>
+<p>Jni.cpp: have 3 function:</p>
+<p>JNIEXPORT void JNICALL Java_com_example_ClassA_A_method_native(JNIEnv *env, jobject thiz);<br />
+void cpp_function_1(JNIEnv *env, jobject thiz);<br />
+void cpp_function_2(JNIEnv *env, jobject thiz);</p>
+<p>in cpp_function_2() you called env-&gt;GetObjectClass(this); to do something.</p>
+<p>call relationship is:<br />
+method_native() -&gt; cpp_function_1() -&gt; cpp_function_2();</p>
+<p>in cpp_function_2() it will generate a localReference, it will not release after cpp_function_2() return,<br />
+it will actually release after method_native() return.</p>
+<p>or, if you have called vm_-&gt;DetachCurrentThread(); (vm_ is JavaVM type), the local reference will release too.</p>
+<p>3. what issue might happens about it.</p>
+<p>So, since java vm will release the reference , why bother to learn this ?</p>
+<p>because in some case, you will leak the local reference, or exceed the maximum count of local reference, and cause you program crash.</p>
+<p>like, you called GetObjectClass() function in a worker thread in native level, and this thread never return control to java level.<br />
+so it leaked.</p>
+<p>if you have some loop calling a function will generate a local reference, it will generate local reference inside the loop, even if it will eventually release by jvm after native function return , it will have some chance exceed the maximum count of local reference.</p>
+<p>So, as a summary , the good practice is release the local reference by DeleteLocalReference() as soon as possible.</p>

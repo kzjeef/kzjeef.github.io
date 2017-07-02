@@ -1,0 +1,24 @@
+---
+layout: post
+title: 使用libjpeg直接转换YUV420图像到JPEG
+date: 2009-04-03 15:06:00.000000000 +08:00
+type: post
+published: true
+status: publish
+categories:
+- 未分类
+tags: []
+meta: {}
+author:
+  login: kzjeef
+  email: kzjeef@gmail.com
+  display_name: kzjeef
+  first_name: ''
+  last_name: ''
+---
+<p><span style="font-family: arial;">这篇文章主要介绍如何把yuv420的图像（当然也可以是422p的图像，但是如果不是planner格式的YUV数据，就不能直接作转换）用libjpeg转换成jpeg的图像。在网上看到许多介绍如何压缩jpeg图像的文章都是通过现把yuv数据转换成rgb格式，然后再通过libjpeg来压缩。但是jpeg内部是基于yuv的颜色空间的，所以这样会进行2次多余的颜色空间转换，这些都是不必要的。</span></p>
+<p><span style="font-family: arial;">看了jpeg的spec以后和libjpeg,还有mjpg-streamer的代码以后，自己尝试作一个能够转换的小程序。 现在把这个程序贡献出来给大家作为参考，有兴趣的可以下来代码看看， 100多行代码，很简单的。</span></p>
+<p><span style="font-family: arial;">source code: http://sites.google.com/site/kzjeef/files/still.bz2?attredirects=0</span></p>
+<p><span style="font-family: courier new;">$ tar jxvf still.bz2</span><br /><span style="font-family: courier new;">$ cd yuv2jpg</span><br /><span style="font-family: courier new;">$ make</span></p>
+<p><span style="font-family: arial;">建议先阅读 README, 经过转换的图像放在/tmp/still.jpg </span></p>
+<p><span style="font-family: arial;">谢谢。</span></p>
