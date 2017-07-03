@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Linux Kernel and Android 休眠与唤醒(中文版) | Thinking beyond source code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Table of Contents    简介 国际化 版本信息 对于休眠(suspend)的简单介绍 Linux Suspend 的流程  相关的文件: 准备, 冻结进程 让外设进入休眠 Resume   Android 休眠(suspend)  涉及到的文件: 特性介绍  Early Suspend Late Resume Wake Lock   Android Suspend Early S">
+<meta name="keywords" content="android,linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux Kernel and Android 休眠与唤醒(中文版)">
+<meta property="og:url" content="http://www.thinksrc.com/2010/04/18/suspend-cn.html">
+<meta property="og:site_name" content="Thinking beyond source code">
+<meta property="og:description" content="Table of Contents    简介 国际化 版本信息 对于休眠(suspend)的简单介绍 Linux Suspend 的流程  相关的文件: 准备, 冻结进程 让外设进入休眠 Resume   Android 休眠(suspend)  涉及到的文件: 特性介绍  Early Suspend Late Resume Wake Lock   Android Suspend Early S">
+<meta property="og:updated_time" content="2017-07-03T07:01:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux Kernel and Android 休眠与唤醒(中文版)">
+<meta name="twitter:description" content="Table of Contents    简介 国际化 版本信息 对于休眠(suspend)的简单介绍 Linux Suspend 的流程  相关的文件: 准备, 冻结进程 让外设进入休眠 Resume   Android 休眠(suspend)  涉及到的文件: 特性介绍  Early Suspend Late Resume Wake Lock   Android Suspend Early S">
+  
+    <link rel="alternate" href="/atom.xml" title="Thinking beyond source code" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Thinking beyond source code</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Recording my throughs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.thinksrc.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-suspend-cn" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2010/04/18/suspend-cn.html" class="article-date">
+  <time datetime="2010-04-17T19:55:45.000Z" itemprop="datePublished">2010-04-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Linux Kernel and Android 休眠与唤醒(中文版)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Table of Contents</p>
+<div id="table-of-contents">
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">简介</a></li>
+<li><a href="#sec-2">国际化</a></li>
+<li><a href="#sec-3">版本信息</a></li>
+<li><a href="#sec-4">对于休眠(suspend)的简单介绍</a></li>
+<li><a href="#sec-5">Linux Suspend 的流程</a>
+<ul>
+<li><a href="#sec-5.1">相关的文件:</a></li>
+<li><a href="#sec-5.2">准备, 冻结进程</a></li>
+<li><a href="#sec-5.3">让外设进入休眠</a></li>
+<li><a href="#sec-5.4">Resume</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">Android 休眠(suspend)</a>
+<ul>
+<li><a href="#sec-6.1">涉及到的文件:</a></li>
+<li><a href="#sec-6.2">特性介绍</a>
+<ul>
+<li><a href="#sec-6.2.1">Early Suspend</a></li>
+<li><a href="#sec-6.2.2">Late Resume</a></li>
+<li><a href="#sec-6.2.3">Wake Lock</a></li>
+</ul>
+</li>
+<li><a href="#sec-6.3">Android Suspend</a></li>
+<li><a href="#sec-6.4">Early Suspend</a></li>
+<li><a href="#sec-6.5">Late Resume</a></li>
+<li><a href="#sec-6.6">Wake Lock</a></li>
+<li><a href="#sec-6.7">Suspend</a></li>
+<li><a href="#sec-6.8">Android于标准Linux休眠的区别</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">简介</h2>
+<div id="text-1" class="outline-text-2">
+<p>休眠/唤醒在嵌入式Linux中是非常重要的部分,嵌入式设备尽可能的进入休眠状 态来延长电池的续航时间.这篇文章就详细介绍一下Linux中休眠/唤醒是如何工作 的, 还有Android中如何把这部分和Linux的机制联系起来的.</p>
+</div>
+</div>
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">国际化</h2>
+<div id="text-2" class="outline-text-2">
+<ul>
+<li>English Version: <a href="http://www.thinksrc.com/2010/11/20/suspend-en.html" target="_blank">link</a></li>
+<li>中文版: <a href="http://www.thinksrc.com/2010/04/18/suspend-cn.html" target="_blank">link</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-3" class="outline-2">
+<p>作者: zhangjiejing &lt;kzjeef#gmail.com&gt;  Date: 2010-04-07, <a href="../">http://www.thinksrc.com<br>
+</a></p>
+<h2>版本信息</h2>
+<div id="text-3" class="outline-text-2">
+<ul>
+<li>Linux Kernel: v2.6.28</li>
+<li>Android: v2.0</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">对于休眠(suspend)的简单介绍</h2>
+<div id="text-4" class="outline-text-2">
+<p>在Linux中,休眠主要分三个主要的步骤:</p>
+<ol>
+<li>冻结用户态进程和内核态任务</li>
+<li>调用注册的设备的suspend的回调函数
+<ul>
+<li>顺序是按照注册顺序</li>
+</ul>
+</li>
+<li>休眠核心设备和使CPU进入休眠态冻结进程是内核把进程列表中所有的进程的状态都设置为停止,并且保存下所有进程的上下文. 当这些进程被解冻的时候,他们是不知道自己被冻结过的,只是简单的继续执行.如何让Linux进入休眠呢?用户可以通过读写sys文件/sys /power/state 是实现控制系统进入休眠. 比如
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;"># echo standby &gt; /sys/power/state</pre>
+<p>命令系统进入休眠. 也可以使用</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;"># cat /sys/power/state</pre>
+<p>来得到内核支持哪几种休眠方式.</p></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Linux Suspend 的流程</h2>
+<div id="outline-container-5.1" class="outline-3">
+<h3 id="sec-5.1"><strong>相关的文件:</strong></h3>
+<div id="text-5.1" class="outline-text-3">
+<p><strong>你可以通过访问 <a href="http://www.kernel.org/" target="_blank" rel="external">Linux内核网站</a> 来得到源代码,下面是文件的路径:</strong></p>
+<ul>
+<li>linux_soruce/kernel/power/main.c</li>
+<li>linux_source/kernel/arch/xxx/mach-xxx/pm.c</li>
+<li>linux_source/driver/base/power/main.c</li>
+</ul>
+<p>接下来让我们详细的看一下Linux是怎么休眠/唤醒的. Let 's going to see how these happens.</p>
+<p>用户对于/sys/power/state 的读写会调用到 main.c中的state_store(), 用户可以写入 const char * const pm_state[] 中定义的字符串, 比如"mem", "standby".</p>
+<p>然后state_store()会调用enter_state(), 它首先会检查一些状态参数,然后同步文件系统. 下面是代码:</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">/**
+ *      enter_state - Do common work of entering low-power state.
+ *      @state:         pm_state structure for state we're entering.
+ *
+ *      Make sure we're the only ones trying to enter a sleep state. Fail
+ *      if someone has beat us to it, since we don't want anything weird to
+ *      happen when we wake up.
+ *      Then, do the setup for suspend, enter the state, and cleaup (after
+ *      we've woken up).
+ */
+static int enter_state(suspend_state_t state)
+{
+        int error;
+
+        if (!valid_state(state))
+                return -ENODEV;
+
+        if (!mutex_trylock(&amp;pm_mutex))
+                return -EBUSY;
+
+        printk(KERN_INFO "PM: Syncing filesystems ... ");
+        sys_sync();
+        printk("done.n");
+
+        pr_debug("PM: Preparing system for %s sleepn", pm_states[state]);
+        error = suspend_prepare();
+        if (error)
+                goto Unlock;
+
+        if (suspend_test(TEST_FREEZER))
+                goto Finish;
+
+        pr_debug("PM: Entering %s sleepn", pm_states[state]);
+        error = suspend_devices_and_enter(state);
+
+ Finish:
+        pr_debug("PM: Finishing wakeup.n");
+        suspend_finish();
+ Unlock:
+        mutex_unlock(&amp;pm_mutex);
+        return error;
+}</pre>
+</div>
+</div>
+<div id="outline-container-5.2" class="outline-3">
+<h3 id="sec-5.2"><strong>准备, 冻结进程</strong></h3>
+<div id="text-5.2" class="outline-text-3">
+<p>当进入到suspend_prepare()中以后, 它会给suspend分配一个虚拟终端来输出信 息, 然后广播一个系统要进入suspend的Notify, 关闭掉用户态的helper进程, 然 后一次调用suspend_freeze_processes()冻结所有的进程, 这里会保存所有进程 当前的状态, 也许有一些进程会拒绝进入冻结状态, 当有这样的进程存在的时候, 会导致冻结失败,此函数就会放弃冻结进程,并且解冻刚才冻结的所有进程.</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">/**
+ *      suspend_prepare - Do prep work before entering low-power state.
+ *
+ *      This is common code that is called for each state that we're entering.
+ *      Run suspend notifiers, allocate a console and stop all processes.
+ */
+static int suspend_prepare(void)
+{
+        int error;
+        unsigned int free_pages;
+
+        if (!suspend_ops || !suspend_ops-&gt;enter)
+                return -EPERM;
+
+        pm_prepare_console();
+
+        error = pm_notifier_call_chain(PM_SUSPEND_PREPARE);
+        if (error)
+                goto Finish;
+
+        error = usermodehelper_disable();
+        if (error)
+                goto Finish;
+
+        if (suspend_freeze_processes()) {
+                error = -EAGAIN;
+                goto Thaw;
+        }
+
+        free_pages = global_page_state(NR_FREE_PAGES);
+        if (free_pages &lt; FREE_PAGE_NUMBER) {
+                pr_debug("PM: free some memoryn");
+                shrink_all_memory(FREE_PAGE_NUMBER - free_pages);
+                if (nr_free_pages() &lt; FREE_PAGE_NUMBER) {
+                        error = -ENOMEM;
+                        printk(KERN_ERR "PM: No enough memoryn");
+                }
+        }
+        if (!error)
+                return 0;
+
+ Thaw:
+        suspend_thaw_processes();
+        usermodehelper_enable();
+ Finish:
+        pm_notifier_call_chain(PM_POST_SUSPEND);
+        pm_restore_console();
+        return error;
+}</pre>
+</div>
+</div>
+<div id="outline-container-5.3" class="outline-3">
+<h3 id="sec-5.3"><strong>让外设进入休眠</strong></h3>
+<div id="text-5.3" class="outline-text-3">
+<p>现在, 所有的进程(也包括workqueue/kthread) 都已经停止了, 内核态人物有 可能在停止的时候握有一些信号量, 所以如果这时候在外设里面去解锁这个信号 量有可能会发生死锁, 所以在外设的suspend()函数里面作lock/unlock锁要非常 小心,这里建议设计的时候就不要在suspend()里面等待锁. 而且因为suspend的时候,有一些Log是无法输出的,所以一旦出现问题,非常难调试.</p>
+<p>然后kernel在这里会尝试释放一些内存.</p>
+<p>最后会调用suspend_devices_and_enter()来把所有的外设休眠, 在这个函数中, 如果平台注册了suspend_pos(通常是在板级定义中定义和注册), 这里就会调用 suspend_ops-&gt;begin(), 然后driver/base/power/main.c 中的 device_suspend()-&gt;dpm_suspend() 会被调用,他们会依次调用驱动的suspend() 回调来休眠掉所有的设备.</p>
+<p>当所有的设备休眠以后, suspend_ops-&gt;prepare()会被调用, 这个函数通常会作 一些准备工作来让板机进入休眠. 接下来Linux,在多核的CPU中的非启动CPU会被关掉, 通过注释看到是避免这些其他的CPU造成race condion,接下来的以后只有一个CPU在运行了.</p>
+<p>suspend_ops 是板级的电源管理操作, 通常注册在文件 arch/xxx/mach-xxx/pm.c 中.</p>
+<p>接下来, suspend_enter()会被调用, 这个函数会关闭arch irq, 调用 device_power_down(), 它会调用suspend_late()函数, 这个函数是系统真正进入 休眠最后调用的函数, 通常会在这个函数中作最后的检查. 如果检查没问题, 接 下来休眠所有的系统设备和总线, 并且调用 suspend_pos-&gt;enter() 来使CPU进入 省电状态. 这时候,就已经休眠了.代码的执行也就停在这里了.</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">/**
+ *      suspend_devices_and_enter - suspend devices and enter the desired system
+ *                                  sleep state.
+ *      @state:           state to enter
+ */
+int suspend_devices_and_enter(suspend_state_t state)
+{
+        int error, ftrace_save;
+
+        if (!suspend_ops)
+                return -ENOSYS;
+
+        if (suspend_ops-&gt;begin) {
+                error = suspend_ops-&gt;begin(state);
+                if (error)
+                        goto Close;
+        }
+        suspend_console();
+        ftrace_save = __ftrace_enabled_save();
+        suspend_test_start();
+        error = device_suspend(PMSG_SUSPEND);
+        if (error) {
+                printk(KERN_ERR "PM: Some devices failed to suspendn");
+                goto Recover_platform;
+        }
+        suspend_test_finish("suspend devices");
+        if (suspend_test(TEST_DEVICES))
+                goto Recover_platform;
+
+        if (suspend_ops-&gt;prepare) {
+                error = suspend_ops-&gt;prepare();
+                if (error)
+                        goto Resume_devices;
+        }
+
+        if (suspend_test(TEST_PLATFORM))
+                goto Finish;
+
+        error = disable_nonboot_cpus();
+        if (!error &amp;&amp; !suspend_test(TEST_CPUS))
+                suspend_enter(state);
+
+        enable_nonboot_cpus();
+ Finish:
+        if (suspend_ops-&gt;finish)
+                suspend_ops-&gt;finish();
+ Resume_devices:
+        suspend_test_start();
+        device_resume(PMSG_RESUME);
+        suspend_test_finish("resume devices");
+        __ftrace_enabled_restore(ftrace_save);
+        resume_console();
+ Close:
+        if (suspend_ops-&gt;end)
+                suspend_ops-&gt;end();
+        return error;
+
+ Recover_platform:
+        if (suspend_ops-&gt;recover)
+                suspend_ops-&gt;recover();
+        goto Resume_devices;
+}</pre>
+</div>
+</div>
+<div id="outline-container-5.4" class="outline-3">
+<h3 id="sec-5.4"><strong>Resume</strong></h3>
+<div id="text-5.4" class="outline-text-3">
+<p>如果在休眠中系统被中断或者其他事件唤醒, 接下来的代码就会开始执行, 这个 唤醒的顺序是和休眠的循序相反的,所以系统设备和总线会首先唤醒,使能系统中 断, 使能休眠时候停止掉的非启动CPU, 以及调用suspend_ops-&gt;finish(), 而且 在suspend_devices_and_enter()函数中也会继续唤醒每个设备,使能虚拟终端, 最后调用 suspend_ops-&gt;end().</p>
+<p>在返回到enter_state()函数中的, 当 suspend_devices_and_enter() 返回以后, 外设已经唤醒了, 但是进程和任务都还是冻结状态, 这里会调用suspend_finish()来解冻这些进程和任务, 而且发出Notify来表示系统已经从suspend状态退出, 唤醒终端.</p>
+<p>到这里, 所有的休眠和唤醒就已经完毕了, 系统继续运行了.</p>
+</div>
+</div>
+</div>
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6">Android 休眠(suspend)</h2>
+<div id="text-6" class="outline-text-2">
+<p>在一个打过android补丁的内核中, state_store()函数会走另外一条路,会进 入到request_suspend_state()中, 这个文件在earlysuspend.c中. 这些功能都 是android系统加的, 后面会对earlysuspend和late resume 进行介绍.</p>
+</div>
+<div id="outline-container-6.1" class="outline-3">
+<h3 id="sec-6.1">涉及到的文件:</h3>
+<div id="text-6.1" class="outline-text-3">
+<ul>
+<li>linux_source/kernel/power/main.c</li>
+<li>linux_source/kernel/power/earlysuspend.c</li>
+<li>linux_source/kernel/power/wakelock.c</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-6.2" class="outline-3">
+<h3 id="sec-6.2"><strong>特性介绍</strong></h3>
+<div id="outline-container-6.2.1" class="outline-4">
+<h4 id="sec-6.2.1">Early Suspend</h4>
+<div id="text-6.2.1" class="outline-text-4">
+<p>Early suspend 是android 引进的一种机制, 这种机制在上游备受争议,这里 不做评论. 这个机制作用在关闭显示的时候, 在这个时候, 一些和显示有关的 设备, 比如LCD背光, 比如重力感应器, 触摸屏, 这些设备都会关掉, 但是系 统可能还是在运行状态(这时候还有wake lock)进行任务的处理, 例如在扫描 SD卡上的文件等. 在嵌入式设备中, 背光是一个很大的电源消耗,所以 android会加入这样一种机制.</p>
+</div>
+</div>
+<div id="outline-container-6.2.2" class="outline-4">
+<h4 id="sec-6.2.2">Late Resume</h4>
+<div id="text-6.2.2" class="outline-text-4">
+<p>Late Resume 是和suspend 配套的一种机制, 是在内核唤醒完毕开始执行的. 主要就是唤醒在Early Suspend的时候休眠的设备.</p>
+</div>
+</div>
+<div id="outline-container-6.2.3" class="outline-4">
+<h4 id="sec-6.2.3">Wake Lock</h4>
+<div id="text-6.2.3" class="outline-text-4">
+<p>Wake Lock 在Android的电源管理系统中扮演一个核心的角色. Wake Lock是一种锁的机制, 只要有人拿着这个锁, 系统就无法进入休眠, 可以被用户态程序和内核获得. 这个锁可以是有超时的或者是没有超时的, 超时的锁会在时间过去以后自动解锁. 如果没有锁了或者超时了, 内核就会启动休眠的那套机制来进入休眠.</p>
+</div>
+</div>
+</div>
+<div id="outline-container-6.3" class="outline-3">
+<h3 id="sec-6.3"><strong>Android Suspend</strong></h3>
+<div id="text-6.3" class="outline-text-3">
+<p>当用户写入mem 或者 standby到 /sys/power/state中的时候, state_store()会被调用, 然后Android会在这里调用 request_suspend_state() 而标准的Linux会在这里进入enter_state()这个函数. 如果请求的是休眠, 那么early_suspend这个workqueue就会被调用,并且进入early_suspend状态.</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">void request_suspend_state(suspend_state_t new_state)
+{
+        unsigned long irqflags;
+        int old_sleep;
+
+        spin_lock_irqsave(&amp;state_lock, irqflags);
+        old_sleep = state &amp; SUSPEND_REQUESTED;
+        if (debug_mask &amp; DEBUG_USER_STATE) {
+                struct timespec ts;
+                struct rtc_time tm;
+                getnstimeofday(&amp;ts);
+                rtc_time_to_tm(ts.tv_sec, &amp;tm);
+                pr_info("request_suspend_state: %s (%d-&gt;%d) at %lld "
+                        "(%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)n",
+                        new_state != PM_SUSPEND_ON ? "sleep" : "wakeup",
+                        requested_suspend_state, new_state,
+                        ktime_to_ns(ktime_get()),
+                        tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+                        tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
+        }
+        if (!old_sleep &amp;&amp; new_state != PM_SUSPEND_ON) {
+                state |= SUSPEND_REQUESTED;
+                queue_work(suspend_work_queue, &amp;early_suspend_work);
+        } else if (old_sleep &amp;&amp; new_state == PM_SUSPEND_ON) {
+                state &amp;= ~SUSPEND_REQUESTED;
+                wake_lock(&amp;main_wake_lock);
+                queue_work(suspend_work_queue, &amp;late_resume_work);
+        }
+        requested_suspend_state = new_state;
+        spin_unlock_irqrestore(&amp;state_lock, irqflags);
+}</pre>
+</div>
+</div>
+<div id="outline-container-6.4" class="outline-3">
+<h3 id="sec-6.4"><strong>Early Suspend</strong></h3>
+<div id="text-6.4" class="outline-text-3">
+<p>在early_suspend()函数中, 首先会检查现在请求的状态还是否是suspend, 来 防止suspend的请求会在这个时候取消掉(因为这个时候用户进程还在运行),如 果需要退出, 就简单的退出了. 如果没有, 这个函数就会把early suspend中 注册的一系列的回调都调用一次, 然后同步文件系统, 然后放弃掉 main_wake_lock, 这个wake lock是一个没有超时的锁,如果这个锁不释放, 那 么系统就无法进入休眠.</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">   static void early_suspend(struct work_struct *work)
+{
+        struct early_suspend *pos;
+        unsigned long irqflags;
+        int abort = 0;
+
+        mutex_lock(&amp;early_suspend_lock);
+        spin_lock_irqsave(&amp;state_lock, irqflags);
+        if (state == SUSPEND_REQUESTED)
+                state |= SUSPENDED;
+        else
+                abort = 1;
+        spin_unlock_irqrestore(&amp;state_lock, irqflags);
+
+        if (abort) {
+                if (debug_mask &amp; DEBUG_SUSPEND)
+                        pr_info("early_suspend: abort, state %dn", state);
+                mutex_unlock(&amp;early_suspend_lock);
+                goto abort;
+        }
+
+        if (debug_mask &amp; DEBUG_SUSPEND)
+                pr_info("early_suspend: call handlersn");
+        list_for_each_entry(pos, &amp;early_suspend_handlers, link) {
+                if (pos-&gt;suspend != NULL)
+                        pos-&gt;suspend(pos);
+        }
+        mutex_unlock(&amp;early_suspend_lock);
+
+        if (debug_mask &amp; DEBUG_SUSPEND)
+                pr_info("early_suspend: syncn");
+
+        sys_sync();
+abort:
+        spin_lock_irqsave(&amp;state_lock, irqflags);
+        if (state == SUSPEND_REQUESTED_AND_SUSPENDED)
+                wake_unlock(&amp;main_wake_lock);
+        spin_unlock_irqrestore(&amp;state_lock, irqflags);
+}</pre>
+</div>
+</div>
+<div id="outline-container-6.5" class="outline-3">
+<h3 id="sec-6.5"><strong>Late Resume</strong></h3>
+<div id="text-6.5" class="outline-text-3">
+<p>当所有的唤醒已经结束以后, 用户进程都已经开始运行了, 唤醒通常会是以下的几种原因:</p>
+<ul>
+<li>来电</li>
+</ul>
+<p>如果是来电, 那么Modem会通过发送命令给rild来让rild通知WindowManager有 来电响应,这样就会远程调用PowerManagerService来写"on" 到 /sys/power/state 来执行late resume的设备, 比如点亮屏幕等.</p>
+<ul>
+<li>用户按键用户按键事件会送到WindowManager中, WindowManager会处理这些 按键事件,按键分为几种情况, 如果案件不是唤醒键(能够唤醒系统的按键) 那么WindowManager会主动放弃wakeLock来使系统进入再次休眠, 如果按键 是唤醒键,那么WindowManger就会调用PowerManagerService中的接口来执行 Late Resume.</li>
+<li>Late Resume 会依次唤醒前面调用了Early Suspend的设备.</li>
+</ul>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">static void late_resume(struct work_struct *work)
+{
+        struct early_suspend *pos;
+        unsigned long irqflags;
+        int abort = 0;
+
+        mutex_lock(&amp;early_suspend_lock);
+        spin_lock_irqsave(&amp;state_lock, irqflags);
+        if (state == SUSPENDED)
+                state &amp;= ~SUSPENDED;
+        else
+                abort = 1;
+        spin_unlock_irqrestore(&amp;state_lock, irqflags);
+
+        if (abort) {
+                if (debug_mask &amp; DEBUG_SUSPEND)
+                        pr_info("late_resume: abort, state %dn", state);
+                goto abort;
+        }
+        if (debug_mask &amp; DEBUG_SUSPEND)
+                pr_info("late_resume: call handlersn");
+        list_for_each_entry_reverse(pos, &amp;early_suspend_handlers, link)
+                if (pos-&gt;resume != NULL)
+                        pos-&gt;resume(pos);
+        if (debug_mask &amp; DEBUG_SUSPEND)
+                pr_info("late_resume: donen");
+abort:
+        mutex_unlock(&amp;early_suspend_lock);
+}</pre>
+</div>
+</div>
+<div id="outline-container-6.6" class="outline-3">
+<h3 id="sec-6.6"><strong>Wake Lock</strong></h3>
+<div id="text-6.6" class="outline-text-3">
+<p>我们接下来看一看wake lock的机制是怎么运行和起作用的, 主要关注 wakelock.c文件就可以了.</p>
+<p>wake lock 有加锁和解锁两种状态, 加锁的方式有两种, 一种是永久的锁住, 这样的锁除非显示的放开, 是不会解锁的, 所以这种锁的使用是非常小心的. 第二种是超时锁, 这种锁会锁定系统唤醒一段时间, 如果这个时间过去了, 这个锁会自动解除.</p>
+<p>锁有两种类型:</p>
+<ol>
+<li>WAKE_LOCK_SUSPEND 这种锁会防止系统进入睡眠</li>
+<li>WAKE_LOCK_IDLE 这种锁不会影响系统的休眠, 作用我不是很清楚.</li>
+</ol>
+<p>在wake lock中, 会有3个地方让系统直接开始suspend(), 分别是:</p>
+<ol>
+<li>在wake_unlock()中, 如果发现解锁以后没有任何其他的wake lock了, 就开始休眠</li>
+<li>在定时器都到时间以后, 定时器的回调函数会查看是否有其他的wake lock, 如果没有, 就在这里让系统进入睡眠.</li>
+<li>在wake_lock() 中, 对一个wake lock加锁以后, 会再次检查一下有没有锁, 我想这里的检查是没有必要的, 更好的方法是使加锁的这个操作原子化, 而 不是繁冗的检查. 而且这样的检查也有可能漏掉.</li>
+</ol>
+</div>
+<div id="text-6.6" class="outline-text-3">调试wake lock的时候， 有一个很有用的方法就是</div>
+<div class="outline-text-3">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">echo 15 &gt; /sys/module/wakelock/parameter/debug_mask</pre>
+</div>
+<div class="outline-text-3">这样wakelock的驱动会把每次的wakelock操作都打印在console上，对于调试为什么suspend不下去这类的问题很有用。</div>
+</div>
+<div id="outline-container-6.7" class="outline-3">
+<h3 id="sec-6.7"><strong>Suspend</strong></h3>
+<div id="text-6.7" class="outline-text-3">
+<p>当wake_lock 运行 suspend()以后, 在wakelock.c的suspend()函数会被调用,这 个函数首先sync文件系统,然后调用pm_suspend(request_suspend_state),接 下来pm_suspend()就会调用enter_state()来进入Linux的休眠流程..</p>
+<pre class="example" style="background-color: #f3f5f7; font-family: courier, monospace; font-size: 14px; overflow-x: auto; overflow-y: auto; padding: 5pt; border: 1pt solid #aebdcc;">      static void suspend(struct work_struct *work)
+{
+        int ret;
+        int entry_event_num;
+
+        if (has_wake_lock(WAKE_LOCK_SUSPEND)) {
+                if (debug_mask &amp; DEBUG_SUSPEND)
+                        pr_info("suspend: abort suspendn");
+                return;
+        }
+
+        entry_event_num = current_event_num;
+        sys_sync();
+        if (debug_mask &amp; DEBUG_SUSPEND)
+                pr_info("suspend: enter suspendn");
+        ret = pm_suspend(requested_suspend_state);
+        if (current_event_num == entry_event_num) {
+                wake_lock_timeout(&amp;unknown_wakeup, HZ / 2);
+        }
+}</pre>
+</div>
+</div>
+<div id="outline-container-6.8" class="outline-3">
+<h3 id="sec-6.8"><strong>Android于标准Linux休眠的区别</strong></h3>
+<div id="text-6.8" class="outline-text-3">
+<p>pm_suspend() 虽然会调用enter_state()来进入标准的Linux休眠流程,但是还 是有一些区别:</p>
+<ul>
+<li>当进入冻结进程的时候, android首先会检查有没有wake lock,如果没有, 才会停止这些进程, 因为在开始suspend和冻结进程期间有可能有人申请了 wake lock,如果是这样, 冻结进程会被中断.</li>
+<li>在suspend_late()中, 会最后检查一次有没有wake lock, 这有可能是某种快速申请wake lock,并且快速释放这个锁的进程导致的,如果有这种情况, 这里会返回错误, 整个suspend就会全部放弃.如果pm_suspend()成功了,LOG的输出可以通过在kernel cmd里面增加 "<span style="line-height: 17px; font-size: 12px;"><span style="color: #000000;">no_console_suspend" 来看到suspend和resume过程中的log输出。<br>
+</span></span></li>
+</ul>
+</div>
+</div>
+</div>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2010/04/18/suspend-cn.html" data-id="cj4nt09j8003musa60lmx3ba9" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2010/04/21/git-am.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          git: 如何用git-am来合并git format-patch生成的一系列的patch.
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2010/04/11/dma-zone.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Config Linux DMA zone memory</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/">CPU</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/Throughs/">Throughs</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Performance/">Performance</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/">Rails</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GAE/">GAE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GFW/">GFW</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Rails/">Rails</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apple/">apple</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm/">arm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emacs/">emacs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/google/">google</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/internet/">internet</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kindle/">kindle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-优化/">linux 优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm/">pm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uart/">uart</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性格/">性格</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电子商务/">电子商务</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/GAE/" style="font-size: 10px;">GAE</a> <a href="/tags/GFW/" style="font-size: 15px;">GFW</a> <a href="/tags/Postgres/" style="font-size: 10px;">Postgres</a> <a href="/tags/Rails/" style="font-size: 10px;">Rails</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 17.5px;">android</a> <a href="/tags/apple/" style="font-size: 10px;">apple</a> <a href="/tags/arm/" style="font-size: 10px;">arm</a> <a href="/tags/bluetooth/" style="font-size: 12.5px;">bluetooth</a> <a href="/tags/emacs/" style="font-size: 12.5px;">emacs</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/google/" style="font-size: 10px;">google</a> <a href="/tags/homebrew/" style="font-size: 10px;">homebrew</a> <a href="/tags/internet/" style="font-size: 10px;">internet</a> <a href="/tags/kindle/" style="font-size: 10px;">kindle</a> <a href="/tags/linux/" style="font-size: 20px;">linux</a> <a href="/tags/linux-优化/" style="font-size: 10px;">linux 优化</a> <a href="/tags/mac/" style="font-size: 10px;">mac</a> <a href="/tags/pm/" style="font-size: 10px;">pm</a> <a href="/tags/uart/" style="font-size: 10px;">uart</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/性格/" style="font-size: 10px;">性格</a> <a href="/tags/电子商务/" style="font-size: 10px;">电子商务</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06/">June 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/01/">January 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/12/">December 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/11/">November 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/07/">July 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/03/">March 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/02/">February 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/12/">December 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/10/">October 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/09/">September 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/08/">August 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/07/">July 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/06/">June 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/05/">May 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/04/">April 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/03/">March 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/12/">December 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/11/">November 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/08/">August 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/07/">July 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/06/">June 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/05/">May 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/04/">April 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/03/">March 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/11/">November 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/09/">September 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/05/">May 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/04/">April 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/11/">November 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/10/">October 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/07/">July 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/03/">March 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/02/">February 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/01/">January 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/12/">December 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/11/">November 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/10/">October 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/09/">September 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/08/">August 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/07/">July 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/06/">June 2007</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/04/art-of-padding.html">Art of padding</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Jiejing Zhang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

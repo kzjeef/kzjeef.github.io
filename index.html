@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Thinking beyond source code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Thinking beyond source code">
+<meta property="og:url" content="http://www.thinksrc.com/index.html">
+<meta property="og:site_name" content="Thinking beyond source code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thinking beyond source code">
+  
+    <link rel="alternate" href="/atom.xml" title="Thinking beyond source code" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Thinking beyond source code</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Recording my throughs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.thinksrc.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-about-java-native-programmingjni-local-reference" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html" class="article-date">
+  <time datetime="2016-05-26T00:34:23.000Z" itemprop="datePublished">2016-05-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/java/">java</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Today I needs record some experience about Java JNI programming,</p>
+<p>More accuratly, it's about the local reference in JNI.</p>
+<p>first of all, about JNI's reference , see this link for a basic knowlege: (http://www.ibm.com/support/knowledgecenter/SSYKE2_8.0.0/com.ibm.java.win.80.doc/diag/understanding/jni_refs.html).</p>
+<p>In this post, I'm going to talk about:<br>
+1) when JNI function will generate a local reference.<br>
+2) when the local reference will be release automatily by java vm.<br>
+3) what issue might happens about it.</p>
+<p>1. When JNI function will generate a local reference.</p>
+<p>Basic rule is simple:<br>
+1) the function not return a GlobalReference / WeakGlobalReferece<br>
+2) the function will return a point named in follwing list:</p>
+<p>jobject, jclass, jstring, jarray, jobjectArray, jbooleanArray, jbyteArray, jcharArray, jshortArray,<br>
+jintArray, jlongArray;, floatArray, jdoubleArray, jthrowable, jweak.</p>
+<p>actually , this list is copy from jni.h , there is a section named /* Reference types */</p>
+<p>When these two rules apply, it will generate a LocalReference.</p>
+<p>2. when the local reference will be release automatily by java vm.</p>
+<p>In java document, said that the local Reference will be freeed after *native* call.</p>
+<p>but what's is the native call, let's give a example.</p>
+<p>A.java : have one native function:</p>
+<p>native void method_native();</p>
+<p>Jni.cpp: have 3 function:</p>
+<p>JNIEXPORT void JNICALL Java_com_example_ClassA_A_method_native(JNIEnv *env, jobject thiz);<br>
+void cpp_function_1(JNIEnv *env, jobject thiz);<br>
+void cpp_function_2(JNIEnv *env, jobject thiz);</p>
+<p>in cpp_function_2() you called env-&gt;GetObjectClass(this); to do something.</p>
+<p>call relationship is:<br>
+method_native() -&gt; cpp_function_1() -&gt; cpp_function_2();</p>
+<p>in cpp_function_2() it will generate a localReference, it will not release after cpp_function_2() return,<br>
+it will actually release after method_native() return.</p>
+<p>or, if you have called vm_-&gt;DetachCurrentThread(); (vm_ is JavaVM type), the local reference will release too.</p>
+<p>3. what issue might happens about it.</p>
+<p>So, since java vm will release the reference , why bother to learn this ?</p>
+<p>because in some case, you will leak the local reference, or exceed the maximum count of local reference, and cause you program crash.</p>
+<p>like, you called GetObjectClass() function in a worker thread in native level, and this thread never return control to java level.<br>
+so it leaked.</p>
+<p>if you have some loop calling a function will generate a local reference, it will generate local reference inside the loop, even if it will eventually release by jvm after native function return , it will have some chance exceed the maximum count of local reference.</p>
+<p>So, as a summary , the good practice is release the local reference by DeleteLocalReference() as soon as possible.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2016/05/26/about-java-native-programmingjni-local-reference.html" data-id="cj4nt09lm007ousa6d10q0u6w" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-write-async-test-case-by-gtest-gmock-for-c" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html" class="article-date">
+  <time datetime="2016-03-18T02:18:25.000Z" itemprop="datePublished">2016-03-18</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/C/">C++</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Recently, I have a project that needs some async IO function,  which use libuv as backend, and move the original logic in an async way.</p>
+<p>The project was ok, but after I have good experience write node.js &amp; Ruby on Rails code, I cannot live without test case for such a complex code.</p>
+<p>Thankfully, deal stackoverflow.com give me the answer, which is <a href="https://github.com/google/googletest" target="_blank" rel="external">gtest + gmock.</a></p>
+<p>Let first have some taste about the code.</p>
+<p>see the code in this link : <a href="https://gist.github.com/kzjeef/92da7e03f7713fa7a80e" target="_blank" rel="external">gist</a>.</p>
+<p>(for security reason, I have ignore some logic part of this code, so it's cannot compile).</p>
+<p>class: AsyncIOHttpCallback {} &lt;- This is the callback class, you should define your callback interface in a virtual class, can be impl the policy by caller.</p>
+<p>class: MockCallback which publicly inherit AsyncIOHttpCallback class, and  implement this class  member function by:</p>
+<blockquote><p>MOCK_METHOD1(onError, void(CURLcode errCode));<br>
+MOCK_METHOD0(onTimeout, void());<br>
+MOCK_METHOD2(onData, void(char *data, size_t datalen));<br>
+MOCK_METHOD4(onFinish, void(double content_length, long header_size, long httpcode, char *redirect_url));</p></blockquote>
+<p>The function like MOCK_* it function inside of google mock, just match the parameter type and numbers.</p>
+<p>OK, mock define part is finished.</p>
+<p>let's see this code:</p>
+<p>Create the mock object:</p>
+<blockquote><p>shared_ptr&lt;MockCallback&gt;    mcallback(new StrictMock&lt;MockCallback&gt;);</p></blockquote>
+<p>&nbsp;</p>
+<blockquote><p>policy-&gt;finishHandler = [&amp;mcallback](double content_length, long header_size, long httpcode, char *redirect_url) {<br>
+EXPECT_EQ(httpcode, 200);<br>
+mcallback-&gt;onFinish(content_length, header_size, httpcode, redirect_url);<br>
+};</p></blockquote>
+<p>The finishHanlder is a std::function&lt;&gt; which can be a functor or lambda, in side this lambda, it will call the mock object. (you can define a simpler interface)</p>
+<p>In the end,  we can assert the mock object:</p>
+<blockquote><p>    EXPECT_CALL((*mcallback.get()), onFinish(_,_, _, NULL)).Times(1);</p></blockquote>
+<p>This means, we expect this callback once, and with some parameter we, "_" is a special function, which means this is something we don't care, and all other values will be checked by gmock. If not match, some warning message will printed, and reported.</p>
+<p>If the callback was not called, it will catch this error, if some uninteresting function is called, there will be a warning message.</p>
+<p>Really useful tool!</p>
+<p>There also some other benifits:</p>
+<ol>
+<li>gmock can check memory leak for your mock callback object, if it was leaked after test terminal, it will print error message like:</li>
+</ol>
+<blockquote><p>test_aio.cpp:198: ERROR: this mock object should be deleted but never is. Its address is @0x7fe1d0c0ce50.</p></blockquote>
+<p>&nbsp;</p>
+<p>If you want to know more about gmock, check google's gtest github: <a href="https://github.com/google/googletest" target="_blank" rel="external">link</a></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html" data-id="cj4nt09lj007lusa67k29utfa" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-understanding-the-stack-frame" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/12/06/understanding-the-stack-frame.html" class="article-date">
+  <time datetime="2015-12-06T10:06:01.000Z" itemprop="datePublished">2015-12-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Have read a serial of post about the stack frame, that's some thing basic on native development.</p>
+<ol>
+<li><a href="http://duartes.org/gustavo/blog/post/journey-to-the-stack/" target="_blank" rel="external">Journey to the Stack, Part I</a></li>
+<li><a href="http://duartes.org/gustavo/blog/post/epilogues-canaries-buffer-overflows/" target="_blank" rel="external">Epilogues, Canaries, and Buffer Overflows</a></li>
+<li><a href="http://duartes.org/gustavo/blog/post/recursion/" target="_blank" rel="external">Recursion: Dream Within a Dream</a></li>
+<li><a href="http://duartes.org/gustavo/blog/post/tail-calls-optimization-es6/" target="_blank" rel="external">Tail Calls, Optimization, and ES6</a></li>
+<li><a href="http://duartes.org/gustavo/blog/post/closures-objects-heap/" target="_blank" rel="external">Closures, Objects, and the Fauna of the Heap</a></li>
+</ol>
+<p>These posts are write by <a href="http://duartes.org/gustavo/blog/about/" target="_blank" rel="external">Gustavo Duarte</a>, and all are describe with figures and funny examples, worth to spend some time to read.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2015/12/06/understanding-the-stack-frame.html" data-id="cj4nt09le007eusa6hdtki8yc" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-art-of-padding" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/10/04/art-of-padding.html" class="article-date">
+  <time datetime="2015-10-03T23:54:46.000Z" itemprop="datePublished">2015-10-04</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Performance/">Performance</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/10/04/art-of-padding.html">Art of padding</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Sharing some  links which I feel very useful when understanding the padding in kernel's code, you usually see those padding skill in some high performance application like 3D gaming.</p>
+<p>Eric.S.Raymond have great Article about C struct padding, how it affect the actually memory size of your structure:<br>
+<a href="http://www.catb.org/esr/structure-packing/" target="_blank" rel="external">link</a></p>
+<p>And there is a article from intel performance guide about how padding fix the "false sharing" issue in a SMP programming model.</p>
+<p><a href="https://software.intel.com/en-us/articles/avoiding-and-identifying-false-sharing-among-threads" target="_blank" rel="external">link</a></p>
+<p>The link below is belongs to <a href="https://software.intel.com/en-us/articles/intel-guide-for-developing-multithreaded-applications" target="_blank" rel="external">Intel Guide for Developing Multithreaded Applications</a>  which also valuable to read.</p>
+<p>This link is from roguewave 's manual, which also have great detail about how actually memory layout by padding: <a href="http://docs.roguewave.com/threadspotter/2011.2/manual_html_linux/manual_html/ch05s01.html" target="_blank" rel="external">link</a></p>
+<p>EOF</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2015/10/04/art-of-padding.html" data-id="cj4nt09lh007iusa68ivg7zr2" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html" class="article-date">
+  <time datetime="2015-09-30T11:14:25.000Z" itemprop="datePublished">2015-09-30</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>去年换了工作， 换了城市， 一切都发生很多的变化。 现在看来虽然不是所有都尽如人意， 但是已经走上了正轨。</p>
+<p>新工作需要话UML图， 主要是做分享和文档的时候。</p>
+<p>就像很多人一样， 我开始去下载一些画图工具， 一个框框一个框框的画。 不知道你们有没有感觉， 反正我是画完一个图以后就不想再来第二个了。</p>
+<p>其实仔细想想这样的画图方式是和程序员的思维方式相左的， 程序员更加习惯的是由代码产生这样的图。</p>
+<p>所以就有了下面几种工具的推荐：</p>
+<p>1. PlantUML：<br>
+此工具是一个Java编写的工具， 它可以把像这样的文字</p>
+<blockquote><p>Bob-&gt;Alice : hello</p></blockquote>
+<p>转换成这样的UML图</p>
+<p><img class="alignnone" src="/assets/SyfFqhLppCbCJbMmKiX8pSd91m00" alt="" width="121" height="127"></p>
+<p>这里只是用一个最简单的例子， 当然它还支持<a href="https://github.com/zwz/plantuml-mode" target="_blank" rel="external">Emacs</a>，以及很多插件等。</p>
+<p>网址： http://plantuml.sourceforge.net/index.html</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html" data-id="cj4nt09l6007busa62duc35s5" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-%e6%88%91%e7%9a%84emacs-theme%e8%ae%be%e7%bd%ae" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/06/24/%e6%88%91%e7%9a%84emacs-theme%e8%ae%be%e7%bd%ae.html" class="article-date">
+  <time datetime="2014-06-23T19:56:03.000Z" itemprop="datePublished">2014-06-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/06/24/%e6%88%91%e7%9a%84emacs-theme%e8%ae%be%e7%bd%ae.html">我的Emacs Theme设置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>TD; DR   我的Emacs Theme部分的设置主要有两个特色, 一个是可以根据热键循环选择主题, 另外一个是根据打开编辑器的时间(白天还是夜里)来选择一个默认的主题.</p>
+<p>今天来看看我的Emacs中的theme 设置, 话了很多时间来来回回换主题, 总是觉得不同情况下使用不同的Theme比较顺眼, 所以我的dot emacs中的Theme设置是比较复杂的. 下面就来说说, Emacs版本都是24.</p>
+<p>安装部分<br>
+除了系统自带的那些主题外, 还使用了一些从VIM和Textmat中拿过来的theme, 使用package-install很容易就安装上了.</p>
+<pre class="lang:lisp decode:true ">  (package-install 'zenburn-theme)
+  (package-install 'twilight-theme)
+  (package-install 'twilight-bright-theme)
+  (package-install 'solarized-theme)
+  (package-install 'monokai-theme)
+</pre>
+<p>然后是初始化部分</p>
+<p>这个函数主要是重载load-theme命令,让其先去掉前面的主题, 然后再应用新的主题, 要不然会把两个主题混在一起.</p>
+<pre class="lang:lisp decode:true ">;; Auto disable theme setup before...
+(defadvice load-theme
+  (before theme-dont-propagate activate)
+  (mapcar #'disable-theme custom-enabled-themes))
+</pre>
+<p>这个函数主要是初始化一个主题列表</p>
+<pre class="lang:lisp decode:true ">(defun reset-theme-list() 
+  (setq all-themes '(twilight twilight-bright adwaita zenburn solarized-dark solarized-light monokai))
+  (setq valid-themes all-themes))</pre>
+<p>这个函数主要是一个一个的来循环主题列表, 使用current-theme这个变量来看自己已经到了哪个主题.</p>
+<pre class="lang:lisp decode:true ">(defun looping-select-theme()
+  (interactive)
+  (if valid-themes
+      ((lambda()
+	 (setq current-theme (car valid-themes))
+	 (setq valid-themes (cdr valid-themes))
+	 (load-theme current-theme t)
+	 (message "Current Theme is: %s" current-theme)
+	 ))
+    (reset-theme-list)
+    (disable-theme current-theme)))</pre>
+<p>下面这个函数是主题的初始化函数, 主要是根据当前的时间来添加一个默认的主题. 现在是主要由(and (&lt; hour 16) (&gt; hour 8) 这条来控制, 主要是说在上午8点到下午4点之间使用白天主题, 也就是adwaita, 晚上就使用twillight. 如果你不喜欢不同时间选择不同背景, 可以去掉下面的let那个表达式就可以了.</p>
+<pre class="lang:lisp decode:true">(defun color-init()
+  (reset-theme-list)
+  (when (not (boundp 'current-theme))
+
+    ;; below let s-list will setup the default theme base on current time, if it was in day light, use a white background, else, use a dark background.
+    (let ((hour  (caddr (decode-time (current-time))))
+	  (day-theme 'adwaita)
+	  (night-theme 'twilight))
+      ;; between AM8 and PM4, use blank background have some reflection.
+      (if (and (&lt; hour 16) (&gt; hour 8))
+	  ;; add a day theme in the front of theme list, make it be the default theme.
+	  (when (not (eq (car all-themes) day-theme))
+	    (setq valid-themes (cons day-theme valid-themes)))
+	;; like above s-list.
+	(when (not (eq (car all-themes) night-theme))
+	  (setq valid-themse (cons night-theme valid-themes)))))
+
+    ;; first time call this will use first theme.
+    (looping-select-theme)))</pre>
+<p>在dot emacs里面要添加下面这两个.</p>
+<pre class="lang:default decode:true">(global-set-key[M-f9] 'looping-select-theme)
+(color-init)
+</pre>
+<p>OK了, 这样就可以按Alt-F9来切换主题, 并且打开Emacs的时候会根据当前的时间来选择不同的主题.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/06/24/%e6%88%91%e7%9a%84emacs-theme%e8%ae%be%e7%bd%ae.html" data-id="cj4nt09l50078usa66uivtnp1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-profiling-ruby-on-rails-app" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/06/12/profiling-ruby-on-rails-app.html" class="article-date">
+  <time datetime="2014-06-11T21:00:06.000Z" itemprop="datePublished">2014-06-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Rails/">Rails</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/06/12/profiling-ruby-on-rails-app.html">Profiling Ruby on Rails App</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>I think everyone is enjoy ruby's programming, the meta programming is really efficiently way. But sometime we meet our function or app have a poor performance.</p>
+<p>Guess what, my first through was, ruby is f**k too slow.. , but my second through was, how can I figure out where is slow, rather than switch some other language?</p>
+<p>So let's start some profiling to figure it out.</p>
+<p>add this in your Gemfile or gem install it.</p>
+<pre class="lang:default decode:true">gem 'ruby-prof', :git =&gt; 'git://github.com/ruby-prof/ruby-prof.git', :group =&gt; [:development, :test]</pre>
+<p>Add this function in your ApplicationController.rb</p>
+<pre class="lang:ruby decode:true "> def profile(prefix = "profile")
+    result = RubyProf.profile { yield }
+
+    dir = File.join(Rails.root, "tmp", "performance", params[:controller].parameterize)
+    FileUtils.mkdir_p(dir)
+    file = File.join(dir, "callgrind.%s.%s.%s" % [prefix.parameterize, params[:action].parameterize, Time.now.to_s.parameterize] )
+    open(file, "w") {|f| RubyProf::CallTreePrinter.new(result).print(f, :min_percent =&gt; 1) }
+  end
+
+  helper_method :profile
+</pre>
+<p>You can put what you want profile in this block, and it will generate callgrind file under your tmp/performance/[controller-name] folder.</p>
+<p>If you're under mac, you can install this tool to check the function profiling:</p>
+<pre class="lang:default decode:true ">brew install qcachegrind</pre>
+<p>other platform have some equal tools like, kcachegrind under linux.</p>
+<p>you will got the profile result like this picture.</p>
+<p><a href="http://thinksrc.com/wp-content/uploads/2014/06/屏幕快照-2014-06-12-下午12.53.38.png" target="_blank" rel="external"><img class="alignnone size-large wp-image-229122" src="/assets/&#23631;&#24149;&#24555;&#29031;-2014-06-12-&#19979;&#21320;12.53.38-1024x576.png" alt="屏幕快照 2014-06-12 下午12.53.38" width="700" height="393"></a></p>
+<p>Hope this will help you figure out which part is cause the performance issue.</p>
+<p>And my other little trick is, like the :profile helper, I add a simple timer helper:</p>
+<pre class="lang:ruby decode:true"> def timer(tag = "default")
+
+   t1 = Time.now
+   yield
+   t2 = Time.now
+   
+   msecs = (t2 - t1) * 1000.0
+   logger.info "Time in profile #{tag} #{msecs.to_i} ms"
+
+ end
+
+ helper_method :timer
+</pre>
+<p>Together with code block, you can get each part 's timer profile like below:</p>
+<pre class="lang:ruby decode:true ">timer("total") do 
+
+  timer("func1") do 
+  function1
+  end
+
+  function2 
+
+  timer("loop") do
+      some_array.each { function }
+  end
+
+end</pre>
+<p>Seems too naive, but this simple method can be more helpful than other complex tools.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/06/12/profiling-ruby-on-rails-app.html" data-id="cj4nt09l20074usa6nsen6c77" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-rubber-deployment-notes-on-ec2-for-rails-app" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/06/10/rubber-deployment-notes-on-ec2-for-rails-app.html" class="article-date">
+  <time datetime="2014-06-09T22:11:58.000Z" itemprop="datePublished">2014-06-10</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Rails/">Rails</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/06/10/rubber-deployment-notes-on-ec2-for-rails-app.html">Rubber Deployment Notes on EC2 for Rails App.</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>I need deployment my rails app on EC2 recently,  actually I use Heroku for a while, Heroku is excellent for development, but the price is not very well compare to EC2, also it's was little slow when access from China.</p>
+<p>So I decide to deployment it to EC2, unlike Heroku, Setup  EC2 require a lots of setting, which is headache for every one. But I found <a href="https://github.com/rubber/rubber" target="_blank" rel="external">Rubber</a>, and excellent tool for setup environment on EC2, it based on <a href="https://github.com/capistrano/capistrano" target="_blank" rel="external">Capistrano</a>.</p>
+<p>From these <a href="http://ramenlab.wordpress.com/2011/06/24/deploying-your-rails-app-to-aws-ec2-using-rubber/" target="_blank" rel="external">link1</a>, <a href="http://ilakeruby.blogspot.tw/2011/04/rails-rubber-github-amazon-free-tier.html" target="_blank" rel="external">link2</a>,  I can start to do with rubber.</p>
+<p>In my first try, I setup all db, app, web, all all server to a single EC2 instance, but there is a lot minor issue, record them here:</p>
+<p>1. in rubber.yml, make sure set correct private net mask, default was 10.0.0.0/8, but in some AWS Region, it was become like 172.0.0.0/8, make sure it added to the list, otherwise, your app instance maybe can not access your db instance.</p>
+<p>2. When build redis, I found it become build failed, like depends on jemalloc.a not been found, the fix is redis build Makefile sucks, and it need add following like into deloy-redis.rb (between two &gt; )</p>
+<pre class="theme:github lang:sh decode:true">&gt;           tar -zxf redis-#{rubber_env.redis_server_version}.tar.gz
+          # Build the binaries.
+          cd redis-#{rubber_env.redis_server_version}
+          cd deps; make hiredis jemalloc linenoise lua; cd ..  # to fix the build error.
+&gt;           make
+</pre>
+<p>3. postgresql, because my postgresql require uuid-ossp, I have add following task warper in config/deploy.rb</p>
+<pre class="theme:github lang:ruby decode:true">namespace :rubber do
+
+  namespace :project do
+
+    before "deploy:migrate", "rubber:project:add_pg_superuser_and_enable_hstore"
+    after "deploy:migrate", "rubber:project:remove_pg_superuser"
+
+    task :add_pg_superuser_and_enable_hstore,
+         :roles =&gt; [:postgresql_master, :postgresql_slave] do
+      alter_user_cmd = "ALTER USER #{rubber_env.db_user} SUPERUSER;"
+      create_ext_cmd = 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+      rubber.sudo_script "add_superuser_create_hstore", &lt;&lt;-ENDSCRIPT
+      ENDSCRIPT
+      rsudo "sudo -i -u postgres psql -c "#{create_ext_cmd}""
+
+
+    end
+
+    task :remove_pg_superuser, :roles =&gt; [:postgresql_master,
+                                          :postgresql_slave] do
+      alter_user_cmd = "ALTER USER #{rubber_env.db_user} NOSUPERUSER"
+      rubber.sudo_script "add_superuser_create_hstore", &lt;&lt;-ENDSCRIPT
+        sudo -i -u postgres psql -c "#{alter_user_cmd}"
+      ENDSCRIPT
+    end
+
+  end</pre>
+<p>Also need this package change in rubber-postgresql.yml : 36</p>
+<pre class="lang:default decode:true">packages: [postgresql-client, libpq-dev, postgresql-contrib]
+</pre>
+<p>4. About figaro</p>
+<p>If you're save your secret in ENV var like me, you maybe want to use figaro,<br>
+but when you use github to deploy code, the application.yml is not check in to repo, so you need add a task in your config/deploy.rb</p>
+<pre class="theme:github lang:ruby decode:true"># This task make sure application.yml will copy after git.
+namespace :figaro do
+  desc "SCP transfer figaro configuration to the shared folder"
+  task :setup do
+    transfer :up, "config/application.yml", "#{shared_path}/application.yml", via: :scp
+  end
+ 
+  desc "Symlink application.yml to the release path"
+  task :symlink do
+    run "ln -sf #{shared_path}/application.yml #{latest_release}/config/application.yml"
+  end
+ 
+  desc "Check if figaro configuration file exists on the server"
+  task :check do
+    begin
+      run "test -f #{shared_path}/application.yml"
+    rescue Capistrano::CommandError
+      unless fetch(:force, false)
+        logger.important 'application.yml file does not exist on the server "shared/application.yml"'
+        exit
+      end
+    end
+  end
+end
+after "deploy:setup", "figaro:setup"
+after "deploy:finalize_update", "figaro:symlink"
+</pre>
+<p>5. Github ssh.</p>
+<p>Because you maybe using a private github account to do deployment, you need to use ssh auth, but you don't want to the private put in every EC2 instance.</p>
+<p>So you can consider use ssh agent forwarding to do this job, you need 3 steps to make it happen:<br>
+a)   add following to your ~/.ssh/config</p>
+<pre class="lang:default decode:true">Host *.compute.amazonaws.com
+  ForwardAgent yes</pre>
+<p>b) use this command to generate a new key for the deployment.</p>
+<pre class="lang:default decode:true">ssh-keygen -f ~/.ec2/github_key
+</pre>
+<p>c) add setting in your config/deploy.rb</p>
+<pre class="lang:default decode:true">ssh_options[:forward_agent] = true
+ssh_options[:port] = 22
+ssh_options[:keys] = [File.join(ENV["HOME"], ".ec2", "github_key")]
+</pre>
+<p>Don't forgot change the scm part:</p>
+<pre class="lang:default decode:true"># Use a simple directory tree copy here to make demo easier.
+# You probably want to use your own repository for a real app
+set :scm, :git
+set :repository, "git@github.com:xxxx/yyyy.git"
+set :deploy_via, :remote_cache</pre>
+<p>After all, you can use github to deploy your new code.</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/06/10/rubber-deployment-notes-on-ec2-for-rails-app.html" data-id="cj4nt09l10070usa67kvd9ahl" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-best-emacs-under-mac" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/26/best-emacs-under-mac.html" class="article-date">
+  <time datetime="2014-05-26T09:06:09.000Z" itemprop="datePublished">2014-05-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Emacs/">Emacs</a>►<a class="article-category-link" href="/categories/Emacs/Throughs/">Throughs</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/26/best-emacs-under-mac.html">Mac下面最好用的Emacs</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>想想第一次接触Emacs是在2005年的时候， 还是yangxi同学推荐的。 自从那个时候， Emacs就一直是我主要的工具。 编程环境从Linux， Win， 到Mac， 变了很多。 从写C，到后来写C＋＋， Java， Objective C, Python, Ruby。</p>
+<p>后来浅浅的尝试过许多编辑器， IDE， 却都没有Emacs用的顺手。 知道后来得了Emacs Pinky， 也没有变过。</p>
+<p>用Emacs就不得不说一下按Control健得方法， 一开始是用小拇指按， 慢慢得变成用手掌按Control键， 后来买了HHKB以后， 就把键盘得Caps键该成了Control。 知道后来小拇指得疼痛已经让我无法正常工作以后， 才意识到不能用换Caps键。 还是回到了用手掌按Caps键得老方法。 小拇指现在不是很疼了。<br>
+当然， 买个脚踏板应该是最终解决办法。 :)</p>
+<p>瞎扯了这么多， 还是回到正题上面来。<br>
+Emacs在Linux下面是非常的快， 用最新的Emacs24很爽。<br>
+但是当我现在主要的编程环境编程了Mac OS以后， Emacs安装那个包就是一个复杂的问题了。</p>
+<p>一开始我用这个：<br>
+<a href="http://www.emacsformacosx.com/" target="_blank" rel="external">emacsformacosx.com/</a><br>
+一开始用的都挺好的， 直到Mac到了10.9以后， 这个Emacs会有严重的<a href="https://groups.google.com/forum/#!topic/gnu.emacs.bug/s47kTTrcL4Q" target="_blank" rel="external">内存泄漏问题</a>造成CPU 100%， 以及在本本休眠唤醒以后， 造成风火轮不停转， 必须切断电源的问题。 经历过几次强行断电之后， 不得已只有换了。</p>
+<p>后来我用这个：<br>
+<a href="http://aquamacs.org/" target="_blank" rel="external">Aquamacs: Emacs for Mac OS X： </a><br>
+但是这个Emacs速度不快， 能够明显感觉到迟滞。还有它对一些扩展包的兼容性并不是太好。 许多很方便的包都不能用。</p>
+<p>于是在某天的晚上， 实在觉得应该磨磨刀的时候， 决定试试新的方法。<br>
+根据这个<a href="http://wikemacs.org/index.php/Installing_Emacs_on_OS_X" target="_blank" rel="external">wiki</a>里面介绍的， 使用homebrew 安装。如果你和一样喜欢用最新的版本，就可以使用下面的Brew命令安装：</p>
+<pre class="lang:default decode:true">brew install emacs --cocoa --HEAD --use-git-head --srgb</pre>
+<p>因为Homebrew是下载源代码， 在本机做编译， 惊喜的发现， 编出来的Emacs速度相当的快， 已经可以和Linux下的媲美了。</p>
+<p>我推测原因可能是因为本机是安装了最新的Xcode， 一些基础库用了Clang做编译， 也许运行时的兼容性更好？</p>
+<p>原因是很难查出来的了， 但是作为一个经验， 还是觉得非常有用。 编辑器的快慢影响的不知是打字的速度， 还能够最小的打断写代码时候的思路。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/05/26/best-emacs-under-mac.html" data-id="cj4nt09kx006wusa6ibt7geje" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/emacs/">emacs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mac/">mac</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-rails-conf-2014-%e5%bd%95%e5%83%8f" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/26/rails-conf-2014-%e5%bd%95%e5%83%8f.html" class="article-date">
+  <time datetime="2014-05-25T21:30:16.000Z" itemprop="datePublished">2014-05-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Rails/">Rails</a>►<a class="article-category-link" href="/categories/Rails/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/26/rails-conf-2014-%e5%bd%95%e5%83%8f.html">Rails Conf 2014 录像</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这里是Rails Conf 2014 的录像， 录像托管在Youtube上面，所以你应该明白你要怎么才能看了吧. :)</p>
+<p><a href="http://confreaks.com/events/railsconf" target="_blank" rel="external">http://confreaks.com/events/railsconf</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/05/26/rails-conf-2014-%e5%bd%95%e5%83%8f.html" data-id="cj4nt09kv006susa65ahr62ey" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/">__('next') &raquo;</a>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/">CPU</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/Throughs/">Throughs</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Performance/">Performance</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/">Rails</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GAE/">GAE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GFW/">GFW</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Rails/">Rails</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apple/">apple</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm/">arm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emacs/">emacs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/google/">google</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/internet/">internet</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kindle/">kindle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-优化/">linux 优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm/">pm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uart/">uart</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性格/">性格</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电子商务/">电子商务</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/GAE/" style="font-size: 10px;">GAE</a> <a href="/tags/GFW/" style="font-size: 15px;">GFW</a> <a href="/tags/Postgres/" style="font-size: 10px;">Postgres</a> <a href="/tags/Rails/" style="font-size: 10px;">Rails</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 17.5px;">android</a> <a href="/tags/apple/" style="font-size: 10px;">apple</a> <a href="/tags/arm/" style="font-size: 10px;">arm</a> <a href="/tags/bluetooth/" style="font-size: 12.5px;">bluetooth</a> <a href="/tags/emacs/" style="font-size: 12.5px;">emacs</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/google/" style="font-size: 10px;">google</a> <a href="/tags/homebrew/" style="font-size: 10px;">homebrew</a> <a href="/tags/internet/" style="font-size: 10px;">internet</a> <a href="/tags/kindle/" style="font-size: 10px;">kindle</a> <a href="/tags/linux/" style="font-size: 20px;">linux</a> <a href="/tags/linux-优化/" style="font-size: 10px;">linux 优化</a> <a href="/tags/mac/" style="font-size: 10px;">mac</a> <a href="/tags/pm/" style="font-size: 10px;">pm</a> <a href="/tags/uart/" style="font-size: 10px;">uart</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/性格/" style="font-size: 10px;">性格</a> <a href="/tags/电子商务/" style="font-size: 10px;">电子商务</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06/">June 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/01/">January 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/12/">December 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/11/">November 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/07/">July 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/03/">March 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/02/">February 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/12/">December 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/10/">October 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/09/">September 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/08/">August 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/07/">July 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/06/">June 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/05/">May 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/04/">April 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/03/">March 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/12/">December 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/11/">November 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/08/">August 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/07/">July 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/06/">June 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/05/">May 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/04/">April 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/03/">March 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/11/">November 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/09/">September 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/05/">May 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/04/">April 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/11/">November 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/10/">October 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/07/">July 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/03/">March 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/02/">February 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/01/">January 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/12/">December 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/11/">November 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/10/">October 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/09/">September 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/08/">August 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/07/">July 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/06/">June 2007</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/04/art-of-padding.html">Art of padding</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Jiejing Zhang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

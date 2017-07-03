@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Thinking beyond source code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Thinking beyond source code">
+<meta property="og:url" content="http://www.thinksrc.com/page/2/index.html">
+<meta property="og:site_name" content="Thinking beyond source code">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thinking beyond source code">
+  
+    <link rel="alternate" href="/atom.xml" title="Thinking beyond source code" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Thinking beyond source code</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Recording my throughs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.thinksrc.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-max-flow-min-cut-algorithm" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/16/max-flow-min-cut-algorithm.html" class="article-date">
+  <time datetime="2014-05-15T19:03:10.000Z" itemprop="datePublished">2014-05-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Algorithm/">Algorithm</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/16/max-flow-min-cut-algorithm.html">Max Flow Min Cut Algorithm.</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这些算法都是基于Ford-Fulkerson 方法，</p>
+<p>这个方法基本上是这样的一个循环：</p>
+<p>Cap = 0;<br>
+while find Augmenting Path != NIL<br>
+Cap += decrease capacity of the Augmenting path</p>
+<p>return Cap;</p>
+<p>就是循环的寻找Augmenting Path（增广路径）， 然后再在图上的边的Capacity（容量）上减去这个值， 这样一直找， 知道找不到增广路径位置。</p>
+<p>首先是一个基于BFS（广度有限搜索）的算法， 名字叫做： Edwinds-Karp alg：</p>
+<p>下面是一个C++实现：</p>
+<pre class="lang:c++ decode:true">#include &lt;vector&gt;
+#include &lt;unordered_set&gt;
+#include &lt;queue&gt;
+#include &lt;cmath&gt;
+#include &lt;climits&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+vector&lt; vector&lt;int&gt; &gt; matrix;
+vector&lt; vector&lt;int&gt; &gt; capacity;
+
+int bfs(int source, int size,  int sink) {
+    queue&lt;int&gt; q;
+    q.push(source);
+    int from[size];
+    bool visited[size];
+
+    memset(from, -1, sizeof(from));
+    memset(visited, false, sizeof(visited));
+
+    visited[source] = true;
+    // use bfs find the route to the sink.
+    while(!q.empty()) {
+        bool found_sink = false;
+        int where = q.front();
+        q.pop();
+
+        // for each vertex next adjancent to where.
+        for (auto next = matrix[where].begin(); next != matrix[where].end(); next++) {
+            int val = *next;
+            if (visited[val] == true)
+                continue;
+            if (capacity[where][val] &gt; 0) {
+                q.push(val);
+                visited[val] = true;
+                from[val] = where;
+                if (val == sink) {
+                    found_sink = true;
+                    break;
+                }
+            }
+        }
+        if (found_sink)
+            break;
+    }
+
+    //  then compute the path capacity.
+    // Find the critical path from the sink back to source.
+    // find the minimal path capacity of the path.
+    int where = sink, prev, path_cap = INT_MAX;
+    while (from[where] &gt; -1) {
+        prev = from[where];
+        path_cap = min(path_cap, capacity[prev][where]);
+        where = prev;
+    }
+
+    // then update the residual network, if no path is found the while loop will not be enter.
+
+    // Then - augment.
+    where = sink;
+    while (from[where] &gt; -1) {
+        prev = from[where];
+        capacity[prev][where] -= path_cap;
+        capacity[where][prev] += path_cap;
+        where = prev;
+    }
+
+    // if no path is found, path_cap is infinity.
+    // and return the augmenting capacity.
+    if (path_cap == INT_MAX)
+        return 0;
+    else
+        return path_cap;
+}
+
+int max_flow()
+{
+    int result = 0, path_cap ;
+    while (true) {
+        path_cap = bfs(1, 8, 7);
+        if (path_cap == 0)
+            break;
+        else
+            result += path_cap;
+    }
+    return result;
+}</pre>
+<p>这个实现的是基于BFS的。</p>
+<p>BFS 里面的循环基本就是一个标准的BFS遍历方法， 检测条件的时候增加了一个路径的Capacity（容量）必须大于0, 这样就不会找到已经满了路径了。顺着source一直走到sink以后， 记录下路径。</p>
+<p>然后通过sink反着找到Capacity最小的一条边， 记录这个值。</p>
+<p>最后在路径上对于正方向， 减去这个指， 对于反方向， 增加这个值。并且返回这个数值。</p>
+<p>这个实现的算法复杂度是O(VE²）， 因为BFS的负责读是O(E)， 而其他每一次找增广路径的计算的复杂度是O(V）。</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/05/16/max-flow-min-cut-algorithm.html" data-id="cj4nt09ks006kusa6rogclfr5" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-notes-on-mattt-thompson-postgres-rails-4-nosql-in-your-sql-database" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/16/notes-on-mattt-thompson-postgres-rails-4-nosql-in-your-sql-database.html" class="article-date">
+  <time datetime="2014-05-15T19:01:48.000Z" itemprop="datePublished">2014-05-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Rails/">Rails</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/16/notes-on-mattt-thompson-postgres-rails-4-nosql-in-your-sql-database.html">Notes on Mattt Thompson: Postgres &amp; Rails 4: NoSQL in your SQL Database</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Video: https://www.youtube.com/watch?v=HXEb5-9Nt20</p>
+<p>记录一些要点，</p>
+<p>Postgres 9.2：</p>
+<p>－ hstore， 在Sql 数据库中加入NoSQL的元素。Rails 4 可以直接使用 t.hstore ， 初始化的时候就像Dict一样assign。 非Rails4可以使用这个Gem， activerecord-postgres-hstore。 （create extension hstore）<br>
+－ Full Text Index： 对于English Native 更加有用吧。<br>
+－ plv8: Buildin Javascript： node.js的风刮到这里了。可以直接在postgres里面执行javascript， 会让更多的人把应用逻辑写到数据库里把。 当然这样的效率肯定很高。缺点嘛， 就是Vendor Lock了。<br>
+－ JSON： 直接放进Postgres里面， 可以index等， Postgres有一个Cool Feature。</p>
+<p>Rails4:<br>
+－ hstore， 上面说过了。<br>
+－ Buildin 高级的Type：<br>
+＊ INET： ipv4， ipv6的类型， 比用string提供更多的功能。<br>
+＊ CIDR： Sub Net 专用类型<br>
+＊ MACADDR： 专用的Mac Address的类型<br>
+＊ UUID： UUID 的类型， 比String的好处在于： 对于支持Buildin UUID 的Database， 这个可以直接BuindIn<br>
+＊ ARRAY： 这个大赞， 比如 这个migration， t.string :tags, array: true 这样就可以存在tags里面存多个值， 如果没有，我通常得新建一张表。</p>
+<p>回顾一下， 最赞的地方莫过于hstore &amp; ARRAY</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2014/05/16/notes-on-mattt-thompson-postgres-rails-4-nosql-in-your-sql-database.html" data-id="cj4nt09ku006ousa6akatqzk4" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Rails/">Rails</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-finally-fix-ia32-libs-depends-error" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2013/06/28/finally-fix-ia32-libs-depends-error.html" class="article-date">
+  <time datetime="2013-06-27T19:49:47.000Z" itemprop="datePublished">2013-06-28</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2013/06/28/finally-fix-ia32-libs-depends-error.html">Finally Fix ia32-libs depends error</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>I'm using Ubuntu 12.04 at work, the laptop is a intel + nvidia video card, so I have tried a lot of solution to fix the 3D issue, but I finally found it introduce a lot of other issue like ia32-libs depends issue.</p>
+<p>The log is like this:</p>
+<pre class="lang:sh highlight:0 decode:true">/var@jasozhang-nv $ sudo apt-get install ia32-libs
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+Some packages could not be installed. This may mean that you have
+requested an impossible situation or if you are using the unstable
+distribution that some required packages have not yet been created
+or been moved out of Incoming.
+The following information may help to resolve the situation:
+
+The following packages have unmet dependencies:
+ ia32-libs : Depends: ia32-libs-multiarch
+E: Unable to correct problems, you have held broken packages.</pre>
+<p>After tried every method on google, all failed.</p>
+<p>So I remember I have add lots of ppa which maybe related to this issue.</p>
+<p>I tried this:</p>
+<p>1. in Update Manager -&gt; Software Sources -&gt; Other Software<br>
+Enable *ALL* ppa you have ever installed, what even currently it was disable or not, enable them all.</p>
+<p>2. Then, install y-ppa-manager, (method can be search on google).<br>
+<strong>*Purge*</strong> Every ppa you have.</p>
+<p>After did this, the package relationship become a normal.</p>
+<p>In the end, I think this is a lesson that install ppa, specially big ppa, like xorg-edgers, kubuntu-ppa are very risky. Be caution when you install such ppa.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2013/06/28/finally-fix-ia32-libs-depends-error.html" data-id="cj4nt09kr006gusa6i9gxmzm1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-c%ef%bc%9a-disallow-evil-constructors" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2013/01/29/c%ef%bc%9a-disallow-evil-constructors.html" class="article-date">
+  <time datetime="2013-01-29T00:14:33.000Z" itemprop="datePublished">2013-01-29</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/C/">C++</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2013/01/29/c%ef%bc%9a-disallow-evil-constructors.html">C++： Disallow evil constructors.</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>I have not write C++ code for years, recently because some reason, also because c++11, have start touch c++.</p>
+<p>Today found a very funny macro in google's android c++ code, it maybe very populary in c++ world, but I still want to write some about this.</p>
+<p>The macro is like this:</p>
+<pre class="lang:c++ decode:true" title="Disallow evil constructors.">// A macro to disallow the copy constructor and operator= functions
+// This should be used in the private: declarations for a class
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) 
+  TypeName(const TypeName&amp;);               
+  void operator=(const TypeName&amp;)
+
+// An older, deprecated, politically incorrect name for the above.
+// NOTE: The usage of this macro was baned from our code base, but some
+// third_party libraries are yet using it.
+// TODO(tfarina): Figure out how to fix the usage of this macro in the
+// third_party libraries and get rid of it.
+#define DISALLOW_EVIL_CONSTRUCTORS(TypeName) DISALLOW_COPY_AND_ASSIGN(TypeName)</pre>
+<p>From the comment, you can see this macro declear the copy constructor and assign operator.</p>
+<p>If you want to disabllow these two "help" function generated by c++ complier, you can do the macro the private, like this:</p>
+<pre class="lang:c++ decode:true ">class Foo {
+public:
+  int bar();
+private:
+DISALLOW_EVIL_CONSTRUCTORS(Foo);
+};</pre>
+<p>This macro will do this for you, generally, you want do this in all you c++ class, except you really need it.</p>
+<p>This macro was in many project, like chromium, regex-re2, skia, srec, webrtc, android.</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2013/01/29/c%ef%bc%9a-disallow-evil-constructors.html" data-id="cj4nt09kp006cusa68kpxxz77" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-handy-one-liners-for-awk" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/12/22/handy-one-liners-for-awk.html" class="article-date">
+  <time datetime="2012-12-21T21:20:54.000Z" itemprop="datePublished">2012-12-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/12/22/handy-one-liners-for-awk.html">Handy One-liners for AWK</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>This post copy a very handy text about awk, for I can reference in further.<br>
+The copyright belongs to the origin auther: Eric Pement.</p>
+<pre class="theme:classic-spaced font:tahoma striped:false nums:false nums-toggle:false lang:ps decode:true crayon-selected">HANDY ONE-LINERS FOR AWK                                  22 July 2003
+compiled by Eric Pement &lt;pemente@northpark.edu&gt;           version 0.22
+   Latest version of this file is usually at:
+   http://www.student.northpark.edu/pemente/awk/awk1line.txt
+
+USAGE:
+
+    Unix:  awk '/pattern/ {print "$1"}'    # standard Unix shells
+ DOS/Win:  awk '/pattern/ {print "$1"}'    # okay for DJGPP compiled
+           awk "/pattern/ {print "$1"}"  # required for Mingw32
+
+Most of my experience comes from version of GNU awk (gawk) compiled for
+Win32. Note in particular that DJGPP compilations permit the awk script
+to follow Unix quoting syntax '/like/ {"this"}'. However, the user must
+know that single quotes under DOS/Windows do not protect the redirection
+arrows (&lt;, &gt;) nor do they protect pipes (|). Both are special symbols
+for the DOS/CMD command shell and their special meaning is ignored only
+if they are placed within "double quotes." Likewise, DOS/Win users must
+remember that the percent sign (%) is used to mark DOS/Win environment
+variables, so it must be doubled (%%) to yield a single percent sign
+visible to awk.
+
+If I am sure that a script will NOT need to be quoted in Unix, DOS, or
+CMD, then I normally omit the quote marks. If an example is peculiar to
+GNU awk, the command 'gawk' will be used. Please notify me if you find
+errors or new commands to add to this list (total length under 65
+characters). I usually try to put the shortest script first.
+
+FILE SPACING:
+
+ # double space a file
+ awk '1;{print ""}'
+ awk 'BEGIN{ORS="nn"};1'
+
+ # double space a file which already has blank lines in it. Output file
+ # should contain no more than one blank line between lines of text.
+ # NOTE: On Unix systems, DOS lines which have only CRLF (rn) are
+ # often treated as non-blank, and thus 'NF' alone will return TRUE.
+ awk 'NF{print $0 "n"}'
+
+ # triple space a file
+ awk '1;{print "n"}'
+
+NUMBERING AND CALCULATIONS:
+
+ # precede each line by its line number FOR THAT FILE (left alignment).
+ # Using a tab (t) instead of space will preserve margins.
+ awk '{print FNR "t" $0}' files*
+
+ # precede each line by its line number FOR ALL FILES TOGETHER, with tab.
+ awk '{print NR "t" $0}' files*
+
+ # number each line of a file (number on left, right-aligned)
+ # Double the percent signs if typing from the DOS command prompt.
+ awk '{printf("%5d : %sn", NR,$0)}'
+
+ # number each line of file, but only print numbers if line is not blank
+ # Remember caveats about Unix treatment of r (mentioned above)
+ awk 'NF{$0=++a " :" $0};{print}'
+ awk '{print (NF? ++a " :" :"") $0}'
+
+ # count lines (emulates "wc -l")
+ awk 'END{print NR}'
+
+ # print the sums of the fields of every line
+ awk '{s=0; for (i=1; i&lt;=NF; i++) s=s+$i; print s}'
+
+ # add all fields in all lines and print the sum
+ awk '{for (i=1; i&lt;=NF; i++) s=s+$i}; END{print s}'
+
+ # print every line after replacing each field with its absolute value
+ awk '{for (i=1; i&lt;=NF; i++) if ($i &lt; 0) $i = -$i; print }'
+ awk '{for (i=1; i&lt;=NF; i++) $i = ($i &lt; 0) ? -$i : $i; print }'
+
+ # print the total number of fields ("words") in all lines
+ awk '{ total = total + NF }; END {print total}' file
+
+ # print the total number of lines that contain "Beth"
+ awk '/Beth/{n++}; END {print n+0}' file
+
+ # print the largest first field and the line that contains it
+ # Intended for finding the longest string in field #1
+ awk '$1 &gt; max {max=$1; maxline=$0}; END{ print max, maxline}'
+
+ # print the number of fields in each line, fol]+$/,lowed by the line
+ awk '{ print NF ":" $0 } '
+
+ # print the last field of each line
+ awk '{ print $NF }'
+
+ # print the last field of the last line
+ awk '{ field = $NF }; END{ print field }'
+
+ # print every line with more than 4 fields
+ awk 'NF &gt; 4'
+
+ # print every line where the value of the last field is &gt; 4
+ awk '$NF &gt; 4'
+
+TEXT CONVERSION AND SUBSTITUTION:
+
+ # IN UNIX ENVIRONMENT: convert DOS newlines (CR/LF) to Unix format
+ awk '{sub(/r$/,"");print}'   # assumes EACH line ends with Ctrl-M
+
+ # IN UNIX ENVIRONMENT: convert Unix newlines (LF) to DOS format
+ awk '{sub(/$/,"r");print}'
+
+ # IN DOS ENVIRONMENT: convert Unix newlines (LF) to DOS format
+ awk 1
+
+ # IN DOS ENVIRONMENT: convert DOS newlines (CR/LF) to Unix format
+ # Cannot be done with DOS versions of awk, other than gawk:
+ gawk -v BINMODE="w" '1' infile &gt;outfile
+
+ # Use "tr" instead.
+ tr -d r &lt;infile &gt;outfile            # GNU tr version 1.22 or higher
+
+ # delete leading whitespace (spaces, tabs) from front of each line
+ # aligns all text flush left
+ awk '{sub(/^[ t]+/, ""); print}'
+
+ # delete trailing whitespace (spaces, tabs) from end of each line
+ awk '{sub(/[ t]+$/, "");print}'
+
+ # delete BOTH leading and trailing whitespace from each line
+ awk '{gsub(/^[ t]+|[ t]+$/,"");print}'
+ awk '{$1=$1;print}'           # also removes extra space between fields
+
+ # insert 5 blank spaces at beginning of each line (make page offset)
+ awk '{sub(/^/, "     ");print}'
+
+ # align all text flush right on a 79-column width
+ awk '{printf "%79sn", $0}' file*
+
+ # center all text on a 79-character width
+ awk '{l=length();s=int((79-l)/2); printf "%"(s+l)"sn",$0}' file*
+
+ # substitute (find and replace) "foo" with "bar" on each line
+ awk '{sub(/foo/,"bar");print}'           # replaces only 1st instance
+ gawk '{$0=gensub(/foo/,"bar",4);print}'  # replaces only 4th instance
+ awk '{gsub(/foo/,"bar");print}'          # replaces ALL instances in a line
+
+ # substitute "foo" with "bar" ONLY for lines which contain "baz"
+ awk '/baz/{gsub(/foo/, "bar")};{print}'
+
+ # substitute "foo" with "bar" EXCEPT for lines which contain "baz"
+ awk '!/baz/{gsub(/foo/, "bar")};{print}'
+
+ # change "scarlet" or "ruby" or "puce" to "red"
+ awk '{gsub(/scarlet|ruby|puce/, "red"); print}'
+
+ # reverse order of lines (emulates "tac")
+ awk '{a[i++]=$0} END {for (j=i-1; j&gt;=0;) print a[j--] }' file*
+
+ # if a line ends with a backslash, append the next line to it
+ # (fails if there are multiple lines ending with backslash...)
+ awk '/$/ {sub(/$/,""); getline t; print $0 t; next}; 1' file*
+
+ # print and sort the login names of all users
+ awk -F ":" '{ print $1 | "sort" }' /etc/passwd
+
+ # print the first 2 fields, in opposite order, of every line
+ awk '{print $2, $1}' file
+
+ # switch the first 2 fields of every line
+ awk '{temp = $1; $1 = $2; $2 = temp}' file
+
+ # print every line, deleting the second field of that line
+ awk '{ $2 = ""; print }'
+
+ # print in reverse order the fields of every line
+ awk '{for (i=NF; i&gt;0; i--) printf("%s ",i);printf ("n")}' file
+
+ # remove duplicate, consecutive lines (emulates "uniq")
+ awk 'a !~ $0; {a=$0}'
+
+ # remove duplicate, nonconsecutive lines
+ awk '! a[$0]++'                     # most concise script
+ awk '!($0 in a) {a[$0];print}'      # most efficient script
+
+ # concatenate every 5 lines of input, using a comma separator
+ # between fields
+ awk 'ORS=%NR%5?",":"n"' file
+
+SELECTIVE PRINTING OF CERTAIN LINES:
+
+ # print first 10 lines of file (emulates behavior of "head")
+ awk 'NR &lt; 11'
+
+ # print first line of file (emulates "head -1")
+ awk 'NR&gt;1{exit};1'
+
+  # print the last 2 lines of a file (emulates "tail -2")
+ awk '{y=x "n" $0; x=$0};END{print y}'
+
+ # print the last line of a file (emulates "tail -1")
+ awk 'END{print}'
+
+ # print only lines which match regular expression (emulates "grep")
+ awk '/regex/'
+
+ # print only lines which do NOT match regex (emulates "grep -v")
+ awk '!/regex/'
+
+ # print the line immediately before a regex, but not the line
+ # containing the regex
+ awk '/regex/{print x};{x=$0}'
+ awk '/regex/{print (x=="" ? "match on line 1" : x)};{x=$0}'
+
+ # print the line immediately after a regex, but not the line
+ # containing the regex
+ awk '/regex/{getline;print}'
+
+ # grep for AAA and BBB and CCC (in any order)
+ awk '/AAA/; /BBB/; /CCC/'
+
+ # grep for AAA and BBB and CCC (in that order)
+ awk '/AAA.*BBB.*CCC/'
+
+ # print only lines of 65 characters or longer
+ awk 'length &gt; 64'
+
+ # print only lines of less than 65 characters
+ awk 'length &lt; 64'
+
+ # print section of file from regular expression to end of file
+ awk '/regex/,0'
+ awk '/regex/,EOF'
+
+ # print section of file based on line numbers (lines 8-12, inclusive)
+ awk 'NR==8,NR==12'
+
+ # print line number 52
+ awk 'NR==52'
+ awk 'NR==52 {print;exit}'          # more efficient on large files
+
+ # print section of file between two regular expressions (inclusive)
+ awk '/Iowa/,/Montana/'             # case sensitive
+
+SELECTIVE DELETION OF CERTAIN LINES:
+
+ # delete ALL blank lines from a file (same as "grep '.' ")
+ awk NF
+ awk '/./'
+
+CREDITS AND THANKS:
+
+Special thanks to Peter S. Tillier for helping me with the first release
+of this FAQ file.
+
+For additional syntax instructions, including the way to apply editing
+commands from a disk file instead of the command line, consult:
+
+"sed &amp; awk, 2nd Edition," by Dale Dougherty and Arnold Robbins
+  O'Reilly, 1997
+"UNIX Text Processing," by Dale Dougherty and Tim O'Reilly
+  Hayden Books, 1987
+"Effective awk Programming, 3rd Edition." by Arnold Robbins
+  O'Reilly, 2001
+
+To fully exploit the power of awk, one must understand "regular
+expressions." For detailed discussion of regular expressions, see
+"Mastering Regular Expressions, 2d edition" by Jeffrey Friedl
+   (O'Reilly, 2002).
+
+The manual ("man") pages on Unix systems may be helpful (try "man awk",
+"man nawk", "man regexp", or the section on regular expressions in "man
+ed"), but man pages are notoriously difficult. They are not written to
+teach awk use or regexps to first-time users, but as a reference text
+for those already acquainted with these tools.
+
+USE OF 't' IN awk SCRIPTS: For clarity in documentation, we have used
+the expression 't' to indicate a tab character (0x09) in the scripts.
+All versions of awk, even the UNIX System 7 version should recognize
+the 't' abbreviation.
+
+#---end of file---</pre>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/12/22/handy-one-liners-for-awk.html" data-id="cj4nt09ko0069usa6dcnw8d5m" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-%e6%9c%80%e8%bf%91google%e6%90%9c%e7%b4%a2%e6%89%93%e4%b8%8d%e5%bc%80%ef%bc%9f%e7%9c%8b%e8%bf%99%e9%87%8c" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/12/06/%e6%9c%80%e8%bf%91google%e6%90%9c%e7%b4%a2%e6%89%93%e4%b8%8d%e5%bc%80%ef%bc%9f%e7%9c%8b%e8%bf%99%e9%87%8c.html" class="article-date">
+  <time datetime="2012-12-06T07:36:38.000Z" itemprop="datePublished">2012-12-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/12/06/%e6%9c%80%e8%bf%91google%e6%90%9c%e7%b4%a2%e6%89%93%e4%b8%8d%e5%bc%80%ef%bc%9f%e7%9c%8b%e8%bf%99%e9%87%8c.html">最近Google搜索打不开？看这里</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近由于一些总所周知的原因，大陆地区的Google的搜索结果打不开(或者说很难打开)了。 原因是因为DNS污染之类的， 详见： <a href="http://www.williamlong.info/archives/2263.html" target="_blank" rel="external">http://www.williamlong.info/archives/2263.html</a></p>
+<p>解决办法倒是有一些的，针对不同的浏览器， 下载不同的插件去掉Google搜索结果打开需要的Google Forward 的URL即可：</p>
+<p>Chrome： 这里：<a href="https://chrome.google.com/webstore/detail/remove-google-redirects/ccenmflbeofaceccfhhggbagkblihpoh" target="_blank" rel="external">https://chrome.google.com/webstore/detail/remove-google-redirects/ccenmflbeofaceccfhhggbagkblihpoh</a></p>
+<p>Opera:<a href=" https://addons.opera.com/en/extensions/details/remove-google-redirects/" target="_blank" rel="external"> https://addons.opera.com/en/extensions/details/remove-google-redirects/</a></p>
+<p>Safari: 无。我已经提交了一个插件，希望能够尽快出现</p>
+<p>Firefox: 无， 这个有时间也弄一个。</p>
+<p>这个插件的原理就是去掉Gogole Forward的URL， 让你直接打开你搜索到的结果， 这样没有被墙的内容还是可以打开的。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/12/06/%e6%9c%80%e8%bf%91google%e6%90%9c%e7%b4%a2%e6%89%93%e4%b8%8d%e5%bc%80%ef%bc%9f%e7%9c%8b%e8%bf%99%e9%87%8c.html" data-id="cj4nt09km0067usa6kloocvfj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/GFW/">GFW</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/google/">google</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-rails-dynamic-finders" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/12/01/rails-dynamic-finders.html" class="article-date">
+  <time datetime="2012-12-01T01:39:14.000Z" itemprop="datePublished">2012-12-01</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Rails/">Rails</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/12/01/rails-dynamic-finders.html">Rails: Dynamic Finders</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>Rails's ActiveRecord can use a dymatic way to finder</p>
+<p>Like this model class in rails:</p>
+<pre>
+class Article < ActiveRecord::Base
+  attr_accessible :body, :excerpt, :location, :published_at, :title
+  validates :title, :presence => true
+  validates :body, :presence => true
+end
+</pre>
+<p>It don't have much query function, but you can use query function like:</p>
+<pre>Article.find_by_title('Hello')
+=>; #<;article id:1,="" title:="" "hello",="" ...="">;</;article></pre>
+<p>It because it use Ruby’s method_missing functionality to automatically create methods that don’t exist until runtime. Using dynamic finders, you can include the attribute you’re looking for directly in the method name.</p>
+<p>There are several variations of dynamic finders, which are summarized in the Table:</p>
+<table border="2" frame="hsides" rules="groups" cellspacing="0" cellpadding="6">
+<caption> </caption>
+<colgroup>
+<col align="left">
+<col align="left"></colgroup>
+<thead>
+<tr>
+<th scope="col">Finder</th>
+<th scope="col">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>find_by_*(cond)</td>
+<td>find_by_title('Hello') #=>; Article</td>
+</tr>
+<tr>
+<td>find_all_by_*(cond)</td>
+<td>find_all_by_title('Hello') #=>; Array</td>
+</tr>
+<tr>
+<td>find_by_*_and_*(cond1, cond2)</td>
+<td>find_by_title_and_published_on('Hello', '2012-03-12') #=>;Articlelike creating a record. You can update attributes one at a time and<br>
+then save the result, or you can update attributes in one fell swoop. When you update a<br>
+record, a SQL UPDATE statement is constructed behind the scenes. First, you use a find<br>
+operation to retrieve the record you</td>
+</tr>
+<tr>
+<td>find_all_by_*_and_*(cond1, cond2)</td>
+<td>find_all_by_title_and_published_on('Hello', '2012-03-12') #=>;Array</td>
+</tr>
+</tbody>
+</table>
+<p>Amazing...</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/12/01/rails-dynamic-finders.html" data-id="cj4nt09kl0063usa6ccfr6i9e" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-60" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/11/26/60.html" class="article-date">
+  <time datetime="2012-11-26T06:04:27.000Z" itemprop="datePublished">2012-11-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/CPU/">CPU</a>►<a class="article-category-link" href="/categories/CPU/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/11/26/60.html">ARM V6 和V6+架构中的原子指令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><!--?xml version="1.0" encoding="UTF-8" standalone="no"?--></p>
+<h1>ARM V6</h1>
+<p>ARM V6中原子指令是:</p>
+<h2>SWP 指令</h2>
+<div>该指令可以实现寄存器和内存之间的原子交换, 但是由于该指令要lock住BUS, 所以会影响系统性能.</div>
+<div></div>
+<div>例子:</div>
+<div>
+<pre>sem_wati:MOV R1,#0
+LDR R0,=SEM
+SWP R1,R1,[R0] ;取出信号量，并设置其为0
+CMP R1,#0 ;判断是否有信号
+BEQ sem_wait ;若没有信号，则等待</pre>
+</div>
+<div></div>
+<div>所以在内核中, V6以前的架构, atomic_add/sub 之类的指令都是用</div>
+<pre>
+raw_local_irq_save(flags)
+val = v->counter;
+v->counter = val += 1;
+raw_local_irq_restore(flags)
+</pre>
+<div>来实现的.</div>
+<div></div>
+<h1>ARM V6 以后， V7， V8中</h1>
+<div>提供LDREX和STREX来替换SWP指令, 实现对原子的内存操作.</div>
+<div></div>
+<div>
+<pre>LDREX &lt;Rt&gt;,[Rn]STREX &lt;Rd&gt;,&lt;Rt&gt;,[Rn] ；STREX成功，Rd置0</pre>
+</div>
+<div></div>
+<div>所以Linux内核就可以利用这个指令来做原子操作， 内核中的atomic_add 实现就是</div>
+<div></div>
+<div>
+<pre> static inline void atomic_add(int i, atomic_t *v)
+static inline void atomic_add(int i, atomic_t *v)
+{
+     unsigned long tmp;
+     int result;
+
+     __asm__ __volatile__("@ atomic_addn"
+"1:     ldrex     %0, [%3]n"    // 先读入counter
+"     add     %0, %0, %4n"     // 再把counter+i
+"     strex     %1, %0, [%3]n"  // 把counter再写到result的地址, 并且放返回值到tmp里面.
+"     teq     %1, #0n"                // 检查tmp和0相等否
+"     bne     1b"                          // 如果不相等, 再重新来一次. 防止被其他的CPU或者其他的竞争条件.
+     : "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)
+     : "r" (&v->counter), "Ir" (i)
+     : "cc");
+}</pre>
+</div>
+<div></div>
+<div></div>
+<div>下面是一些ARM V6+架构对该指令的内部实现,(参考:<a href="http://www.keil.com/support/man/docs/armasmref/armasmref_Cihbghef.htm" target="_blank" rel="external">http://www.keil.com/support/man/docs/armasmref/armasmref_Cihbghef.htm</a>)</div>
+<div>
+<p>LDREX loads data from memory.If the physical address has the Shared TLB attribute, LDREX tags the physical address as exclusive access for the current processor, and clears any exclusive access tag for this processor for any other physical address.</p>
+<p>Otherwise, it tags the fact that the executing processor has an outstanding tagged physical address.</p>
+</div>
+<div>(如果物理地址在TLB中, 那么LDREX就标识该地址为当前CORE的排他使用(exclusive access), 而且清楚掉该Core对其他的地址的exclusive access.</div>
+<div>如果不在TLB中, 那么就标志当前CPU有一个outstanding tagged 物理地址, 我想应该是一个特殊的物理地址访问的意思.)</div>
+<div></div>
+<div>
+<p>STREX performs a conditional store to memory. The conditions are as follows:If the physical address does not have the Shared TLB attribute, and the executing processor has an outstanding tagged physical address, the store takes place, the tag is cleared, and the value 0 is returned in Rd.</p>
+</div>
+<div>(如果该物理地址没有share TBL 属性, 也就是没有load到TLB中, 当前执行的CPU有一个"outstanding tagged physical address", 那么存储会直接存进去, 清除tag, 然后再Rd里面返回0)</div>
+<div></div>
+<div>
+<p>    If the physical address does not have the Shared TLB attribute, and the executing processor does not have an outstanding tagged physical address, the store does not take place, and the value 1 is returned in Rd. (如果物理地址没有在TBL中, 而且当前执行CPU没有一个outstanding tagged physical address, 那么这次store不发生, 并且返回1在Rd中).If the physical address has the Shared TLB attribute, and the physical address is tagged as exclusive access for the executing processor, the store takes place, the tag is cleared, and the value 0 is returned in Rd.</p>
+<p>(如果物理地址已经有一个TLB的属性, 而且该物理地址已经被标识为exclusive access, 那么存储发生, 并且清掉TAG, 在Rd中返回0)</p>
+</div>
+<div>If the physical address has the Shared TLB attribute, and the physical address is not tagged as exclusive access for the executing processor, the store does not take place, and the value 1 is returned in Rd.</div>
+<div>(如果该地址已经有TLB的属性, 但是物理地址没有tag成exclusive access, 存储不发生, 并且在Rd中返回0.</div>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/11/26/60.html" data-id="cj4nt09kj0061usa6hxxgchet" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm/">arm</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-time-machine-eat-my-hd" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/07/20/time-machine-eat-my-hd.html" class="article-date">
+  <time datetime="2012-07-19T23:32:13.000Z" itemprop="datePublished">2012-07-20</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/07/20/time-machine-eat-my-hd.html">Time Machine Eat My HD...</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><!--?xml version="1.0" encoding="UTF-8" standalone="no"?--></p>
+<div style="font-family: Arial; font-size: small;">今天忽然发现自己的MBP上面的320G的硬盘用完了， 慢的叫个没话说。</div>
+<div style="font-family: Arial; font-size: small;">可是东西感觉没安多少， 基本上就是iTune U上面下了很多视频， 但是也不至于把硬盘全部用完把。</div>
+<div style="font-family: Arial; font-size: small;">所以还是先到根目录下面找找是什么占了内存了：</div>
+<div style="font-family: Arial; font-size: small;"><span style="font-family: Arial, Verdana, sans-serif; font-size: 12px;"> </span>&nbsp;<p></p>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">cd /
+sudo find . -size +200M 2&>/dev/null</pre>
+</div>
+</div>
+<div style="font-family: Arial; font-size: small;">惊讶的发现删掉的很多视频竟然出现在 /.MbileBackups 里面。</div>
+<div style="font-family: Arial; font-size: small;">计算了一下大小：</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo du -sh /.MobileBackups.trash/</pre>
+</div>
+<div style="font-family: Arial; font-size: small;">发现竟然有48G， My God， 必须回收回来。。</div>
+<div style="font-family: Arial; font-size: small;">Google了一会发现原来发现这个目录是Time Machine用来做本地备份的，</div>
+<div style="font-family: Arial; font-size: small;"><em>Apple considered to implement a new "feature" to Lion that no one seems to be aware of: Local Backups if your Time Machine Drive is not connected to you computer. It seems to affect only Mac Laptops, not the desktop Macs. So every time your Time Machine backup starts without the destination drive it will copy all data in a secure folder on your local startup volume called ".MobileBackups".</em></div>
+<div style="font-family: Arial; font-size: small;">已经有很多天备份了， 而且已经把Music目录排除出去了，估计这些文件是在很早以前下载的。 于是查到了通过这个命令关掉这些本地备份， 重启以后就会全部删掉。</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo tmutil disablelocal
+sudo reboot</pre>
+</div>
+<div style="font-family: Arial; font-size: small;">然后发现重启以后就多了48G空间</div>
+<div style="font-family: Arial; font-size: small;">不过Time Machine还是有必要的，于是又重新打开</div>
+<div style="font-family: Arial; font-size: small;">
+<pre class="brush: bash;fontsize: 100; first-line: 1; ">sudo tmutil enablelocal
+sudo reboot</pre>
+</div>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/07/20/time-machine-eat-my-hd.html" data-id="cj4nt09ki005yusa672cwpi6j" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-android-gdb-full-symbol" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/07/14/android-gdb-full-symbol.html" class="article-date">
+  <time datetime="2012-07-14T14:46:42.000Z" itemprop="datePublished">2012-07-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2012/07/14/android-gdb-full-symbol.html">adb &amp; gdbserver:  remote gdb debugging under android</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>&nbsp;</p>
+<div style="background-color: transparent; line-height: normal;"><strong><br>
+</strong><br>
+<h1 dir="ltr"><strong><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Most of operations are  reference from&nbsp;this link, but with some more refine, and detail.</span></strong></h1>
+<p><a style="font-weight: normal; font-family: Times; font-size: medium;" href="http://www.kandroid.org/online-pdk/guide/debugging_native.html" target="_blank" rel="external"><span style="font-size: 15px; font-family: Arial; color: #1155cc; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; vertical-align: baseline; white-space: pre-wrap; text-decoration: underline;">http://www.kandroid.org/online-pdk/guide/debugging_native.html</span></a></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">This&nbsp;page&nbsp;show&nbsp;how&nbsp;to&nbsp;use&nbsp;gdb&nbsp;in&nbsp;android&nbsp;env,&nbsp;it&nbsp;will&nbsp;use&nbsp;adb&nbsp;to&nbsp;forward&nbsp;tcp&nbsp;to&nbsp;gbd&nbsp;port,&nbsp;so&nbsp;no&nbsp;network&nbsp;needed,&nbsp;and&nbsp;also&nbsp;show&nbsp;how&nbsp;to&nbsp;load&nbsp;the&nbsp;symbol&nbsp;information&nbsp;from&nbsp;an&nbsp;android&nbsp;build&nbsp;dir,&nbsp;also&nbsp;use&nbsp;sshfs&nbsp;to&nbsp;mapping&nbsp;the&nbsp;build&nbsp;env&nbsp;in&nbsp;server&nbsp;to&nbsp;local&nbsp;PC.</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">first,&nbsp;the&nbsp;commands&nbsp;in&nbsp;this&nbsp;page:</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #222222; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">#&nbsp;the&nbsp;command&nbsp;under&nbsp;target&nbsp;board,&nbsp;adb</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;the&nbsp;command&nbsp;on&nbsp;host.</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(god)&nbsp;the&nbsp;command&nbsp;under&nbsp;gdb&nbsp;shell.</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #666666; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">to&nbsp;debug&nbsp;use&nbsp;gdb,&nbsp;tell&nbsp;adb&nbsp;forward&nbsp;all&nbsp;tcp&nbsp;to&nbsp;gdb&nbsp;port.</span></p>
+<p><span style="font-size: 15px; font-family: Consolas; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;adb&nbsp;forward&nbsp;tcp:5039&nbsp;tcp:5039</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #666666; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">start&nbsp;gdb&nbsp;server&nbsp;at&nbsp;board.</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">#&nbsp;gbdserver&nbsp;:5039&nbsp;--attach&nbsp;257&nbsp;&amp;&nbsp;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">or&nbsp;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">#&nbsp;gdbserver&nbsp;:5039&nbsp;/system/bin/surfacefligner</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #666666; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">start&nbsp;debugging</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-gdb out/target/product/sabresd_6q/symbols/system/bin/surfaceflinger</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;set solib-absolute-prefix /home/xxxx/proj/ics/out/target/product/sabresd_6q/symbols/</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;set&nbsp;solib-search-path&nbsp;/home/xxxx/proj/ics/out/target/product/sabresd_6q/symbols/system/lib</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;target&nbsp;remote&nbsp;:5039</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #666666; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">//&nbsp;don't&nbsp;let&nbsp;other&nbsp;scheduler&nbsp;during&nbsp;your&nbsp;debugging.</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;set&nbsp;scheduler-locking&nbsp;on</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #666666; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">//&nbsp; continue&nbsp;can&nbsp;start&nbsp;remote&nbsp;debugging.</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gbd)&nbsp;continue</span></p>
+<h1 style="font-weight: normal; font-family: Times; font-size: medium;" dir="ltr"><span style="font-size: 24px; font-family: Arial; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Tips:</span></h1>
+<h2 style="font-weight: normal; font-family: Times; font-size: medium;" dir="ltr"><span style="font-size: 19px; font-family: Arial; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">0.&nbsp;use&nbsp;sshfs&nbsp;to&nbsp;remap&nbsp;the&nbsp;build&nbsp;dir&nbsp;to&nbsp;your&nbsp;local&nbsp;PC:</span></h2>
+<p><span style="font-size: 15px; font-family: Arial; color: #434343; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">//&nbsp;&nbsp;use&nbsp;adb&nbsp;require&nbsp;a&nbsp;usb&nbsp;cable&nbsp;connect&nbsp;to&nbsp;your&nbsp;board,&nbsp;so&nbsp;for&nbsp;some&nbsp;guy&nbsp;build&nbsp;the&nbsp;code&nbsp;on&nbsp;server,&nbsp;you&nbsp;can&nbsp;use&nbsp;sshfs&nbsp;to&nbsp;let&nbsp;all&nbsp;file&nbsp;system&nbsp;in&nbsp;server&nbsp;mapping&nbsp;to&nbsp;your&nbsp;PC.</span><br><span style="font-size: 15px; font-family: Arial; color: #434343; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">//&nbsp;in&nbsp;my&nbsp;case,&nbsp;i&nbsp;use&nbsp;</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">sshfs &nbsp;b33xxx@10.192.224.xx:/home/b33xxx/ &nbsp;~/shdroid1</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">start&nbsp;gdb&nbsp;command&nbsp;become:</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">prebuilt/linux-x86/toolchain/arm-eabi-4.4.3/bin/arm-eabi-gdb /home/xxx/shdroid1/proj/ics/out/target/product/sabresd_6q/symbols/system/bin/surfaceflinger</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #434343; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">and&nbsp;the&nbsp;path&nbsp;in&nbsp;gbd&nbsp;'s&nbsp;input&nbsp;is&nbsp;become:</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> set solib-absolute-prefix /home/xxx/shdroid1/proj/ics/out/target/product/sabresd_6q/symbols/</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> set&nbsp;solib-search-path&nbsp;/home/xxx/shdroid1/proj/ics/out/target/product/sabresd_6q/symbols/system/lib</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">1.&nbsp;how&nbsp;to&nbsp;keep&nbsp;gdb&nbsp;run</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"><span style="white-space: pre;"> </span>modify&nbsp;init.freescale.rc,&nbsp;change&nbsp;this&nbsp;line&nbsp;from:</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"><span style="white-space: pre;"> </span>setprop persist.sys.usb.config mtp</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"><span style="white-space: pre;"> </span>--&gt;&nbsp;setprop persist.sys.usb.config gdb</span></p>
+<h2 style="font-weight: normal; font-family: Times; font-size: medium;" dir="ltr"><span style="font-size: 19px; font-family: Arial; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">2.&nbsp;How&nbsp;to&nbsp;let&nbsp;gdb&nbsp;load&nbsp;all&nbsp;symbol</span></h2>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"><span style="white-space: pre;"> </span>gdbserver&nbsp;will&nbsp;stop&nbsp;at&nbsp;linker:begin.S&nbsp;when&nbsp;start,&nbsp;&nbsp;&nbsp;before&nbsp;continue,&nbsp;you&nbsp;should&nbsp;set&nbsp;a&nbsp;break&nbsp;point&nbsp;at&nbsp;main()&nbsp;function,&nbsp;after&nbsp;you&nbsp;stop&nbsp;at&nbsp;main,&nbsp;the&nbsp;all&nbsp;symbol&nbsp;will&nbsp;loaded,&nbsp;you&nbsp;can&nbsp;set&nbsp;break&nbsp;point&nbsp;by&nbsp;function's&nbsp;name</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;b&nbsp;main</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gdb)&nbsp;continue</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">&lt;---&nbsp;after&nbsp;stop&nbsp;at&nbsp;main&nbsp;---&gt;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">b&nbsp;SurfaceFlinger::publishAndJoinThreadPool()&nbsp;#&nbsp;set&nbsp;break&nbsp;point&nbsp;by&nbsp;function&nbsp;name</span></p>
+<h2 style="font-weight: normal; font-family: Times; font-size: medium;" dir="ltr"><span style="font-size: 19px; font-family: Arial; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">3.&nbsp;how&nbsp;to&nbsp;restart&nbsp;debuging,&nbsp;restart&nbsp;debugging&nbsp;like&nbsp;this&nbsp;can&nbsp;keep&nbsp;the&nbsp;break&nbsp;points.</span></h2>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gbd)&nbsp;kill&nbsp;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">#&nbsp;gdbserver&nbsp;xxxx&nbsp;//&nbsp;needs&nbsp;to&nbsp;restart&nbsp;server</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gbd)&nbsp;&nbsp;target&nbsp;remote&nbsp;:5039&nbsp;&nbsp;&nbsp;&nbsp;//&nbsp;reconnect.</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(gbd)&nbsp;set scheduler-locking on</span></p>
+<h2 style="font-weight: normal; font-family: Times; font-size: medium;" dir="ltr"><span style="font-size: 19px; font-family: Arial; color: #000000; background-color: transparent; font-weight: bold; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">4.&nbsp;how&nbsp;to&nbsp;extract&nbsp;the&nbsp;stack&nbsp;dump&nbsp;quickly,</span></h2>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(going&nbsp;to&nbsp;android&nbsp;build&nbsp;dir)</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;.&nbsp;build/envsetup.sh</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;lunch&nbsp;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(&nbsp;choose&nbsp;your&nbsp;product)</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">(make&nbsp;sure&nbsp;this&nbsp;was&nbsp;full&nbsp;build&nbsp;dir)</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">run&nbsp;</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">$&nbsp;./development/scripts/stack</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">when&nbsp;you&nbsp;see&nbsp;this:</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Reading native crash info from stdin</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">you&nbsp;can&nbsp;copy&nbsp;the&nbsp;stack&nbsp;dump&nbsp;from&nbsp;logcat,&nbsp;begin&nbsp;with&nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">such&nbsp;as:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): Build fingerprint: 'freescale/sabresd_6q/sabresd_6q:4.0.3/R13.2-rc3/eng.b33651.20120327.172909:eng/test-keys'</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): pid: 2649, tid: 2649 &nbsp;&gt;&gt;&gt; /system/bin/surfaceflinger &lt;&lt;&lt;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 002e0064</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;r0 ffffffff &nbsp;r1 002e0064 &nbsp;r2 401167d0 &nbsp;r3 0066791c</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;r4 ffffffff &nbsp;r5 002e0064 &nbsp;r6 bec42a50 &nbsp;r7 40208e85</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;r8 bec429f0 &nbsp;r9 00000a59 &nbsp;10 000003e8 &nbsp;fp 00000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;ip 40196078 &nbsp;sp bec429b8 &nbsp;lr 4004d0e8 &nbsp;pc 4004d0e8 &nbsp;cpsr 00000010</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d0 &nbsp;0000000000000000 &nbsp;d1 &nbsp;0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d2 &nbsp;0000000000000000 &nbsp;d3 &nbsp;0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d4 &nbsp;0000000000000000 &nbsp;d5 &nbsp;0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d6 &nbsp;3f80000000000000 &nbsp;d7 &nbsp;000000003f800000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d8 &nbsp;0000000000000000 &nbsp;d9 &nbsp;0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d10 0000000000000000 &nbsp;d11 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d12 0000000000000000 &nbsp;d13 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d14 0000000000000000 &nbsp;d15 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d16 41a93d96b0b645a2 &nbsp;d17 3f50624dd2f1a9fc</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d18 41c5dae992000000 &nbsp;d19 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d20 0000000000000000 &nbsp;d21 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d22 0000000000000000 &nbsp;d23 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d24 0000000000000000 &nbsp;d25 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d26 0000000000000000 &nbsp;d27 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d28 0000000000000000 &nbsp;d29 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;d30 0000000000000000 &nbsp;d31 0000000000000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;scr 00000010</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167):</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>#00 &nbsp;pc 000050e8 &nbsp;/system/lib/libcutils.so (android_atomic_add)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>#01 &nbsp;pc 0001a058 &nbsp;/system/lib/libutils.so (_ZNK7android7RefBase9decStrongEPKv)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>#02 &nbsp;pc 00019218 &nbsp;/system/lib/libbinder.so (_ZN7android2spINS_21IPermissionControllerEED1Ev)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>#03 &nbsp;pc 0001b1fa &nbsp;/system/lib/libbinder.so (_ZN7android14IPCThreadState14executeCommandEi)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>#04 &nbsp;pc 0001b3c6 &nbsp;/system/lib/libbinder.so (_ZN7android14IPCThreadState14joinThreadPoolEb)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167):</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): code around pc:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 4004d0c8 e1853f92 e3530000 1afffffa e8bd8070 &nbsp;.?....S.....p...</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 4004d0d8 e92d4070 e1a04000 e1a05001 ebffffd1 &nbsp;p@-..@...P......</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 4004d0e8 e1950f9f e0802004 e1853f92 e3530000 &nbsp;..... ...?....S.</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 4004d0f8 1afffffa e8bd8070 e1a01000 e3e00000 &nbsp;....p...........</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 4004d108 eafffff2 e1a01000 e3a00001 eaffffef &nbsp;................</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167):</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): memory map around addr 002e0064:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 00009000-0000a000 /system/bin/surfaceflinger</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): (no map for address)</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): 00662000-00668000 [heap]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167):</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): stack:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42978 &nbsp;bec42a20 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec4297c &nbsp;bec429f0 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42980 &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42984 &nbsp;bec42a20 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42988 &nbsp;00000a59 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec4298c &nbsp;000003e8 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42990 &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42994 &nbsp;4010ed0d &nbsp;/system/lib/libsurfaceflinger.so</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec42998 &nbsp;00000010 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec4299c &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429a0 &nbsp;bec42a20 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429a4 &nbsp;bec429f0 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429a8 &nbsp;0066791c &nbsp;[heap]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429ac &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429b0 &nbsp;df0027ad &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429b4 &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): #00 bec429b8 &nbsp;002e0064 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429bc &nbsp;00667f68 &nbsp;[heap]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429c0 &nbsp;bec42a50 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429c4 &nbsp;4018205b &nbsp;/system/lib/libutils.so</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): #01 bec429c8 &nbsp;bec42a50 &nbsp;[stack]</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429cc &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429d0 &nbsp;4021932c &nbsp;/system/lib/libbinder.so</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 39pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">I/DEBUG &nbsp;&nbsp;( 2167): <span style="white-space: pre;"> </span>bec429d4 &nbsp;4020a21b &nbsp;/system/lib/libbinder.so</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">then&nbsp;you&nbsp;type&nbsp;CTRL-D&nbsp;to&nbsp;tell&nbsp;the&nbsp;script&nbsp;EOF,</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">then&nbsp;you&nbsp;will&nbsp;see&nbsp;the&nbsp;full&nbsp;stack&nbsp;dump&nbsp;with&nbsp;source&nbsp;and&nbsp;lines&nbsp;like&nbsp;this;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Reading symbols from /home/b33651/proj/ics/out/target/product/sabresd_6q/symbols</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">pid: 2649, tid: 2649 &nbsp;&gt;&gt;&gt; /system/bin/surfaceflinger &lt;&lt;&lt;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 002e0064</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;r0 ffffffff &nbsp;r1 002e0064 &nbsp;r2 401167d0 &nbsp;r3 0066791c</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;r4 ffffffff &nbsp;r5 002e0064 &nbsp;r6 bec42a50 &nbsp;r7 40208e85</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;r8 bec429f0 &nbsp;r9 00000a59 &nbsp;10 000003e8 &nbsp;fp 00000000</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;ip 40196078 &nbsp;sp bec429b8 &nbsp;lr 4004d0e8 &nbsp;pc 4004d0e8</span></p>
+<p></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Stack Trace:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;RELADDR &nbsp;&nbsp;FUNCTION &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>FILE:LINE</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;000050e8 &nbsp;android_atomic_add+16 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>/home/b33651/proj/ics/system/core/include/cutils/atomic-arm.h:158</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;0001a058 &nbsp;android::RefBase::decStrong(void const*) const+12 &nbsp;/home/b33651/proj/ics/frameworks/base/libs/utils/RefBase.cpp:351</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;v------&gt; &nbsp;~sp &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>/home/b33651/proj/ics/frameworks/base/include/utils/StrongPointer.h:149</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;00019218 &nbsp;android::sp&lt;android::IMemoryHeap&gt;::~sp()+20 &nbsp;&nbsp;&nbsp;<span style="white-space: pre;"> </span>/home/b33651/proj/ics/frameworks/base/include/utils/StrongPointer.h:149</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;0001b1fa &nbsp;android::IPCThreadState::executeCommand(int)+538 &nbsp;&nbsp;/home/b33651/proj/ics/frameworks/base/libs/binder/IPCThreadState.cpp:1029</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;0001b3c6 &nbsp;android::IPCThreadState::joinThreadPool(bool)+186 &nbsp;/home/b33651/proj/ics/frameworks/base/libs/binder/IPCThreadState.cpp:468</span></p>
+<p></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">Stack Data:</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;ADDR &nbsp;<span style="white-space: pre;"> </span>VALUE <span style="white-space: pre;"> </span>FILE:LINE/FUNCTION</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42978 &nbsp;bec42a20 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec4297c &nbsp;bec429f0 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42980 &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42984 &nbsp;bec42a20 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42988 &nbsp;00000a59 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec4298c &nbsp;000003e8 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42990 &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42994 &nbsp;4010ed0d &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec42998 &nbsp;00000010 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec4299c &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429a0 &nbsp;bec42a20 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429a4 &nbsp;bec429f0 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429a8 &nbsp;0066791c &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429ac &nbsp;00000004 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429b0 &nbsp;df0027ad &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429b4 &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429b8 &nbsp;002e0064 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429bc &nbsp;00667f68 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429c0 &nbsp;bec42a50 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429c4 &nbsp;4018205b &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429c8 &nbsp;bec42a50 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429cc &nbsp;00000000 &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429d0 &nbsp;4021932c &nbsp;</span></p>
+<p style="font-weight: normal; font-family: Times; font-size: medium; text-indent: 4.5pt; margin-top: 0pt; margin-bottom: 0pt;" dir="ltr"><span style="font-size: 11px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> &nbsp;bec429d4 &nbsp;4020a21b &nbsp;</span></p>
+<p><span style="font-size: 15px; font-family: Arial; color: #434343; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;">#####----------------------------</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> set solib-absolute-prefix /home/kzj/shdroid1/proj/ics/out/target/product/sabresd_6q/symbols/</span><br><span style="font-size: 15px; font-family: Arial; color: #000000; background-color: transparent; font-weight: normal; font-style: normal; font-variant: normal; text-decoration: none; vertical-align: baseline; white-space: pre-wrap;"> set&nbsp;solib-search-path&nbsp;/home/kzj/shdroid1/proj/ics/out/target/product/sabresd_6q/symbols/system/lib</span></p></div>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/07/14/android-gdb-full-symbol.html" data-id="cj4nt09lw008pusa6wl4gnnnl" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/adb/">adb</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/3/">__('next') &raquo;</a>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/">CPU</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/Throughs/">Throughs</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Performance/">Performance</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/">Rails</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GAE/">GAE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GFW/">GFW</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Rails/">Rails</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apple/">apple</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm/">arm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emacs/">emacs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/google/">google</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/internet/">internet</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kindle/">kindle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-优化/">linux 优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm/">pm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uart/">uart</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性格/">性格</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电子商务/">电子商务</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/GAE/" style="font-size: 10px;">GAE</a> <a href="/tags/GFW/" style="font-size: 15px;">GFW</a> <a href="/tags/Postgres/" style="font-size: 10px;">Postgres</a> <a href="/tags/Rails/" style="font-size: 10px;">Rails</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 17.5px;">android</a> <a href="/tags/apple/" style="font-size: 10px;">apple</a> <a href="/tags/arm/" style="font-size: 10px;">arm</a> <a href="/tags/bluetooth/" style="font-size: 12.5px;">bluetooth</a> <a href="/tags/emacs/" style="font-size: 12.5px;">emacs</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/google/" style="font-size: 10px;">google</a> <a href="/tags/homebrew/" style="font-size: 10px;">homebrew</a> <a href="/tags/internet/" style="font-size: 10px;">internet</a> <a href="/tags/kindle/" style="font-size: 10px;">kindle</a> <a href="/tags/linux/" style="font-size: 20px;">linux</a> <a href="/tags/linux-优化/" style="font-size: 10px;">linux 优化</a> <a href="/tags/mac/" style="font-size: 10px;">mac</a> <a href="/tags/pm/" style="font-size: 10px;">pm</a> <a href="/tags/uart/" style="font-size: 10px;">uart</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/性格/" style="font-size: 10px;">性格</a> <a href="/tags/电子商务/" style="font-size: 10px;">电子商务</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06/">June 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/01/">January 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/12/">December 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/11/">November 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/07/">July 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/03/">March 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/02/">February 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/12/">December 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/10/">October 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/09/">September 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/08/">August 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/07/">July 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/06/">June 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/05/">May 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/04/">April 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/03/">March 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/12/">December 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/11/">November 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/08/">August 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/07/">July 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/06/">June 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/05/">May 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/04/">April 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/03/">March 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/11/">November 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/09/">September 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/05/">May 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/04/">April 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/11/">November 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/10/">October 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/07/">July 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/03/">March 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/02/">February 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/01/">January 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/12/">December 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/11/">November 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/10/">October 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/09/">September 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/08/">August 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/07/">July 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/06/">June 2007</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/04/art-of-padding.html">Art of padding</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Jiejing Zhang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

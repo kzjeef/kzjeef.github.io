@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Handy One-liners for AWK | Thinking beyond source code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="This post copy a very handy text about awk, for I can reference in further. The copyright belongs to the origin auther: Eric Pement. HANDY ONE-LINERS FOR AWK                                  22 July 2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handy One-liners for AWK">
+<meta property="og:url" content="http://www.thinksrc.com/2012/12/22/handy-one-liners-for-awk.html">
+<meta property="og:site_name" content="Thinking beyond source code">
+<meta property="og:description" content="This post copy a very handy text about awk, for I can reference in further. The copyright belongs to the origin auther: Eric Pement. HANDY ONE-LINERS FOR AWK                                  22 July 2">
+<meta property="og:updated_time" content="2017-07-03T07:01:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Handy One-liners for AWK">
+<meta name="twitter:description" content="This post copy a very handy text about awk, for I can reference in further. The copyright belongs to the origin auther: Eric Pement. HANDY ONE-LINERS FOR AWK                                  22 July 2">
+  
+    <link rel="alternate" href="/atom.xml" title="Thinking beyond source code" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Thinking beyond source code</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Recording my throughs</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.thinksrc.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-handy-one-liners-for-awk" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2012/12/22/handy-one-liners-for-awk.html" class="article-date">
+  <time datetime="2012-12-21T21:20:54.000Z" itemprop="datePublished">2012-12-22</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/未分类/">未分类</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Handy One-liners for AWK
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>This post copy a very handy text about awk, for I can reference in further.<br>
+The copyright belongs to the origin auther: Eric Pement.</p>
+<pre class="theme:classic-spaced font:tahoma striped:false nums:false nums-toggle:false lang:ps decode:true crayon-selected">HANDY ONE-LINERS FOR AWK                                  22 July 2003
+compiled by Eric Pement &lt;pemente@northpark.edu&gt;           version 0.22
+   Latest version of this file is usually at:
+   http://www.student.northpark.edu/pemente/awk/awk1line.txt
+
+USAGE:
+
+    Unix:  awk '/pattern/ {print "$1"}'    # standard Unix shells
+ DOS/Win:  awk '/pattern/ {print "$1"}'    # okay for DJGPP compiled
+           awk "/pattern/ {print "$1"}"  # required for Mingw32
+
+Most of my experience comes from version of GNU awk (gawk) compiled for
+Win32. Note in particular that DJGPP compilations permit the awk script
+to follow Unix quoting syntax '/like/ {"this"}'. However, the user must
+know that single quotes under DOS/Windows do not protect the redirection
+arrows (&lt;, &gt;) nor do they protect pipes (|). Both are special symbols
+for the DOS/CMD command shell and their special meaning is ignored only
+if they are placed within "double quotes." Likewise, DOS/Win users must
+remember that the percent sign (%) is used to mark DOS/Win environment
+variables, so it must be doubled (%%) to yield a single percent sign
+visible to awk.
+
+If I am sure that a script will NOT need to be quoted in Unix, DOS, or
+CMD, then I normally omit the quote marks. If an example is peculiar to
+GNU awk, the command 'gawk' will be used. Please notify me if you find
+errors or new commands to add to this list (total length under 65
+characters). I usually try to put the shortest script first.
+
+FILE SPACING:
+
+ # double space a file
+ awk '1;{print ""}'
+ awk 'BEGIN{ORS="nn"};1'
+
+ # double space a file which already has blank lines in it. Output file
+ # should contain no more than one blank line between lines of text.
+ # NOTE: On Unix systems, DOS lines which have only CRLF (rn) are
+ # often treated as non-blank, and thus 'NF' alone will return TRUE.
+ awk 'NF{print $0 "n"}'
+
+ # triple space a file
+ awk '1;{print "n"}'
+
+NUMBERING AND CALCULATIONS:
+
+ # precede each line by its line number FOR THAT FILE (left alignment).
+ # Using a tab (t) instead of space will preserve margins.
+ awk '{print FNR "t" $0}' files*
+
+ # precede each line by its line number FOR ALL FILES TOGETHER, with tab.
+ awk '{print NR "t" $0}' files*
+
+ # number each line of a file (number on left, right-aligned)
+ # Double the percent signs if typing from the DOS command prompt.
+ awk '{printf("%5d : %sn", NR,$0)}'
+
+ # number each line of file, but only print numbers if line is not blank
+ # Remember caveats about Unix treatment of r (mentioned above)
+ awk 'NF{$0=++a " :" $0};{print}'
+ awk '{print (NF? ++a " :" :"") $0}'
+
+ # count lines (emulates "wc -l")
+ awk 'END{print NR}'
+
+ # print the sums of the fields of every line
+ awk '{s=0; for (i=1; i&lt;=NF; i++) s=s+$i; print s}'
+
+ # add all fields in all lines and print the sum
+ awk '{for (i=1; i&lt;=NF; i++) s=s+$i}; END{print s}'
+
+ # print every line after replacing each field with its absolute value
+ awk '{for (i=1; i&lt;=NF; i++) if ($i &lt; 0) $i = -$i; print }'
+ awk '{for (i=1; i&lt;=NF; i++) $i = ($i &lt; 0) ? -$i : $i; print }'
+
+ # print the total number of fields ("words") in all lines
+ awk '{ total = total + NF }; END {print total}' file
+
+ # print the total number of lines that contain "Beth"
+ awk '/Beth/{n++}; END {print n+0}' file
+
+ # print the largest first field and the line that contains it
+ # Intended for finding the longest string in field #1
+ awk '$1 &gt; max {max=$1; maxline=$0}; END{ print max, maxline}'
+
+ # print the number of fields in each line, fol]+$/,lowed by the line
+ awk '{ print NF ":" $0 } '
+
+ # print the last field of each line
+ awk '{ print $NF }'
+
+ # print the last field of the last line
+ awk '{ field = $NF }; END{ print field }'
+
+ # print every line with more than 4 fields
+ awk 'NF &gt; 4'
+
+ # print every line where the value of the last field is &gt; 4
+ awk '$NF &gt; 4'
+
+TEXT CONVERSION AND SUBSTITUTION:
+
+ # IN UNIX ENVIRONMENT: convert DOS newlines (CR/LF) to Unix format
+ awk '{sub(/r$/,"");print}'   # assumes EACH line ends with Ctrl-M
+
+ # IN UNIX ENVIRONMENT: convert Unix newlines (LF) to DOS format
+ awk '{sub(/$/,"r");print}'
+
+ # IN DOS ENVIRONMENT: convert Unix newlines (LF) to DOS format
+ awk 1
+
+ # IN DOS ENVIRONMENT: convert DOS newlines (CR/LF) to Unix format
+ # Cannot be done with DOS versions of awk, other than gawk:
+ gawk -v BINMODE="w" '1' infile &gt;outfile
+
+ # Use "tr" instead.
+ tr -d r &lt;infile &gt;outfile            # GNU tr version 1.22 or higher
+
+ # delete leading whitespace (spaces, tabs) from front of each line
+ # aligns all text flush left
+ awk '{sub(/^[ t]+/, ""); print}'
+
+ # delete trailing whitespace (spaces, tabs) from end of each line
+ awk '{sub(/[ t]+$/, "");print}'
+
+ # delete BOTH leading and trailing whitespace from each line
+ awk '{gsub(/^[ t]+|[ t]+$/,"");print}'
+ awk '{$1=$1;print}'           # also removes extra space between fields
+
+ # insert 5 blank spaces at beginning of each line (make page offset)
+ awk '{sub(/^/, "     ");print}'
+
+ # align all text flush right on a 79-column width
+ awk '{printf "%79sn", $0}' file*
+
+ # center all text on a 79-character width
+ awk '{l=length();s=int((79-l)/2); printf "%"(s+l)"sn",$0}' file*
+
+ # substitute (find and replace) "foo" with "bar" on each line
+ awk '{sub(/foo/,"bar");print}'           # replaces only 1st instance
+ gawk '{$0=gensub(/foo/,"bar",4);print}'  # replaces only 4th instance
+ awk '{gsub(/foo/,"bar");print}'          # replaces ALL instances in a line
+
+ # substitute "foo" with "bar" ONLY for lines which contain "baz"
+ awk '/baz/{gsub(/foo/, "bar")};{print}'
+
+ # substitute "foo" with "bar" EXCEPT for lines which contain "baz"
+ awk '!/baz/{gsub(/foo/, "bar")};{print}'
+
+ # change "scarlet" or "ruby" or "puce" to "red"
+ awk '{gsub(/scarlet|ruby|puce/, "red"); print}'
+
+ # reverse order of lines (emulates "tac")
+ awk '{a[i++]=$0} END {for (j=i-1; j&gt;=0;) print a[j--] }' file*
+
+ # if a line ends with a backslash, append the next line to it
+ # (fails if there are multiple lines ending with backslash...)
+ awk '/$/ {sub(/$/,""); getline t; print $0 t; next}; 1' file*
+
+ # print and sort the login names of all users
+ awk -F ":" '{ print $1 | "sort" }' /etc/passwd
+
+ # print the first 2 fields, in opposite order, of every line
+ awk '{print $2, $1}' file
+
+ # switch the first 2 fields of every line
+ awk '{temp = $1; $1 = $2; $2 = temp}' file
+
+ # print every line, deleting the second field of that line
+ awk '{ $2 = ""; print }'
+
+ # print in reverse order the fields of every line
+ awk '{for (i=NF; i&gt;0; i--) printf("%s ",i);printf ("n")}' file
+
+ # remove duplicate, consecutive lines (emulates "uniq")
+ awk 'a !~ $0; {a=$0}'
+
+ # remove duplicate, nonconsecutive lines
+ awk '! a[$0]++'                     # most concise script
+ awk '!($0 in a) {a[$0];print}'      # most efficient script
+
+ # concatenate every 5 lines of input, using a comma separator
+ # between fields
+ awk 'ORS=%NR%5?",":"n"' file
+
+SELECTIVE PRINTING OF CERTAIN LINES:
+
+ # print first 10 lines of file (emulates behavior of "head")
+ awk 'NR &lt; 11'
+
+ # print first line of file (emulates "head -1")
+ awk 'NR&gt;1{exit};1'
+
+  # print the last 2 lines of a file (emulates "tail -2")
+ awk '{y=x "n" $0; x=$0};END{print y}'
+
+ # print the last line of a file (emulates "tail -1")
+ awk 'END{print}'
+
+ # print only lines which match regular expression (emulates "grep")
+ awk '/regex/'
+
+ # print only lines which do NOT match regex (emulates "grep -v")
+ awk '!/regex/'
+
+ # print the line immediately before a regex, but not the line
+ # containing the regex
+ awk '/regex/{print x};{x=$0}'
+ awk '/regex/{print (x=="" ? "match on line 1" : x)};{x=$0}'
+
+ # print the line immediately after a regex, but not the line
+ # containing the regex
+ awk '/regex/{getline;print}'
+
+ # grep for AAA and BBB and CCC (in any order)
+ awk '/AAA/; /BBB/; /CCC/'
+
+ # grep for AAA and BBB and CCC (in that order)
+ awk '/AAA.*BBB.*CCC/'
+
+ # print only lines of 65 characters or longer
+ awk 'length &gt; 64'
+
+ # print only lines of less than 65 characters
+ awk 'length &lt; 64'
+
+ # print section of file from regular expression to end of file
+ awk '/regex/,0'
+ awk '/regex/,EOF'
+
+ # print section of file based on line numbers (lines 8-12, inclusive)
+ awk 'NR==8,NR==12'
+
+ # print line number 52
+ awk 'NR==52'
+ awk 'NR==52 {print;exit}'          # more efficient on large files
+
+ # print section of file between two regular expressions (inclusive)
+ awk '/Iowa/,/Montana/'             # case sensitive
+
+SELECTIVE DELETION OF CERTAIN LINES:
+
+ # delete ALL blank lines from a file (same as "grep '.' ")
+ awk NF
+ awk '/./'
+
+CREDITS AND THANKS:
+
+Special thanks to Peter S. Tillier for helping me with the first release
+of this FAQ file.
+
+For additional syntax instructions, including the way to apply editing
+commands from a disk file instead of the command line, consult:
+
+"sed &amp; awk, 2nd Edition," by Dale Dougherty and Arnold Robbins
+  O'Reilly, 1997
+"UNIX Text Processing," by Dale Dougherty and Tim O'Reilly
+  Hayden Books, 1987
+"Effective awk Programming, 3rd Edition." by Arnold Robbins
+  O'Reilly, 2001
+
+To fully exploit the power of awk, one must understand "regular
+expressions." For detailed discussion of regular expressions, see
+"Mastering Regular Expressions, 2d edition" by Jeffrey Friedl
+   (O'Reilly, 2002).
+
+The manual ("man") pages on Unix systems may be helpful (try "man awk",
+"man nawk", "man regexp", or the section on regular expressions in "man
+ed"), but man pages are notoriously difficult. They are not written to
+teach awk use or regexps to first-time users, but as a reference text
+for those already acquainted with these tools.
+
+USE OF 't' IN awk SCRIPTS: For clarity in documentation, we have used
+the expression 't' to indicate a tab character (0x09) in the scripts.
+All versions of awk, even the UNIX System 7 version should recognize
+the 't' abbreviation.
+
+#---end of file---</pre>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.thinksrc.com/2012/12/22/handy-one-liners-for-awk.html" data-id="cj4nt09ko0069usa6dcnw8d5m" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2013/01/29/c%ef%bc%9a-disallow-evil-constructors.html" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          C++： Disallow evil constructors.
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2012/12/06/%e6%9c%80%e8%bf%91google%e6%90%9c%e7%b4%a2%e6%89%93%e4%b8%8d%e5%bc%80%ef%bc%9f%e7%9c%8b%e8%bf%99%e9%87%8c.html" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">最近Google搜索打不开？看这里</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/">CPU</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/Throughs/">Throughs</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Performance/">Performance</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/">Rails</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GAE/">GAE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GFW/">GFW</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Rails/">Rails</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apple/">apple</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm/">arm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emacs/">emacs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/google/">google</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/internet/">internet</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kindle/">kindle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-优化/">linux 优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm/">pm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uart/">uart</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性格/">性格</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电子商务/">电子商务</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/GAE/" style="font-size: 10px;">GAE</a> <a href="/tags/GFW/" style="font-size: 15px;">GFW</a> <a href="/tags/Postgres/" style="font-size: 10px;">Postgres</a> <a href="/tags/Rails/" style="font-size: 10px;">Rails</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 17.5px;">android</a> <a href="/tags/apple/" style="font-size: 10px;">apple</a> <a href="/tags/arm/" style="font-size: 10px;">arm</a> <a href="/tags/bluetooth/" style="font-size: 12.5px;">bluetooth</a> <a href="/tags/emacs/" style="font-size: 12.5px;">emacs</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/google/" style="font-size: 10px;">google</a> <a href="/tags/homebrew/" style="font-size: 10px;">homebrew</a> <a href="/tags/internet/" style="font-size: 10px;">internet</a> <a href="/tags/kindle/" style="font-size: 10px;">kindle</a> <a href="/tags/linux/" style="font-size: 20px;">linux</a> <a href="/tags/linux-优化/" style="font-size: 10px;">linux 优化</a> <a href="/tags/mac/" style="font-size: 10px;">mac</a> <a href="/tags/pm/" style="font-size: 10px;">pm</a> <a href="/tags/uart/" style="font-size: 10px;">uart</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/性格/" style="font-size: 10px;">性格</a> <a href="/tags/电子商务/" style="font-size: 10px;">电子商务</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06/">June 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/01/">January 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/12/">December 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/11/">November 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/07/">July 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/03/">March 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/02/">February 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/12/">December 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/10/">October 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/09/">September 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/08/">August 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/07/">July 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/06/">June 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/05/">May 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/04/">April 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/03/">March 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/12/">December 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/11/">November 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/08/">August 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/07/">July 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/06/">June 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/05/">May 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/04/">April 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/03/">March 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/11/">November 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/09/">September 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/05/">May 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/04/">April 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/11/">November 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/10/">October 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/07/">July 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/03/">March 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/02/">February 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/01/">January 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/12/">December 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/11/">November 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/10/">October 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/09/">September 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/08/">August 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/07/">July 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/06/">June 2007</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
+          </li>
+        
+          <li>
+            <a href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
+          </li>
+        
+          <li>
+            <a href="/2015/10/04/art-of-padding.html">Art of padding</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Jiejing Zhang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
