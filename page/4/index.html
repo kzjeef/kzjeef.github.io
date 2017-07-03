@@ -1,97 +1,380 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
+<!doctype html>
+
+
+
   
-  <title>Thinking beyond source code</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="cDFhyeCTjCtdiX_kTRM-f4YBtgdo30SXuvERbggq39E" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta property="og:type" content="website">
 <meta property="og:title" content="Thinking beyond source code">
 <meta property="og:url" content="http://www.thinksrc.com/page/4/index.html">
 <meta property="og:site_name" content="Thinking beyond source code">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Thinking beyond source code">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.thinksrc.com/page/4/"/>
+
+
+
+
+
+  <title>Thinking beyond source code</title>
   
-    <link rel="alternate" href="/atom.xml" title="Thinking beyond source code" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-1633147-2', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f1c3ad154ad58e9f01314ca420646c0d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
 
 </head>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">Thinking beyond source code</a>
-      </h1>
-      
-        <h2 id="subtitle-wrap">
-          <a href="/" id="subtitle">Recording my throughs</a>
-        </h2>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.thinksrc.com"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main">
-  
-    <article id="post-ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/06/24/ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90.html" class="article-date">
-  <time datetime="2011-06-24T01:32:39.000Z" itemprop="datePublished">2011-06-24</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/06/24/ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90.html">ext4的fsync性能和nodelalloc参数的分析</a>
-    </h1>
+  
+    
   
 
+  <div class="container sidebar-position-right 
+   page-home 
+ ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Thinking beyond source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Recording my throughs</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+  <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/06/24/ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/06/24/ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90.html" itemprop="url">ext4的fsync性能和nodelalloc参数的分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-06-24T09:32:39+08:00">
+                2011-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>感叹归感叹，发泄完了还得继续过。</p>
+      
+
+      
+        
+          
+            <p>感叹归感叹，发泄完了还得继续过。</p>
 <p>前几天忙的不可开交，周报上面竟然能列出11项，想想以前在T公司时候的清闲，现在的老板的真幸运了。</p>
 <p>好了，言归正传。</p>
 <p>我们的系统是使用ext4作为文件系统的，ext4怎么好呢？ 主要是我对它感觉比较好，呵呵，开玩笑的。还记得第一次使用一个全新的ext4作为文件系统（不是ext3转过来的）时候感觉性能的feeling，应该用神奇来形容。</p>
@@ -265,90 +548,276 @@ int ext4_sync_file(struct file *file, int datasync)
 <p>[1] right thing, but really affect performance&nbsp; <a href="http://postgresql.1045698.n5.nabble.com/ext4-finally-doing-the-right-thing-td2076089.html" target="_blank">http://postgresql.1045698.n5.nabble.com/ext4-finally-doing-the-right-thing-td2076089.html</a></p>
 <p><a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745" target="_blank">[2] This patch fix it.</a><a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745" target="_blank"> http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commit;h=5f3481e9a80c240f169b36ea886e2325b9aeb745</a></p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/06/24/ext4%e7%9a%84fsync%e6%80%a7%e8%83%bd%e5%92%8cnodelalloc%e5%8f%82%e6%95%b0%e7%9a%84%e5%88%86%e6%9e%90.html" data-id="cj4nt09k30051usa6y6bb4vc9" class="article-share-link">Share</a>
+
+    <div>
       
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
       
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/06/24/%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93.html" class="article-date">
-  <time datetime="2011-06-24T01:19:33.000Z" itemprop="datePublished">2011-06-24</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/06/24/%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/06/24/%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93.html">生活不易，卢瑟的更不易</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/06/24/%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93.html" itemprop="url">生活不易，卢瑟的更不易</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-06-24T09:19:33+08:00">
+                2011-06-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>卢瑟，记得两年前就拿到手就这么多了，现在还是这么多。而生活的成本却上升的受不了的快。 税前想想还可以安心睡个觉，税后就连安慰心爱的人都不知道怎么安慰了。 只能说面包会有的，什么都会有的之类的话。对于现在的我们，这些话说来就没有太多的用了。 睡不着，一年前西湖边的甜蜜合影，右手边没有喝完的二锅头，电脑旁边的云南白药。</p>
+      
+
+      
+        
+          
+            <p>卢瑟，记得两年前就拿到手就这么多了，现在还是这么多。而生活的成本却上升的受不了的快。 税前想想还可以安心睡个觉，税后就连安慰心爱的人都不知道怎么安慰了。 只能说面包会有的，什么都会有的之类的话。对于现在的我们，这些话说来就没有太多的用了。 睡不着，一年前西湖边的甜蜜合影，右手边没有喝完的二锅头，电脑旁边的云南白药。</p>
 <p>忙着累着，公司一堆事情，家里一堆事情，再看看那可怜的工资。 想想遥不可及的梦想。会走到今天这么悲凉，我走了一条自己坚持的路，坚持做自己想做的事情的代价就是没有得到相应的回报， 感觉是时间不够吧。 可是在这一段时间，这样的坚持是何等的煎熬。好久没有快乐的感觉了。</p>
 <p>我开始怀疑是不是我错了，当初就应该选择钱多的那方？</p>
 <p>这就是我，得意时飘飘然，低落时寂寞然。</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/06/24/%e7%94%9f%e6%b4%bb%e4%b8%8d%e6%98%93%ef%bc%8c%e5%8d%a2%e7%91%9f%e7%9a%84%e6%9b%b4%e4%b8%8d%e6%98%93.html" data-id="cj4nt09k1004yusa6y21jvfwb" class="article-share-link">Share</a>
+
+    <div>
       
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
       
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-3g-router" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/06/01/3g-router.html" class="article-date">
-  <time datetime="2011-06-01T13:06:54.000Z" itemprop="datePublished">2011-06-01</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/06/01/3g-router.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/06/01/3g-router.html">一个3G router的性能优化经历</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/06/01/3g-router.html" itemprop="url">一个3G router的性能优化经历</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-06-01T21:06:54+08:00">
+                2011-06-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这里记录一个在工作中经历过的一次优化记录，其中会隐去一些真实的名字。</p>
+      
+
+      
+        
+          
+            <p>这里记录一个在工作中经历过的一次优化记录，其中会隐去一些真实的名字。</p>
 <p>背景是这样的，公司有一个客户要做一个3G的WIFI移动AP，就是像 http://www.360buy.com/product/273676.html 这个东东一样的一个产品。 使用的CPU是ARM9为Core，运行在454MHz上，并且内存宽度只有16-bit. 这种设备通常对成本和功耗比较敏感，所以硬件配置都比较低，但是对于一方面的性能还是有很高的要求的。</p>
 <p>架构大概是这样的：</p><p></p>
 <p>这里3G要通过USB， 然后经过Net Filter过滤，通常这个规则是很少的，但是是必须的， 然后通过SDIO连接到WIFI芯片上，然后再通过无线连接到各种Device上面。</p>
@@ -379,48 +848,139 @@ User faults:&nbsp;&nbsp;&nbsp; 4 (signal)</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/06/01/3g-router.html" data-id="cj4nt09jz004vusa67b7fkdzk" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux-优化/">linux 优化</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/05/22/%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93.html" class="article-date">
-  <time datetime="2011-05-21T23:05:32.000Z" itemprop="datePublished">2011-05-22</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/05/22/%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/05/22/%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93.html">性格的纠结</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/05/22/%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93.html" itemprop="url">性格的纠结</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-05-22T07:05:32+08:00">
+                2011-05-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这些年里面，太过注重技术层面的学习，看书，写代码，研究细节。到了今天蓦然回首，却发现我过的很不幸福，处理非技术层次中生活的一些问题很差。以前有一个懂我的人经常和我说，你的性格太软弱，我听不进去。今天头一次当二房东，在选择租客的问题上我犯下了一个小错误，从小后悔小纠结到很后悔很纠结。再到自我安慰，不知道以后还会出现多大的后悔。</p>
+      
+
+      
+        
+          
+            <p>这些年里面，太过注重技术层面的学习，看书，写代码，研究细节。到了今天蓦然回首，却发现我过的很不幸福，处理非技术层次中生活的一些问题很差。以前有一个懂我的人经常和我说，你的性格太软弱，我听不进去。今天头一次当二房东，在选择租客的问题上我犯下了一个小错误，从小后悔小纠结到很后悔很纠结。再到自我安慰，不知道以后还会出现多大的后悔。</p>
 <p>看着镜子里面的自己，才发现这些都是自己不愿意面对的性格的弱点。不坚持，没有信心，摇摆。这件小事的发展过程和感情上最大的失败大致相同。</p>
 <p>1. 首先是给出了不合理的承诺（性格很乐观），</p>
 <p>2. 到了一个看似不大的决定的时候，虽然很纠结，但是还是按照当时承诺的做了，虽然已经发现这样做不对了。</p>
@@ -435,48 +995,139 @@ User faults:&nbsp;&nbsp;&nbsp; 4 (signal)</p>
 <p>--</p>
 <p>反思</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/05/22/%e6%80%a7%e6%a0%bc%e7%9a%84%e7%ba%a0%e7%bb%93.html" data-id="cj4nt09jy004susa638qk0fnx" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/性格/">性格</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-ath300-bluetooth" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/04/01/ath300-bluetooth.html" class="article-date">
-  <time datetime="2011-03-31T22:18:08.000Z" itemprop="datePublished">2011-04-01</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/04/01/ath300-bluetooth.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/04/01/ath300-bluetooth.html">UART蓝牙Linux调试的一些经验, DMA, FTP</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/04/01/ath300-bluetooth.html" itemprop="url">UART蓝牙Linux调试的一些经验, DMA, FTP</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-04-01T06:18:08+08:00">
+                2011-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这几天在调试一块Atheros 3001的蓝牙芯片，今天算是有一个里程碑了，总结一下放在这里吧，开始写博客的习惯吧。尽管这有些out，不过当作自己的一个习惯吧。</p>
+      
+
+      
+        
+          
+            <p>这几天在调试一块Atheros 3001的蓝牙芯片，今天算是有一个里程碑了，总结一下放在这里吧，开始写博客的习惯吧。尽管这有些out，不过当作自己的一个习惯吧。</p>
 <p>先介绍下这个芯片吧， Ath3001, 一块通过uart，也就是串口，连到host的蓝牙芯片。特点呢，我不清楚，一个比较明显的感觉就是比较快吧。最多支持3000000(3M)的波特率，如果忽略上层的话，数据吞吐量应该比较好。 不过应该主流的蓝牙芯片都差不多吧。</p>
 <p>我的任务呢，就是要在我们的平台上, Freescale i.MX53上把这块芯片跑好，跑顺。。。说实话，我不太喜欢做第三方的东西支持，有时候交流起来比较困难，但是做成以后呢，自己又好像没多大意思似的。不过既然是咱做，咱就把它做好吧。</p>
 <p>最后通过该驱动，打到了3M 的波特率。FTP的速度可以达到，接受140KB/s， 输出75KB/s。具体无法达到375K的理论最高速度应该是和上层的MTU之类的设置有关。插播一下，刚搜到说iPhone之间传文件最高为67KB/s，尽管我没有测试过两台mx53之间的速度，但是能和苹果达到一个数量级已经让我感到很欣慰了。阿门。</p>
@@ -501,48 +1152,139 @@ User faults:&nbsp;&nbsp;&nbsp; 4 (signal)</p>
 <p>接下来做做HFP的工作吧，这大概是蓝牙这玩意最有用的功能了。</p>
 <p>PS，我这个驱动主要是在arm的ubuntu下面调试完成的，由于强大的工具支持，这个过程会比较顺畅。 调试好了底层，把东西跑在Android上也是非常顺利的。</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/04/01/ath300-bluetooth.html" data-id="cj4nt09jw004ousa6lfmmrta5" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/03/27/wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93.html" class="article-date">
-  <time datetime="2011-03-26T16:15:44.000Z" itemprop="datePublished">2011-03-27</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/03/27/wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/03/27/wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93.html">wm8993啸叫问题调试总结</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/03/27/wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93.html" itemprop="url">wm8993啸叫问题调试总结</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-03-27T00:15:44+08:00">
+                2011-03-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>最近调了一个wm8993的啸叫问题， 看了一些Linux ALSA Asoc的资料，发现了很多很好的地方，放在这里做一个集合吧。也许能帮到别人。<br> 那个wm8993的啸叫问题现象是这样的，在录音的时候，从系统里面播放一个声音，就会发生啸叫。由于wm8993有很恐怖的AudioMap， 可以参考wm8993文档的27页。所以一开始分析觉得是在播放的路由有一声音跑到了录音那里，然后录音出来的的声音又跑到了Speaker上。这样就会形成一个死循环，导致声音越来越大。</p>
+      
+
+      
+        
+          
+            <p>最近调了一个wm8993的啸叫问题， 看了一些Linux ALSA Asoc的资料，发现了很多很好的地方，放在这里做一个集合吧。也许能帮到别人。<br> 那个wm8993的啸叫问题现象是这样的，在录音的时候，从系统里面播放一个声音，就会发生啸叫。由于wm8993有很恐怖的AudioMap， 可以参考wm8993文档的27页。所以一开始分析觉得是在播放的路由有一声音跑到了录音那里，然后录音出来的的声音又跑到了Speaker上。这样就会形成一个死循环，导致声音越来越大。</p>
 <p>啸叫我知道两种情况：</p>
 <p>一种啸叫是由于内部路由的问题，就像现在这种情况，所以你按住Mic（也就是不让Mic听到Speaker放出来的声音）是没有用的。<br>还有一种啸叫是外部原因，因为结构的问题把Mic放到了Speaker的前面，就像你在卡拉OK听到的哪种。<br>判断这两种有一个方法就是在发生啸叫的时候，按住Mic，如果还有啸叫就是内部那种。</p>
 <p>经过把那张路由表打出来，必须是A3的，A4的纸都看不清楚。检查出来确实有几个通路形成了这样的循环。在配置里面关掉就好了。有一个奇怪的地方是，这些通路默认都是关掉的，是谁把他们打开了呢？现在还不知道，一个猜测可能是在alsa.conf里面没有配置好，或者是asoc的machine代码中没有把这些场景定义好。</p>
@@ -553,136 +1295,413 @@ User faults:&nbsp;&nbsp;&nbsp; 4 (signal)</p>
 <p>Neo1973 相关的，一个完整的电话声音，非常有参考价值</p>
 <p><a href="http://wiki.openmoko.org/wiki/Neo1973_Audio_Subsystem" target="_blank" rel="external">http://wiki.openmoko.org/wiki/Neo1973_Audio_Subsystem</a><br> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag_gsmhandset_mic_std.png" target="_blank" rel="external">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag_gsmhandset_mic_std.png</a><br> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag__gsmhandset_tx+rx-processed.png" target="_blank" rel="external">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag__gsmhandset_tx+rx-processed.png</a><br> <a href="http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag.png" target="_blank" rel="external">http://people.openmoko.org/joerg/ALSA/doc/WM8753_control_diag.png</a><br> <a href="http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem" target="_blank" rel="external">http://wiki.openmoko.org/wiki/Neo_Freerunner_audio_subsystem</a><br><a href="http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#AT.25Nxxxx" target="_blank" rel="external"> http://wiki.openmoko.org/wiki/Neo_1973_and_Neo_FreeRunner_gsm_modem#AT.25Nxxxx</a></p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/03/27/wm8993%e5%95%b8%e5%8f%ab%e9%97%ae%e9%a2%98%e8%b0%83%e8%af%95%e6%80%bb%e7%bb%93.html" data-id="cj4nt09ju004lusa6wmkck2bd" class="article-share-link">Share</a>
+
+    <div>
       
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
       
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2011/03/25/dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95.html" class="article-date">
-  <time datetime="2011-03-24T20:12:06.000Z" itemprop="datePublished">2011-03-25</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2011/03/25/dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2011/03/25/dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95.html">Dell T3500 安装 ubuntu记录</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2011/03/25/dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95.html" itemprop="url">Dell T3500 安装 ubuntu记录</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2011-03-25T04:12:06+08:00">
+                2011-03-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这几天部门买了台工作站，Dell T3500， 很好很强大，硬件RAID0/5支持。于是要装一台Ubuntu 10.10 64位机器出来。  没想到过程很是痛苦，让我折腾了好几天。这里记录一下吧，也许有人也在痛苦着。  首先是安装环节，Ubuntu10.10 默认用的2.6.35的kernel， 这个kernel在T3500的这个AHCI的Controller有一个BUG，会导致识别不出来硬盘。</p>
+      
+
+      
+        
+          
+            <p>这几天部门买了台工作站，Dell T3500， 很好很强大，硬件RAID0/5支持。于是要装一台Ubuntu 10.10 64位机器出来。  没想到过程很是痛苦，让我折腾了好几天。这里记录一下吧，也许有人也在痛苦着。  首先是安装环节，Ubuntu10.10 默认用的2.6.35的kernel， 这个kernel在T3500的这个AHCI的Controller有一个BUG，会导致识别不出来硬盘。</p>
 <p>找了一堆以后发现，可以通过在安装程序的cmdline里面加一条命令完成，  如果你是用Cmdline模式的安装，那么输入 install pci=nocrs 或者是图形界面，选择高级以后，然后在cmdline的末尾&ldquo;ro quiet&rdquo;后面写上，pci=nocrs。  否则在安装程序格盘的时候会只能找到iSCSI的盘。</p>
 <p>第二，也许你现在已经开始装了，但是别着急，好戏还在后头呢。 由于这台工作站有硬件的RADI，而且是默认打开的，你会发现安装完毕以后，initrd会找不到根目录，提示大概是UUID=xxx找不到。然后把你扔到一个busybox里面了。 调查了很久，还看了一下kernel的文档和代码。</p>
 <p>终于发现症结了，原来是dm(Hardwaer RAID)的支持在这个Ubuntu的版本不好， 尽管kernel支持了，可是在initrd里面，没有去创建设备节点，你可以看到在/dev/mapper/下面只有两个文件，一个是control, 一个是zxz...Volume0,上面的分区节点都找不到了，所以这就是为什么系统起不来的原因。  大概是mdadm一类的脚本写的不好。我想在下一个Release会解决这个问题吧。  但是生活还得继续，虽然说还有一个月Ubuntu就会出11.04的版本了，可是我下了Alpha3的版本发现根本不能安装，所以只有换了。</p>
 <p>最终的解决办法是使用软Raid，在机器启动的时候你能看到一个RAID的管理程序，进去以后把里面的RAID volume都删掉，然后再重新安装的时候配置成Software RAID。  这里还有一个提示就是/boot分区不要用任何RAID之类的套起来，否则grub会找不到它的config。</p>
 <p>我这里是把 sda1的分区format成EXT2的分区，用来挂/boot 其他一个RAID0 挂 / 一个RAID0 挂 /home 一个16G的swap 这里有一个技巧就是，把同一个raid分区的两个字卷放在两个磁盘上，这样会有性能的提升。如果你放在同一个磁盘上，我想会有性能的下降吧。</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2011/03/25/dell-t3500-%e5%ae%89%e8%a3%85-ubuntu%e8%ae%b0%e5%bd%95.html" data-id="cj4nt09jt004iusa6143fvwwj" class="article-share-link">Share</a>
+
+    <div>
       
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
       
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2010/12/15/%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8.html" class="article-date">
-  <time datetime="2010-12-15T00:59:25.000Z" itemprop="datePublished">2010-12-15</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2010/12/15/%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2010/12/15/%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8.html">分布式系统笔记 - 密码学的应用</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2010/12/15/%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8.html" itemprop="url">分布式系统笔记 - 密码学的应用</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2010-12-15T08:59:25+08:00">
+                2010-12-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这个笔记是《分布式系统》里面的一章的内容，里面的几个例子大大的让我理解了现在的一些网络安全方面的应用， 比如共享密钥，为什么要用公私钥，什么是证书，服务器登录等。</p>
+      
+
+      
+        
+          
+            <p>这个笔记是《分布式系统》里面的一章的内容，里面的几个例子大大的让我理解了现在的一些网络安全方面的应用， 比如共享密钥，为什么要用公私钥，什么是证书，服务器登录等。</p>
 <p>因为书要卖了，于是抄下这些例子。里面有一些公式，所以还是用latex写比较好，发现转成HTML以后有很多图片，所以还是把pdf放在<a href="../media/agdrempibG9ncg0LEgVNZWRpYRiZ1woM/%E5%AF%86%E7%A0%81%E5%AD%A6.pdf?a=download">这里</a>吧。</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2010/12/15/%e5%88%86%e5%b8%83%e5%bc%8f%e7%b3%bb%e7%bb%9f%e7%ac%94%e8%ae%b0-%e5%af%86%e7%a0%81%e5%ad%a6%e7%9a%84%e5%ba%94%e7%94%a8.html" data-id="cj4nt09jr004fusa60ck2q36m" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/internet/">internet</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-suspend-en" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2010/11/20/suspend-en.html" class="article-date">
-  <time datetime="2010-11-19T21:28:56.000Z" itemprop="datePublished">2010-11-20</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2010/11/20/suspend-en.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2010/11/20/suspend-en.html">Linux Kernel and Android Suspend/Resume</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2010/11/20/suspend-en.html" itemprop="url">Linux Kernel and Android Suspend/Resume</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2010-11-20T05:28:56+08:00">
+                2010-11-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p><span style="font-family: Times, serif; line-height: normal;">Author: zhangjiejing &lt;kzjeef#gmail.com&gt;   thinksrc.com</span></p>
+      
+
+      
+        
+          
+            <p><span style="font-family: Times, serif; line-height: normal;">Author: zhangjiejing &lt;kzjeef#gmail.com&gt;   thinksrc.com</span></p>
 <h2 id="sec-2" style="font-size: 1.5em;"><span style="font-family: Times, serif; font-weight: normal; line-height: normal; font-size: 13px;"> <strong>Table of Contents</strong> </span></h2>
 <div id="table-of-contents">
 <div id="text-table-of-contents">
@@ -1157,48 +2176,139 @@ int suspend_devices_and_enter(suspend_state_t state)
 </div>
 <p>&nbsp;</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2010/11/20/suspend-en.html" data-id="cj4nt09jq004cusa6diq7cxb3" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+      
+
   
-</article>
-
 
   
-    <article id="post-uart-story-of-cts-rts" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2010/11/08/uart-story-of-cts-rts.html" class="article-date">
-  <time datetime="2010-11-07T21:31:19.000Z" itemprop="datePublished">2010-11-08</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/未分类/">未分类</a>
-  </div>
+  
+  
 
-  </div>
-  <div class="article-inner">
+  <article class="post post-type-post " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://www.thinksrc.com/2010/11/08/uart-story-of-cts-rts.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Jiejing Zhang">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/113606?v=3&s=460">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Thinking beyond source code">
+    </span>
+
     
-    
-      <header class="article-header">
+      <header class="post-header">
+
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2010/11/08/uart-story-of-cts-rts.html">UART: hardware flow control, story of CTS/RTS.</a>
-    </h1>
-  
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2010/11/08/uart-story-of-cts-rts.html" itemprop="url">UART: hardware flow control, story of CTS/RTS.</a></h1>
+        
 
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2010-11-08T05:31:19+08:00">
+                2010-11-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/未分类/" itemprop="url" rel="index">
+                    <span itemprop="name">未分类</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
       </header>
     
-    <div class="article-entry" itemprop="articleBody">
+
+    <div class="post-body" itemprop="articleBody">
+
       
-        <p>这几天在调试蓝牙(Bluetooth, 以下用BT代替), 这个蓝牙呢是通过把Soc和BT芯片连起来的. 也就是传说中的hci_uart. 芯片是AR3001, 这个调试成功是一个比较曲折的路程, 大致再这里总结一下吧.</p>
+      
+
+      
+        
+          
+            <p>这几天在调试蓝牙(Bluetooth, 以下用BT代替), 这个蓝牙呢是通过把Soc和BT芯片连起来的. 也就是传说中的hci_uart. 芯片是AR3001, 这个调试成功是一个比较曲折的路程, 大致再这里总结一下吧.</p>
 <p>首先拿到的时候, 对UART不是很熟悉, 连公母头都分不清楚, 一开始是用飞线把开发板上的UART和BT上的UART口连起来的. 连了5根线. 分别是, RX, TX, CTS, RTS, GND, 分别是接受, 发送, (Clear to Send)接受方流控(BT芯片控制), (Request to Send)发送用的流控(开发板控制). 首先得搞清除那边控制那边, 所以还是画个图来的比较明显:</p>
 <p style="text-align: center;">
 </p><p>图中的方向是指数据的方向, RTS 是由CPU来控制的, 而CTS是由BT来控制的. 他们再连起来的时候是一个交叉连的关系. RX,TX是RS232的2,3针, CTS, RTX是RS232的7,8针, 具体是几针请对这你的原理图看吧, 一定要看仔细了. 我就在这个上弄了很久.</p>
@@ -1212,131 +2322,339 @@ int suspend_devices_and_enter(suspend_state_t state)
 <p>还有,就是你汇发现这里面的tty驱动, 其实如果遇到问题, 你也要钻到TTY驱动里面的, <br>对这Reference manual看看里面的操作是否正确. 因为我遇到的问题就是, imx的uart驱动不是很标准, <br>打开硬件流控和关闭硬件流控没有实现. 折腾了半天, 现象就是UART时好时坏, 就像便秘一样.</p>
 <p>最后自己打了实现打开和关闭流控的代码之后就一切没有问题了.别看小小的UART驱动, 如果不标准,也会带来很大的麻烦阿!</p>
 
+          
+        
       
     </div>
-    <footer class="article-footer">
-      <a data-url="http://www.thinksrc.com/2010/11/08/uart-story-of-cts-rts.html" data-id="cj4nt09jp0049usa6vw843a3r" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uart/">uart</a></li></ul>
 
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
     </footer>
-  </div>
+  </article>
+
+
+    
+  </section>
+
   
-</article>
-
-
-  
-
-
-  <nav id="page-nav">
-    <a class="extend prev" rel="prev" href="/page/3/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/">__('next') &raquo;</a>
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
-</section>
+
+
+
+          </div>
+          
+
+
+          
+
+        </div>
         
-          <aside id="sidebar">
+          
   
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Categories</h3>
-    <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Algorithm/">Algorithm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/C/">C++</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/">CPU</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/CPU/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/Throughs/">Throughs</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/Performance/">Performance</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/">Rails</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Rails/未分类/">未分类</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a></li></ul>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
     </div>
   </div>
 
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/GAE/">GAE</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/GFW/">GFW</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Postgres/">Postgres</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Rails/">Rails</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/adb/">adb</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/apple/">apple</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm/">arm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/bluetooth/">bluetooth</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/emacs/">emacs</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/git/">git</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/go/">go</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/google/">google</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/homebrew/">homebrew</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/internet/">internet</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kindle/">kindle</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux-优化/">linux 优化</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mac/">mac</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/pm/">pm</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uart/">uart</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ubuntu/">ubuntu</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性格/">性格</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/电子商务/">电子商务</a></li></ul>
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars0.githubusercontent.com/u/113606?v=3&s=460"
+               alt="Jiejing Zhang" />
+          <p class="site-author-name" itemprop="name">Jiejing Zhang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">110</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
     </div>
-  </div>
+  </aside>
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/GAE/" style="font-size: 10px;">GAE</a> <a href="/tags/GFW/" style="font-size: 15px;">GFW</a> <a href="/tags/Postgres/" style="font-size: 10px;">Postgres</a> <a href="/tags/Rails/" style="font-size: 10px;">Rails</a> <a href="/tags/adb/" style="font-size: 10px;">adb</a> <a href="/tags/android/" style="font-size: 17.5px;">android</a> <a href="/tags/apple/" style="font-size: 10px;">apple</a> <a href="/tags/arm/" style="font-size: 10px;">arm</a> <a href="/tags/bluetooth/" style="font-size: 12.5px;">bluetooth</a> <a href="/tags/emacs/" style="font-size: 12.5px;">emacs</a> <a href="/tags/git/" style="font-size: 10px;">git</a> <a href="/tags/go/" style="font-size: 10px;">go</a> <a href="/tags/google/" style="font-size: 10px;">google</a> <a href="/tags/homebrew/" style="font-size: 10px;">homebrew</a> <a href="/tags/internet/" style="font-size: 10px;">internet</a> <a href="/tags/kindle/" style="font-size: 10px;">kindle</a> <a href="/tags/linux/" style="font-size: 20px;">linux</a> <a href="/tags/linux-优化/" style="font-size: 10px;">linux 优化</a> <a href="/tags/mac/" style="font-size: 10px;">mac</a> <a href="/tags/pm/" style="font-size: 10px;">pm</a> <a href="/tags/uart/" style="font-size: 10px;">uart</a> <a href="/tags/ubuntu/" style="font-size: 10px;">ubuntu</a> <a href="/tags/性格/" style="font-size: 10px;">性格</a> <a href="/tags/电子商务/" style="font-size: 10px;">电子商务</a>
-    </div>
-  </div>
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">May 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">March 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">December 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">October 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">September 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/06/">June 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06/">June 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/01/">January 2013</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/12/">December 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/11/">November 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/07/">July 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/03/">March 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2012/02/">February 2012</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/12/">December 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/10/">October 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/09/">September 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/08/">August 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/07/">July 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/06/">June 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/05/">May 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/04/">April 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2011/03/">March 2011</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/12/">December 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/11/">November 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/08/">August 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/07/">July 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/06/">June 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/05/">May 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/04/">April 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2010/03/">March 2010</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/11/">November 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/09/">September 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/05/">May 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2009/04/">April 2009</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/11/">November 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/10/">October 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/07/">July 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/03/">March 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/02/">February 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2008/01/">January 2008</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/12/">December 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/11/">November 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/10/">October 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/09/">September 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/08/">August 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/07/">July 2007</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2007/06/">June 2007</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2016/05/26/about-java-native-programmingjni-local-reference.html">About Java Native Programming(JNI) Local Reference</a>
-          </li>
-        
-          <li>
-            <a href="/2016/03/18/write-async-test-case-by-gtest-gmock-for-c.html">Write Async Test Case by gtest &amp; gmock for C++</a>
-          </li>
-        
-          <li>
-            <a href="/2015/12/06/understanding-the-stack-frame.html">Understanding the function call and recursion ...</a>
-          </li>
-        
-          <li>
-            <a href="/2015/10/04/art-of-padding.html">Art of padding</a>
-          </li>
-        
-          <li>
-            <a href="/2015/09/30/%e6%8e%a8%e8%8d%90%e4%b8%80%e4%b8%aa%e7%94%bbuml%e5%88%a9%e5%99%a8-plantuml.html">推荐一个画UML利器 - PlantUML</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
         
       </div>
-      <footer id="footer">
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
   
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2017 Jiejing Zhang<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiejing Zhang</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-
-
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
-
-
-<script src="/js/script.js"></script>
-
   </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+    <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
 </body>
 </html>

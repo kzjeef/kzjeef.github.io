@@ -1,0 +1,594 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="cDFhyeCTjCtdiX_kTRM-f4YBtgdo30SXuvERbggq39E" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="现在已经全面转向 Spacemacs 了, 所以配置大大减少. 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888">
+<meta property="og:type" content="website">
+<meta property="og:title" content="emacs-configure">
+<meta property="og:url" content="http://www.thinksrc.com/emacs-configure/index.html">
+<meta property="og:site_name" content="Thinking beyond source code">
+<meta property="og:description" content="现在已经全面转向 Spacemacs 了, 所以配置大大减少. 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888">
+<meta property="og:updated_time" content="2017-07-03T07:19:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="emacs-configure">
+<meta name="twitter:description" content="现在已经全面转向 Spacemacs 了, 所以配置大大减少. 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.thinksrc.com/emacs-configure/"/>
+
+
+
+
+
+  <title>emacs-configure | Thinking beyond source code</title>
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-1633147-2', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f1c3ad154ad58e9f01314ca420646c0d";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Thinking beyond source code</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Recording my throughs</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+  <header class="post-header">
+
+	<h1 class="post-title" itemprop="name headline">emacs-configure</h1>
+
+
+
+</header>
+
+    
+    
+      <p>现在已经全面转向 Spacemacs 了, 所以配置大大减少.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div><div class="line">231</div><div class="line">232</div><div class="line">233</div><div class="line">234</div><div class="line">235</div><div class="line">236</div><div class="line">237</div><div class="line">238</div><div class="line">239</div><div class="line">240</div><div class="line">241</div><div class="line">242</div><div class="line">243</div><div class="line">244</div><div class="line">245</div><div class="line">246</div><div class="line">247</div><div class="line">248</div><div class="line">249</div><div class="line">250</div><div class="line">251</div><div class="line">252</div><div class="line">253</div><div class="line">254</div><div class="line">255</div><div class="line">256</div><div class="line">257</div><div class="line">258</div><div class="line">259</div><div class="line">260</div><div class="line">261</div><div class="line">262</div><div class="line">263</div><div class="line">264</div><div class="line">265</div><div class="line">266</div><div class="line">267</div><div class="line">268</div><div class="line">269</div><div class="line">270</div><div class="line">271</div><div class="line">272</div><div class="line">273</div><div class="line">274</div><div class="line">275</div><div class="line">276</div><div class="line">277</div><div class="line">278</div><div class="line">279</div><div class="line">280</div><div class="line">281</div><div class="line">282</div><div class="line">283</div><div class="line">284</div><div class="line">285</div><div class="line">286</div><div class="line">287</div><div class="line">288</div><div class="line">289</div><div class="line">290</div><div class="line">291</div><div class="line">292</div><div class="line">293</div><div class="line">294</div><div class="line">295</div><div class="line">296</div><div class="line">297</div><div class="line">298</div><div class="line">299</div><div class="line">300</div><div class="line">301</div><div class="line">302</div><div class="line">303</div><div class="line">304</div><div class="line">305</div><div class="line">306</div><div class="line">307</div><div class="line">308</div><div class="line">309</div><div class="line">310</div><div class="line">311</div><div class="line">312</div><div class="line">313</div><div class="line">314</div><div class="line">315</div><div class="line">316</div><div class="line">317</div><div class="line">318</div><div class="line">319</div><div class="line">320</div><div class="line">321</div><div class="line">322</div><div class="line">323</div><div class="line">324</div><div class="line">325</div><div class="line">326</div><div class="line">327</div><div class="line">328</div><div class="line">329</div><div class="line">330</div><div class="line">331</div><div class="line">332</div><div class="line">333</div><div class="line">334</div><div class="line">335</div><div class="line">336</div><div class="line">337</div><div class="line">338</div><div class="line">339</div><div class="line">340</div><div class="line">341</div><div class="line">342</div><div class="line">343</div><div class="line">344</div><div class="line">345</div><div class="line">346</div><div class="line">347</div><div class="line">348</div><div class="line">349</div><div class="line">350</div><div class="line">351</div><div class="line">352</div><div class="line">353</div><div class="line">354</div><div class="line">355</div><div class="line">356</div><div class="line">357</div><div class="line">358</div><div class="line">359</div><div class="line">360</div><div class="line">361</div><div class="line">362</div><div class="line">363</div><div class="line">364</div><div class="line">365</div><div class="line">366</div><div class="line">367</div><div class="line">368</div><div class="line">369</div><div class="line">370</div><div class="line">371</div><div class="line">372</div><div class="line">373</div><div class="line">374</div><div class="line">375</div><div class="line">376</div><div class="line">377</div><div class="line">378</div><div class="line">379</div><div class="line">380</div><div class="line">381</div><div class="line">382</div><div class="line">383</div><div class="line">384</div><div class="line">385</div><div class="line">386</div><div class="line">387</div><div class="line">388</div><div class="line">389</div><div class="line">390</div><div class="line">391</div><div class="line">392</div><div class="line">393</div><div class="line">394</div><div class="line">395</div><div class="line">396</div><div class="line">397</div><div class="line">398</div><div class="line">399</div><div class="line">400</div><div class="line">401</div><div class="line">402</div><div class="line">403</div><div class="line">404</div><div class="line">405</div><div class="line">406</div><div class="line">407</div><div class="line">408</div><div class="line">409</div><div class="line">410</div><div class="line">411</div><div class="line">412</div><div class="line">413</div><div class="line">414</div><div class="line">415</div><div class="line">416</div><div class="line">417</div><div class="line">418</div><div class="line">419</div><div class="line">420</div><div class="line">421</div><div class="line">422</div><div class="line">423</div><div class="line">424</div><div class="line">425</div><div class="line">426</div><div class="line">427</div><div class="line">428</div><div class="line">429</div><div class="line">430</div><div class="line">431</div><div class="line">432</div><div class="line">433</div><div class="line">434</div><div class="line">435</div><div class="line">436</div><div class="line">437</div><div class="line">438</div><div class="line">439</div><div class="line">440</div><div class="line">441</div><div class="line">442</div><div class="line">443</div><div class="line">444</div><div class="line">445</div><div class="line">446</div><div class="line">447</div><div class="line">448</div><div class="line">449</div><div class="line">450</div><div class="line">451</div><div class="line">452</div><div class="line">453</div><div class="line">454</div><div class="line">455</div><div class="line">456</div><div class="line">457</div><div class="line">458</div><div class="line">459</div><div class="line">460</div><div class="line">461</div><div class="line">462</div><div class="line">463</div><div class="line">464</div><div class="line">465</div><div class="line">466</div><div class="line">467</div><div class="line">468</div><div class="line">469</div><div class="line">470</div><div class="line">471</div><div class="line">472</div><div class="line">473</div><div class="line">474</div><div class="line">475</div><div class="line">476</div><div class="line">477</div><div class="line">478</div><div class="line">479</div><div class="line">480</div><div class="line">481</div><div class="line">482</div><div class="line">483</div><div class="line">484</div><div class="line">485</div><div class="line">486</div><div class="line">487</div><div class="line">488</div><div class="line">489</div><div class="line">490</div><div class="line">491</div><div class="line">492</div><div class="line">493</div><div class="line">494</div><div class="line">495</div><div class="line">496</div><div class="line">497</div><div class="line">498</div><div class="line">499</div><div class="line">500</div><div class="line">501</div><div class="line">502</div><div class="line">503</div><div class="line">504</div><div class="line">505</div><div class="line">506</div><div class="line">507</div><div class="line">508</div><div class="line">509</div><div class="line">510</div><div class="line">511</div><div class="line">512</div><div class="line">513</div><div class="line">514</div><div class="line">515</div><div class="line">516</div><div class="line">517</div><div class="line">518</div><div class="line">519</div><div class="line">520</div><div class="line">521</div><div class="line">522</div><div class="line">523</div><div class="line">524</div><div class="line">525</div><div class="line">526</div><div class="line">527</div><div class="line">528</div><div class="line">529</div><div class="line">530</div><div class="line">531</div><div class="line">532</div><div class="line">533</div><div class="line">534</div><div class="line">535</div><div class="line">536</div><div class="line">537</div><div class="line">538</div><div class="line">539</div><div class="line">540</div><div class="line">541</div><div class="line">542</div><div class="line">543</div><div class="line">544</div><div class="line">545</div><div class="line">546</div><div class="line">547</div><div class="line">548</div><div class="line">549</div><div class="line">550</div><div class="line">551</div><div class="line">552</div><div class="line">553</div><div class="line">554</div><div class="line">555</div><div class="line">556</div><div class="line">557</div><div class="line">558</div><div class="line">559</div><div class="line">560</div><div class="line">561</div><div class="line">562</div><div class="line">563</div><div class="line">564</div><div class="line">565</div><div class="line">566</div><div class="line">567</div><div class="line">568</div><div class="line">569</div><div class="line">570</div><div class="line">571</div><div class="line">572</div><div class="line">573</div><div class="line">574</div><div class="line">575</div><div class="line">576</div><div class="line">577</div><div class="line">578</div><div class="line">579</div><div class="line">580</div><div class="line">581</div><div class="line">582</div><div class="line">583</div><div class="line">584</div><div class="line">585</div><div class="line">586</div><div class="line">587</div><div class="line">588</div><div class="line">589</div><div class="line">590</div><div class="line">591</div><div class="line">592</div><div class="line">593</div><div class="line">594</div><div class="line">595</div><div class="line">596</div><div class="line">597</div><div class="line">598</div><div class="line">599</div><div class="line">600</div><div class="line">601</div><div class="line">602</div><div class="line">603</div><div class="line">604</div><div class="line">605</div><div class="line">606</div><div class="line">607</div><div class="line">608</div><div class="line">609</div><div class="line">610</div><div class="line">611</div><div class="line">612</div><div class="line">613</div><div class="line">614</div><div class="line">615</div><div class="line">616</div><div class="line">617</div><div class="line">618</div><div class="line">619</div><div class="line">620</div><div class="line">621</div><div class="line">622</div><div class="line">623</div><div class="line">624</div><div class="line">625</div><div class="line">626</div><div class="line">627</div><div class="line">628</div><div class="line">629</div><div class="line">630</div><div class="line">631</div><div class="line">632</div><div class="line">633</div><div class="line">634</div><div class="line">635</div><div class="line">636</div><div class="line">637</div><div class="line">638</div><div class="line">639</div><div class="line">640</div><div class="line">641</div><div class="line">642</div><div class="line">643</div><div class="line">644</div><div class="line">645</div></pre></td><td class="code"><pre><div class="line">;; -*- mode: emacs-lisp -*-</div><div class="line">;; This file is loaded by Spacemacs at startup.</div><div class="line">;; It must be stored in your home directory.</div><div class="line"></div><div class="line"></div><div class="line">;;</div><div class="line">(defvar system-type-as-string (prin1-to-string system-type))</div><div class="line"></div><div class="line">(defvar on_windows_nt (string-match &quot;windows-nt&quot; system-type-as-string))</div><div class="line">(defvar on_darwin     (string-match &quot;darwin&quot; system-type-as-string))</div><div class="line">(defvar on_gnu_linux  (string-match &quot;gnu/linux&quot; system-type-as-string))</div><div class="line">(defvar on_cygwin     (string-match &quot;cygwin&quot; system-type-as-string))</div><div class="line">(defvar on_solaris    (string-match &quot;usg-unix-v&quot; system-type-as-string))</div><div class="line"></div><div class="line">(defun is-in-spacemacs()</div><div class="line">  (boundp &apos;spacemacs-emacs-min-version))</div><div class="line"></div><div class="line">(defun not-in-spacemacs()</div><div class="line">  (not (is-in-spacemacs)))</div><div class="line"></div><div class="line">(setq dotspacemacs-delete-orphan-packages nil)</div><div class="line"></div><div class="line">(defmacro safe-wrap (fn &amp;rest clean-up)</div><div class="line">  `(unwind-protect</div><div class="line">       (let (retval)</div><div class="line">         (condition-case ex</div><div class="line">             (setq retval (progn ,fn))</div><div class="line">           (&apos;error</div><div class="line">            (message (format &quot;Caught exception: [%s]&quot; ex))</div><div class="line">            (setq retval (cons &apos;exception (list ex)))))</div><div class="line">         retval)</div><div class="line">     ,@clean-up))</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">(defun dotspacemacs/layers ()</div><div class="line">  &quot;Configuration Layers declaration.</div><div class="line">You should not put any user code in this function besides modifying the variable</div><div class="line">values.&quot;</div><div class="line">  (setq-default</div><div class="line">   ;; Base distribution to use. This is a layer contained in the directory</div><div class="line">   ;; `+distribution&apos;. For now available distributions are `spacemacs-base&apos;</div><div class="line">   ;; or `spacemacs&apos;. (default &apos;spacemacs)</div><div class="line">   dotspacemacs-distribution &apos;spacemacs</div><div class="line">   ;; Lazy installation of layers (i.e. layers are installed only when a file</div><div class="line">   ;; with a supported type is opened). Possible values are `all&apos;, `unused&apos;</div><div class="line">   ;; and `nil&apos;. `unused&apos; will lazy install only unused layers (i.e. layers</div><div class="line">   ;; not listed in variable `dotspacemacs-configuration-layers&apos;), `all&apos; will</div><div class="line">   ;; lazy install any layer that support lazy installation even the layers</div><div class="line">   ;; listed in `dotspacemacs-configuration-layers&apos;. `nil&apos; disable the lazy</div><div class="line">   ;; installation feature and you have to explicitly list a layer in the</div><div class="line">   ;; variable `dotspacemacs-configuration-layers&apos; to install it.</div><div class="line">   ;; (default &apos;unused)</div><div class="line">   dotspacemacs-enable-lazy-installation &apos;unused</div><div class="line">   ;; If non-nil then Spacemacs will ask for confirmation before installing</div><div class="line">   ;; a layer lazily. (default t)</div><div class="line">   dotspacemacs-ask-for-lazy-installation t</div><div class="line">   ;; If non-nil layers with lazy install support are lazy installed.</div><div class="line">   ;; List of additional paths where to look for configuration layers.</div><div class="line">   ;; Paths must have a trailing slash (i.e. `~/.mycontribs/&apos;)</div><div class="line">   dotspacemacs-configuration-layer-path &apos;()</div><div class="line">   ;; List of configuration layers to load.</div><div class="line">   dotspacemacs-configuration-layers</div><div class="line">   &apos;(</div><div class="line">     ruby</div><div class="line">     yaml</div><div class="line">     swift</div><div class="line">     ;; ----------------------------------------------------------------</div><div class="line">     ;; Example of useful layers you may want to use right away.</div><div class="line">     ;; Uncomment some layer names and press &lt;SPC f e R&gt; (Vim style) or</div><div class="line">     ;; &lt;M-m f e R&gt; (Emacs style) to install them.</div><div class="line">     ;; ----------------------------------------------------------------</div><div class="line">     ivy</div><div class="line">     ;; auto-completion</div><div class="line">     ;; better-defaults</div><div class="line">     emacs-lisp</div><div class="line">     ;; git</div><div class="line">     ;; markdown</div><div class="line">     ;; org</div><div class="line">     ;; (shell :variables</div><div class="line">     ;;        shell-default-height 30</div><div class="line">     ;;        shell-default-position &apos;bottom)</div><div class="line">     ;; spell-checking</div><div class="line">     ;; syntax-checking</div><div class="line">     ;; version-control</div><div class="line">     scala</div><div class="line">     sql</div><div class="line">     octave</div><div class="line">     csv</div><div class="line">     windows-scripts</div><div class="line">     html</div><div class="line">     (auto-completion :variables</div><div class="line">                      auto-completion-tab-key-behavior &apos;complete</div><div class="line">                      auto-completion-enable-help-tooltip nil</div><div class="line">                      auto-completion-complete-with-key-sequence nil</div><div class="line">                      auto-completion-complete-with-key-sequence-delay 0.3</div><div class="line">                      )</div><div class="line">     (shell :variables</div><div class="line">            shell-default-height 30</div><div class="line">            shell-default-position &apos;bottom</div><div class="line">            shell-enable-smart-eshell t</div><div class="line">            shell-default-term-shell (getenv &quot;SHELL&quot;))</div><div class="line">     gtags</div><div class="line">     org</div><div class="line">     git</div><div class="line">     javascript</div><div class="line">     markdown</div><div class="line">     cscope</div><div class="line">     dash</div><div class="line">     python</div><div class="line">     chrome</div><div class="line">     themes-megapack</div><div class="line">     asm</div><div class="line">     plantuml</div><div class="line">     search-engine ;; M-m a /</div><div class="line">     (c-c++ :variables</div><div class="line">            c-c++-enable-clang-support nil</div><div class="line">            c-c++-default-mode-for-headers &apos;c++-mode)</div><div class="line">     ;; semantic ;; sematic is too slow...</div><div class="line">     syntax-checking</div><div class="line">     version-control</div><div class="line">     android-logcat</div><div class="line">     ;;    logcat-mode</div><div class="line">     )</div><div class="line">   ;; List of additional packages that will be installed without being</div><div class="line">   ;; wrapped in a layer. If you need some configuration for these</div><div class="line">   ;; packages, then consider creating a layer. You can also put the</div><div class="line">   ;; configuration in `dotspacemacs/user-config&apos;.</div><div class="line"></div><div class="line">   dotspacemacs-additional-packages &apos;(fold-dwim</div><div class="line">                                        ;                                      irony company-irony flycheck-irony company-irony-c-headers</div><div class="line">                                      iedit</div><div class="line">                                      groovy-mode</div><div class="line">                                      ;;                                      vlf ;</div><div class="line">                                      ag</div><div class="line">                                      ace-jump-mode</div><div class="line">                                      android-mode</div><div class="line">                                      plantuml-mode</div><div class="line">                                      js-comint</div><div class="line">                                      nlinum  ;; line number mode, have perfomrnace with big file.</div><div class="line">                                      )</div><div class="line">   ;; A list of packages that cannot be updated.</div><div class="line">   dotspacemacs-frozen-packages &apos;()</div><div class="line">   ;; A list of packages that will not be installed and loaded.</div><div class="line">   ;; disable helm-gtags because it have key conflict with ggtags-mode, which is more powerful.</div><div class="line">   dotspacemacs-excluded-packages &apos;(auto-complete-clang</div><div class="line">                                    helm-gtags</div><div class="line">                                    ws-butler</div><div class="line">                                    tern</div><div class="line">                                    adaptive-wrap)</div><div class="line">   ;; Defines the behaviour of Spacemacs when installing packages.</div><div class="line">   ;; Possible values are `used-only&apos;, `used-but-keep-unused&apos; and `all&apos;.</div><div class="line">   ;; `used-only&apos; installs only explicitly used packages and uninstall any</div><div class="line">   ;; unused packages as well as their unused dependencies.</div><div class="line">   ;; `used-but-keep-unused&apos; installs only the used packages but won&apos;t uninstall</div><div class="line">   ;; them if they become unused. `all&apos; installs *all* packages supported by</div><div class="line">   ;; Spacemacs and never uninstall them. (default is `used-only&apos;)</div><div class="line">   dotspacemacs-install-packages &apos;used-only))</div><div class="line"></div><div class="line">(defun dotspacemacs/init ()</div><div class="line">  &quot;Initialization function.</div><div class="line">This function is called at the very startup of Spacemacs initialization</div><div class="line">before layers configuration.</div><div class="line">You should not put any user code in there besides modifying the variable</div><div class="line">values.&quot;</div><div class="line">  ;; This setq-default sexp is an exhaustive list of all the supported</div><div class="line">  ;; spacemacs settings.</div><div class="line">  (setq-default</div><div class="line">   ;; If non nil ELPA repositories are contacted via HTTPS whenever it&apos;s</div><div class="line">   ;; possible. Set it to nil if you have no way to use HTTPS in your</div><div class="line">   ;; environment, otherwise it is strongly recommended to let it set to t.</div><div class="line">   ;; This variable has no effect if Emacs is launched with the parameter</div><div class="line">   ;; `--insecure&apos; which forces the value of this variable to nil.</div><div class="line">   ;; (default t)</div><div class="line">   dotspacemacs-elpa-https t</div><div class="line">   ;; Maximum allowed time in seconds to contact an ELPA repository.</div><div class="line">   dotspacemacs-elpa-timeout 5</div><div class="line">   ;; If non nil then spacemacs will check for updates at startup</div><div class="line">   ;; when the current branch is not `develop&apos;. Note that checking for</div><div class="line">   ;; new versions works via git commands, thus it calls GitHub services</div><div class="line">   ;; whenever you start Emacs. (default nil)</div><div class="line">   dotspacemacs-check-for-update nil</div><div class="line">   ;; If non-nil, a form that evaluates to a package directory. For example, to</div><div class="line">   ;; use different package directories for different Emacs versions, set this</div><div class="line">   ;; to `emacs-version&apos;.</div><div class="line">   dotspacemacs-elpa-subdirectory nil</div><div class="line">   ;; One of `vim&apos;, `emacs&apos; or `hybrid&apos;.</div><div class="line">   ;; `hybrid&apos; is like `vim&apos; except that `insert state&apos; is replaced by the</div><div class="line">   ;; `hybrid state&apos; with `emacs&apos; key bindings. The value can also be a list</div><div class="line">   ;; with `:variables&apos; keyword (similar to layers). Check the editing styles</div><div class="line">   ;; section of the documentation for details on available variables.</div><div class="line">   ;; (default &apos;vim)</div><div class="line">   dotspacemacs-editing-style &apos;emacs</div><div class="line">   ;; If non nil output loading progress in `*Messages*&apos; buffer. (default nil)</div><div class="line">   dotspacemacs-verbose-loading nil</div><div class="line">   ;; Specify the startup banner. Default value is `official&apos;, it displays</div><div class="line">   ;; the official spacemacs logo. An integer value is the index of text</div><div class="line">   ;; banner, `random&apos; chooses a random text banner in `core/banners&apos;</div><div class="line">   ;; directory. A string value must be a path to an image format supported</div><div class="line">   ;; by your Emacs build.</div><div class="line">   ;; If the value is nil then no banner is displayed. (default &apos;official)</div><div class="line">   dotspacemacs-startup-banner &apos;official</div><div class="line">   ;; List of items to show in startup buffer or an association list of</div><div class="line">   ;; the form `(list-type . list-size)`. If nil then it is disabled.</div><div class="line">   ;; Possible values for list-type are:</div><div class="line">   ;; `recents&apos; `bookmarks&apos; `projects&apos; `agenda&apos; `todos&apos;.&quot;</div><div class="line">   ;; List sizes may be nil, in which case</div><div class="line">   ;; `spacemacs-buffer-startup-lists-length&apos; takes effect.</div><div class="line">   dotspacemacs-startup-lists &apos;((recents . 5)</div><div class="line">                                (projects . 7))</div><div class="line">   ;; True if the home buffer should respond to resize events.</div><div class="line">   dotspacemacs-startup-buffer-responsive t</div><div class="line">   ;; Default major mode of the scratch buffer (default `text-mode&apos;)</div><div class="line">   dotspacemacs-scratch-mode &apos;text-mode</div><div class="line">   ;; List of themes, the first of the list is loaded when spacemacs starts.</div><div class="line">   ;; Press &lt;SPC&gt; T n to cycle to the next theme in the list (works great</div><div class="line">   ;; with 2 themes variants, one dark and one light)</div><div class="line">   dotspacemacs-themes &apos;(</div><div class="line">                         professional</div><div class="line">                         monokai</div><div class="line">                         spacemacs-dark</div><div class="line">                         default</div><div class="line">                         zenburn</div><div class="line">                         whiteboard</div><div class="line">                         solarized-light</div><div class="line">                         adwaita</div><div class="line">                         spacemacs-light</div><div class="line">                         wombat</div><div class="line">                         twilight-bright</div><div class="line">                         tsdh-light</div><div class="line">                         )</div><div class="line">   ;; If non nil the cursor color matches the state color in GUI Emacs.</div><div class="line">   dotspacemacs-colorize-cursor-according-to-state t</div><div class="line">   ;; Default font, or prioritized list of fonts. `powerline-scale&apos; allows to</div><div class="line">   ;; quickly tweak the mode-line size to make separators look not too crappy.</div><div class="line">   dotspacemacs-default-font &apos;(&quot;Monaco&quot;</div><div class="line">                               :size 13</div><div class="line">                               :weight normal</div><div class="line">                               :width normal</div><div class="line">                               :powerline-scale 0.9)</div><div class="line"></div><div class="line"></div><div class="line">   ;; The leader key</div><div class="line">   dotspacemacs-leader-key &quot;SPC&quot;</div><div class="line">   ;; The key used for Emacs commands (M-x) (after pressing on the leader key).</div><div class="line">   ;; (default &quot;SPC&quot;)</div><div class="line">   dotspacemacs-emacs-command-key &quot;SPC&quot;</div><div class="line">   ;; The key used for Vim Ex commands (default &quot;:&quot;)</div><div class="line">   dotspacemacs-ex-command-key &quot;:&quot;</div><div class="line">   ;; The leader key accessible in `emacs state&apos; and `insert state&apos;</div><div class="line">   ;; (default &quot;M-m&quot;)</div><div class="line">   dotspacemacs-emacs-leader-key &quot;M-m&quot;</div><div class="line">   ;; Major mode leader key is a shortcut key which is the equivalent of</div><div class="line">   ;; pressing `&lt;leader&gt; m`. Set it to `nil` to disable it. (default &quot;,&quot;)</div><div class="line">   dotspacemacs-major-mode-leader-key &quot;,&quot;</div><div class="line">   ;; Major mode leader key accessible in `emacs state&apos; and `insert state&apos;.</div><div class="line">   ;; (default &quot;C-M-m&quot;)</div><div class="line">   dotspacemacs-major-mode-emacs-leader-key &quot;C-M-m&quot;</div><div class="line">   ;; These variables control whether separate commands are bound in the GUI to</div><div class="line">   ;; the key pairs C-i, TAB and C-m, RET.</div><div class="line">   ;; Setting it to a non-nil value, allows for separate commands under &lt;C-i&gt;</div><div class="line">   ;; and TAB or &lt;C-m&gt; and RET.</div><div class="line">   ;; In the terminal, these pairs are generally indistinguishable, so this only</div><div class="line">   ;; works in the GUI. (default nil)</div><div class="line">   dotspacemacs-distinguish-gui-tab nil</div><div class="line">   ;; If non nil `Y&apos; is remapped to `y$&apos; in Evil states. (default nil)</div><div class="line">   dotspacemacs-remap-Y-to-y$ nil</div><div class="line">   ;; If non-nil, the shift mappings `&lt;&apos; and `&gt;&apos; retain visual state if used</div><div class="line">   ;; there. (default t)</div><div class="line">   dotspacemacs-retain-visual-state-on-shift t</div><div class="line">   ;; If non-nil, J and K move lines up and down when in visual mode.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-visual-line-move-text nil</div><div class="line">   ;; If non nil, inverse the meaning of `g&apos; in `:substitute&apos; Evil ex-command.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-ex-substitute-global nil</div><div class="line">   ;; Name of the default layout (default &quot;Default&quot;)</div><div class="line">   dotspacemacs-default-layout-name &quot;Default&quot;</div><div class="line">   ;; If non nil the default layout name is displayed in the mode-line.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-display-default-layout nil</div><div class="line">   ;; If non nil then the last auto saved layouts are resume automatically upon</div><div class="line">   ;; start. (default nil)</div><div class="line">   dotspacemacs-auto-resume-layouts nil</div><div class="line">   ;; Size (in MB) above which spacemacs will prompt to open the large file</div><div class="line">   ;; literally to avoid performance issues. Opening a file literally means that</div><div class="line">   ;; no major mode or minor modes are active. (default is 1)</div><div class="line">   dotspacemacs-large-file-size 1</div><div class="line">   ;; Location where to auto-save files. Possible values are `original&apos; to</div><div class="line">   ;; auto-save the file in-place, `cache&apos; to auto-save the file to another</div><div class="line">   ;; file stored in the cache directory and `nil&apos; to disable auto-saving.</div><div class="line">   ;; (default &apos;cache)</div><div class="line">   dotspacemacs-auto-save-file-location &apos;cache</div><div class="line">   ;; Maximum number of rollback slots to keep in the cache. (default 5)</div><div class="line">   dotspacemacs-max-rollback-slots 5</div><div class="line">   ;; If non nil, `helm&apos; will try to minimize the space it uses. (default nil)</div><div class="line">   dotspacemacs-helm-resize nil</div><div class="line">   ;; if non nil, the helm header is hidden when there is only one source.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-helm-no-header nil</div><div class="line">   ;; define the position to display `helm&apos;, options are `bottom&apos;, `top&apos;,</div><div class="line">   ;; `left&apos;, or `right&apos;. (default &apos;bottom)</div><div class="line">   dotspacemacs-helm-position &apos;bottom</div><div class="line">   ;; Controls fuzzy matching in helm. If set to `always&apos;, force fuzzy matching</div><div class="line">   ;; in all non-asynchronous sources. If set to `source&apos;, preserve individual</div><div class="line">   ;; source settings. Else, disable fuzzy matching in all sources.</div><div class="line">   ;; (default &apos;always)</div><div class="line">   dotspacemacs-helm-use-fuzzy &apos;always</div><div class="line">   ;; If non nil the paste micro-state is enabled. When enabled pressing `p`</div><div class="line">   ;; several times cycle between the kill ring content. (default nil)</div><div class="line">   dotspacemacs-enable-paste-transient-state nil</div><div class="line">   ;; Which-key delay in seconds. The which-key buffer is the popup listing</div><div class="line">   ;; the commands bound to the current keystroke sequence. (default 0.4)</div><div class="line">   dotspacemacs-which-key-delay 0.4</div><div class="line">   ;; Which-key frame position. Possible values are `right&apos;, `bottom&apos; and</div><div class="line">   ;; `right-then-bottom&apos;. right-then-bottom tries to display the frame to the</div><div class="line">   ;; right; if there is insufficient space it displays it at the bottom.</div><div class="line">   ;; (default &apos;bottom)</div><div class="line">   dotspacemacs-which-key-position &apos;bottom</div><div class="line">   ;; If non nil a progress bar is displayed when spacemacs is loading. This</div><div class="line">   ;; may increase the boot time on some systems and emacs builds, set it to</div><div class="line">   ;; nil to boost the loading time. (default t)</div><div class="line">   dotspacemacs-loading-progress-bar t</div><div class="line">   ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)</div><div class="line">   ;; (Emacs 24.4+ only)</div><div class="line">   dotspacemacs-fullscreen-at-startup nil</div><div class="line">   ;; If non nil `spacemacs/toggle-fullscreen&apos; will not use native fullscreen.</div><div class="line">   ;; Use to disable fullscreen animations in OSX. (default nil)</div><div class="line">   dotspacemacs-fullscreen-use-non-native nil</div><div class="line">   ;; If non nil the frame is maximized when Emacs starts up.</div><div class="line">   ;; Takes effect only if `dotspacemacs-fullscreen-at-startup&apos; is nil.</div><div class="line">   ;; (default nil) (Emacs 24.4+ only)</div><div class="line">   dotspacemacs-maximized-at-startup nil</div><div class="line">   ;; A value from the range (0..100), in increasing opacity, which describes</div><div class="line">   ;; the transparency level of a frame when it&apos;s active or selected.</div><div class="line">   ;; Transparency can be toggled through `toggle-transparency&apos;. (default 90)</div><div class="line">   dotspacemacs-active-transparency 90</div><div class="line">   ;; A value from the range (0..100), in increasing opacity, which describes</div><div class="line">   ;; the transparency level of a frame when it&apos;s inactive or deselected.</div><div class="line">   ;; Transparency can be toggled through `toggle-transparency&apos;. (default 90)</div><div class="line">   dotspacemacs-inactive-transparency 90</div><div class="line">   ;; If non nil show the titles of transient states. (default t)</div><div class="line">   dotspacemacs-show-transient-state-title t</div><div class="line">   ;; If non nil show the color guide hint for transient state keys. (default t)</div><div class="line">   dotspacemacs-show-transient-state-color-guide t</div><div class="line">   ;; If non nil unicode symbols are displayed in the mode line. (default t)</div><div class="line">   dotspacemacs-mode-line-unicode-symbols t</div><div class="line">   ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth</div><div class="line">   ;; scrolling overrides the default behavior of Emacs which recenters point</div><div class="line">   ;; when it reaches the top or bottom of the screen. (default t)</div><div class="line">   dotspacemacs-smooth-scrolling nil</div><div class="line">;;   dotspacemacs-smooth-scrolling t</div><div class="line">   ;; Control line numbers activation.</div><div class="line">   ;; If set to `t&apos; or `relative&apos; line numbers are turned on in all `prog-mode&apos; and</div><div class="line">   ;; `text-mode&apos; derivatives. If set to `relative&apos;, line numbers are relative.</div><div class="line">   ;; This variable can also be set to a property list for finer control:</div><div class="line">   ;; &apos;(:relative nil</div><div class="line">   ;;   :disabled-for-modes dired-mode</div><div class="line">   ;;                       doc-view-mode</div><div class="line">   ;;                       markdown-mode</div><div class="line">   ;;                       org-mode</div><div class="line">   ;;                       pdf-view-mode</div><div class="line">   ;;                       text-mode</div><div class="line">   ;;   :size-limit-kb 1000)</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-line-numbers nil</div><div class="line">   ;; Code folding method. Possible values are `evil&apos; and `origami&apos;.</div><div class="line">   ;; (default &apos;evil)</div><div class="line">   dotspacemacs-folding-method &apos;evil</div><div class="line">   ;; If non-nil smartparens-strict-mode will be enabled in programming modes.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-smartparens-strict-mode nil</div><div class="line">   ;; If non-nil pressing the closing parenthesis `)&apos; key in insert mode passes</div><div class="line">   ;; over any automatically added closing parenthesis, bracket, quote, etc…</div><div class="line">   ;; This can be temporary disabled by pressing `C-q&apos; before `)&apos;. (default nil)</div><div class="line">   dotspacemacs-smart-closing-parenthesis nil</div><div class="line">   ;; Select a scope to highlight delimiters. Possible values are `any&apos;,</div><div class="line">   ;; `current&apos;, `all&apos; or `nil&apos;. Default is `all&apos; (highlight any scope and</div><div class="line">   ;; emphasis the current one). (default &apos;all)</div><div class="line">   dotspacemacs-highlight-delimiters &apos;all</div><div class="line">   ;; If non nil, advise quit functions to keep server open when quitting.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-persistent-server nil</div><div class="line">   ;; List of search tool executable names. Spacemacs uses the first installed</div><div class="line">   ;; tool of the list. Supported tools are `ag&apos;, `pt&apos;, `ack&apos; and `grep&apos;.</div><div class="line">   ;; (default &apos;(&quot;ag&quot; &quot;pt&quot; &quot;ack&quot; &quot;grep&quot;))</div><div class="line">   dotspacemacs-search-tools &apos;(&quot;ag&quot; &quot;pt&quot; &quot;ack&quot; &quot;grep&quot;)</div><div class="line">   ;; The default package repository used if no explicit repository has been</div><div class="line">   ;; specified with an installed package.</div><div class="line">   ;; Not used for now. (default nil)</div><div class="line">   dotspacemacs-default-package-repository nil</div><div class="line">   ;; Delete whitespace while saving buffer. Possible values are `all&apos;</div><div class="line">   ;; to aggressively delete empty line and long sequences of whitespace,</div><div class="line">   ;; `trailing&apos; to delete only the whitespace at end of lines, `changed&apos;to</div><div class="line">   ;; delete only whitespace for changed lines or `nil&apos; to disable cleanup.</div><div class="line">   ;; (default nil)</div><div class="line">   dotspacemacs-whitespace-cleanup nil</div><div class="line">   ))</div><div class="line"></div><div class="line">(defun dotspacemacs/user-init ()</div><div class="line">  &quot;Initialization function for user code.</div><div class="line">It is called immediately after `dotspacemacs/init&apos;, before layer configuration</div><div class="line">executes.</div><div class="line"> This function is mostly useful for variables that need to be set</div><div class="line">before packages are loaded. If you are unsure, you should try in setting them in</div><div class="line">`dotspacemacs/user-config&apos; first.&quot;</div><div class="line"></div><div class="line">  (setq-default line-spacing 2)</div><div class="line">  )</div><div class="line"></div><div class="line">(defun dotspacemacs/user-config ()</div><div class="line">  &quot;Configuration function for user code.</div><div class="line">This function is called at the very end of Spacemacs initialization after</div><div class="line">layers configuration.</div><div class="line">This is the place where most of your configurations should be done. Unless it is</div><div class="line">explicitly specified that a variable should be set before a package is loaded,</div><div class="line">you should place your code here.&quot;</div><div class="line"></div><div class="line">  (global-company-mode -1)</div><div class="line"></div><div class="line">  (setq-default dotspacemacs-line-numbers nil)</div><div class="line"></div><div class="line"></div><div class="line">    (spacemacs|diminish helm-gtags-mode &quot;G&quot; &quot;g&quot;)</div><div class="line">  (spacemacs|diminish doxymacs-mode &quot;☱&quot; &quot;☱&quot;)</div><div class="line">  (spacemacs|diminish hide-ifdef-mode &quot;♺&quot; &quot;♺&quot;)</div><div class="line">  (spacemacs|diminish ggtags-mode &quot;♕&quot; &quot;♕&quot;)</div><div class="line">  (spacemacs|diminish flycheck-mode &quot;☂&quot; &quot;☂&quot;)</div><div class="line">  (setq ggtags-global-ignore-case t)</div><div class="line"></div><div class="line">  (use-package fold-dwim)</div><div class="line">  (global-set-key (kbd &quot;&lt;f7&gt;&quot;)      &apos;fold-dwim-toggle)</div><div class="line">  (global-set-key (kbd &quot;&lt;M-f7&gt;&quot;)    &apos;fold-dwim-hide-all)</div><div class="line">  (global-set-key (kbd &quot;&lt;S-M-f7&gt;&quot;)  &apos;fold-dwim-show-all)</div><div class="line"></div><div class="line">  (global-set-key &quot;\M-*&quot; &apos;pop-tag-mark)</div><div class="line"></div><div class="line"></div><div class="line">  (use-package clang-format)</div><div class="line">  (global-set-key [C-M-tab] &apos;clang-format-region)</div><div class="line"></div><div class="line">;  (safe-wrap (myirony-mode-setup))</div><div class="line">  (menu-bar-mode 1)</div><div class="line"></div><div class="line">  (setq large-file-warning-threshold 100000000) ;dont&apos; remove this line, otherwise vlf will crash.</div><div class="line">  ;; (require &apos;vlf)</div><div class="line">  ;; (require &apos;vlf-setup)</div><div class="line">  ;; (eval-after-load &quot;vlf&quot;</div><div class="line">  ;;   &apos;(define-key vlf-prefix-map &quot;\C-xv&quot; vlf-mode-map))</div><div class="line"></div><div class="line"></div><div class="line">  (add-hook &apos;edit-server-done-hook (lambda () (shell-command &quot;open -a \&quot;Google Chrome\&quot;&quot;)))</div><div class="line"></div><div class="line">;  (global-set-key (kbd &quot;M-.&quot;) &apos;helm-gtags-dwim)</div><div class="line">                                        ;  (global-set-key (kbd &quot;M-,&quot;) &apos;pop-tag-mark)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  (add-hook &apos;c-mode-common-hook</div><div class="line">            (lambda ()</div><div class="line">              (when (derived-mode-p &apos;c-mode &apos;c++-mode &apos;java-mode)</div><div class="line">                (ggtags-mode 1)</div><div class="line">                (setq ggtags-highlight-tag nil)</div><div class="line">                (local-set-key &quot;\M-.&quot; &apos;ggtags-find-tag-dwim)</div><div class="line">                (global-set-key &quot;\M-,&quot; &apos;tags-loop-continue)</div><div class="line">                (local-set-key &quot;\M-*&quot; &apos;pop-tag-mark)</div><div class="line">                )))</div><div class="line"></div><div class="line">  (global-set-key (kbd &quot;C-c ;&quot;) &apos;iedit-mode)</div><div class="line"></div><div class="line">  (setq</div><div class="line">     company-dabbrev-ignore-case nil</div><div class="line">     company-dabbrev-code-ignore-case nil</div><div class="line">     company-dabbrev-downcase nil</div><div class="line">     company-idle-delay 0.3</div><div class="line">     company-show-numbers t</div><div class="line">     company-dabbrev-downcase nil</div><div class="line">     company-dabbrev-code-everywhere t</div><div class="line">     company-minimum-prefix-length 2</div><div class="line">     )</div><div class="line"></div><div class="line">  ;; (defvar zenburn-override-colors-alist</div><div class="line">  ;;   &apos;((&quot;zenburn-bg+05&quot; . &quot;#282828&quot;)</div><div class="line">  ;;     (&quot;zenburn-bg+1&quot;  . &quot;#2F2F2F&quot;)</div><div class="line">  ;;     (&quot;zenburn-bg+2&quot;  . &quot;#3F3F3F&quot;)</div><div class="line">  ;;     (&quot;zenburn-bg+3&quot;  . &quot;#4F4F4F&quot;)))</div><div class="line">;;  (load-theme &apos;zenburn t)</div><div class="line"></div><div class="line">  ;; Disable eldoc mode, which is very slow on big proj.</div><div class="line">  (global-eldoc-mode -1)</div><div class="line"></div><div class="line">;;  (global-nlinum-mode t)</div><div class="line"></div><div class="line">  (global-set-key[\M-f9] &apos;spacemacs/cycle-spacemacs-theme)</div><div class="line"></div><div class="line"></div><div class="line">    ;; disables TAB in company-mode, freeing it for yasnippet</div><div class="line">  (define-key company-active-map [tab] nil)</div><div class="line"></div><div class="line">  (use-package undo-tree</div><div class="line">    :diminish undo-tree-mode</div><div class="line">    :config (global-undo-tree-mode))</div><div class="line"></div><div class="line">  (defun do-org-show-all-inline-images ()</div><div class="line">    (interactive)</div><div class="line">    (org-display-inline-images t t))</div><div class="line"></div><div class="line">  (global-set-key (kbd &quot;C-c C-x C v&quot;)</div><div class="line">                  &apos;do-org-show-all-inline-images)</div><div class="line"></div><div class="line">  (setq org-plantuml-jar-path</div><div class="line">        (expand-file-name &quot;/usr/local/Cellar/plantuml/8037/plantuml.8037.jar&quot;))</div><div class="line"></div><div class="line"></div><div class="line">    (setq puml-plantuml-jar-path &quot;/usr/local/Cellar/plantuml/8037/plantuml.8037.jar&quot;)</div><div class="line">  (add-to-list &apos;auto-mode-alist &apos;(&quot;\\.puml\\&apos;&quot; . puml-mode))</div><div class="line">  (add-to-list &apos;auto-mode-alist &apos;(&quot;\\.plantuml\\&apos;&quot; . puml-mode))</div><div class="line">  ;; end pinyin input setup.</div><div class="line"></div><div class="line">  (add-to-list &apos;auto-mode-alist &apos;(&quot;\\.gradle\\&apos;&quot; . groovy-mode))</div><div class="line"></div><div class="line"></div><div class="line">  (add-hook &apos;js2-mode-hook (lambda()</div><div class="line"></div><div class="line">                              (setq js2-basic-offset 2)</div><div class="line">                              (setq js2-bounce-indent-p nil)</div><div class="line">                              (hungry-delete-mode 1)</div><div class="line">                             (smartparens-mode 1)</div><div class="line">                             (company-mode 1)</div><div class="line">                             ))</div><div class="line"></div><div class="line">  (eval-after-load &apos;js2-mode</div><div class="line">    &apos;(progn</div><div class="line">       (define-key js2-mode-map (kbd &quot;TAB&quot;) (lambda()</div><div class="line">                                              (interactive)</div><div class="line">                                              (let ((yas/fallback-behavior &apos;return-nil))</div><div class="line">                                                (unless (yas/expand)</div><div class="line">                                                  (indent-for-tab-command)</div><div class="line">                                                  (if (looking-back &quot;^\s*&quot;)</div><div class="line">                                                      (back-to-indentation))))))))</div><div class="line"></div><div class="line">  ;; disable bold font effect.</div><div class="line">  (mapc</div><div class="line">   (lambda (face)</div><div class="line">     (set-face-attribute face nil :weight &apos;normal :underline nil))</div><div class="line">   (face-list))</div><div class="line"></div><div class="line">  (setq-default evil-escape-key-sequence &quot;jk&quot;)</div><div class="line"></div><div class="line"></div><div class="line">  ;; do yas-setup again.</div><div class="line">  ;;(safe-wrap (yas-setup))</div><div class="line">  (safe-wrap (js-comint-setup))</div><div class="line"></div><div class="line">  (safe-wrap (hide-if-0))</div><div class="line"></div><div class="line">  (global-hl-line-mode -1)</div><div class="line"></div><div class="line">  (auto-compression-mode 1) ;; 打开压缩文件时自动解压缩</div><div class="line"></div><div class="line">  (setq visiable-bell t)	 ;; 把嘟的声音去掉</div><div class="line">  (setq ring-bell-function &apos;ignore)	;; 不要让那个DIDI的响</div><div class="line"></div><div class="line">  (setq transient-mark-mode nil)	 ;; 两次按C－space以后高亮显示区域</div><div class="line"></div><div class="line"></div><div class="line">  (setq display-time-24hr-format t)</div><div class="line">  (setq display-time-day-and-date t)</div><div class="line">  (setq display-time-interval 10)</div><div class="line"></div><div class="line">  (setq suggest-key-bindings 1)	 ;; 当使用 M-x COMMAND 后，过 1 秒钟显示该 COMMAND 绑定的键。</div><div class="line"></div><div class="line"></div><div class="line">  (setq kept-old-versions 2)</div><div class="line">  (setq kept-new-versions 5)</div><div class="line">  (setq delete-old-versions t)</div><div class="line">  (setq backup-directory-alist &apos;((&quot;.&quot; . &quot;~/emacs.bak&quot;)))</div><div class="line">  (setq backup-by-copying t)</div><div class="line"></div><div class="line">  (ansi-color-for-comint-mode-on)	 ;; 消除shell中的乱码</div><div class="line"></div><div class="line">  (fset &apos;yes-or-no-p &apos;y-or-n-p)	 ;; 把Yes或者用y代替</div><div class="line"></div><div class="line">  (set-clipboard-coding-system &apos;chinese-iso-8bit) ;; 剪切板，用于和其他程序之间复制内容</div><div class="line">  (set-clipboard-coding-system &apos;ctext) ;;解决firefox有时候复制文件有乱马</div><div class="line"></div><div class="line">  (set-keyboard-coding-system &apos;chinese-iso-8bit) ;; 键盘输入，用于输入法。</div><div class="line">  (set-terminal-coding-system &apos;chinese-iso-8bit) ;; 终端显示的编码方式。</div><div class="line"></div><div class="line"></div><div class="line">  (add-hook &apos;comint-output-filter-functions</div><div class="line">            &apos;comint-watch-for-password-prompt) ;; 密码的相关的提示密码</div><div class="line"></div><div class="line"></div><div class="line">  ;; Full screen settings.</div><div class="line">  ;; Needs Mac configure of full screen</div><div class="line">  (global-set-key (kbd &quot;C-M-RET&quot;)		&apos;toggle-fullscreen)</div><div class="line">  </div><div class="line">  (global-set-key (kbd &quot;C-M-&lt;return&gt;&quot;)	&apos;toggle-fullscreen)</div><div class="line"></div><div class="line">  (setq kill-emacs-query-functions</div><div class="line">        (lambda() (y-or-n-p &quot;Do you really want to quit?&quot;)))</div><div class="line"></div><div class="line">  ;;________________________________________________________________</div><div class="line">  ;;    Some dired settings</div><div class="line">  ;;________________________________________________________________</div><div class="line">  (cond (on_darwin</div><div class="line">         (require &apos;dired)</div><div class="line"></div><div class="line">         (define-key dired-mode-map &quot;o&quot; &apos;dired-open-mac)</div><div class="line">         (defun dired-open-mac ()</div><div class="line">           (interactive)</div><div class="line">           (let ((file-name (dired-get-file-for-visit)))</div><div class="line">             (if (file-exists-p file-name)</div><div class="line">                 (shell-command (concat &quot;open &apos;&quot; file-name &quot;&apos;&quot; nil )))))</div><div class="line">         ))</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  (cond (on_darwin</div><div class="line">         ;; need find-file to do this</div><div class="line">         (add-to-list &apos;load-path &quot;/opt/local/share/emacs/site-lisp&quot;)</div><div class="line">         (setq mac-option-key-is-meta t)</div><div class="line">                                        ;(setq mac-right-option-modifier nil)</div><div class="line">         (setq exec-path (append exec-path &apos;(&quot;/opt/local/bin&quot;)) )</div><div class="line">         (setenv &quot;LC_ALL&quot; &quot;en_US.UTF-8&quot;)</div><div class="line">         (setenv &quot;LANG&quot; &quot;en_US.UTF-8&quot;)</div><div class="line">         ;; Change control and meta key under mac, make less pain...</div><div class="line">         (setq mac-command-modifier &apos;meta)</div><div class="line">         (setq mac-control-modifier &apos;control)</div><div class="line"></div><div class="line">         (exec-path-from-shell-initialize)</div><div class="line">         ))</div><div class="line"></div><div class="line">  (global-set-key [f5] &apos;revert-buffer)</div><div class="line">  (global-set-key [f6] &apos;ff-find-related-file) ;; Find header file.</div><div class="line"></div><div class="line">  (global-set-key (kbd &quot;M-1&quot;)  &apos;delete-other-windows)</div><div class="line">  (global-set-key (kbd &quot;M-3&quot;)  &apos;split-window-right)</div><div class="line">  (global-set-key (kbd &quot;M-2&quot;)  &apos;split-window-below)</div><div class="line">  (global-set-key (kbd &quot;M-0&quot;)  &apos;delete-window)</div><div class="line">  (global-set-key (kbd &quot;M-o&quot;)  &apos;other-window)</div><div class="line"></div><div class="line">  (setq vc-follow-symlinks t)</div><div class="line">  )</div></pre></td></tr></table></figure>
+
+    
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars0.githubusercontent.com/u/113606?v=3&s=460"
+               alt="Jiejing Zhang" />
+          <p class="site-author-name" itemprop="name">Jiejing Zhang</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">110</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Jiejing Zhang</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+    <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+  
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
